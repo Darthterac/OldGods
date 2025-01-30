@@ -1,0 +1,10 @@
+Logs/
+Logs/*
+Fonts/*.txt
+.vscode/
+.vscode/*
+*.json
+*.code-workspace
+*.bak
+*.swp
+*.temp
