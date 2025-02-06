@@ -3,7 +3,7 @@
 ## Notes: Just a personal addon, learning LUA and the WoW API
 ## Version: 2.0
 ## Author: Lazyeyez (with big help from chatGPT)
-## SavedVariables: OGsavedChat, OldGodsSavedColors, OldGodsSavedThemes, OldGodsSavedLastTheme
+## SavedVariables: OGsavedChat, OldGodsSavedColors, OldGodsSavedThemes, OldGodsSavedLastTheme, OldGods_BadMailDB, OldGods_AutoReturnEnabled
 ## OptionalDeps: LibSharedMedia-3.0
 
 OldGods.lua

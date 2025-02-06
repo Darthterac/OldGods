@@ -1,7 +1,9 @@
---#region Global Variables and Tables
+--#region Global SavedVariables and Tables
 OGsavedChat = OGsavedChat or {}
 ChatMessageTable = {}
 TooltipInfoTable = {}
+OldGods_BadMailDB = OldGods_BadMailDB or {}
+OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
 
 Themes = {
     ["Your Custom Theme"] = {
@@ -471,7 +473,8 @@ FrameBackdrop = {
         bottom = 2
     }
 }
---#endregion Global nested tables ends
+
+--#endregion Global Variables and Tables
 
 --#region Jokes Quotes Guild Tables
 local JokeData = { "Why cant you trust an atom? Because they make up literally everything.",
@@ -609,8 +612,7 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods|r AddOn!", "To use this Ad
     "by |cFF7ba9FFLazyeyez|r with help from |cFF00F906chatGPT|r",
     "________________________________________", "|cCF99000AWork in progress|r" }
 
-local GuildData =
-{
+local GuildData = {
     "Welcome to the Old Gods {skull} Lightbringer Chapter {skull} Join our Discord @ https://discord.gg/oldgods to rankup to Member! {star} Make a post in #new_member_info exactly as 'YourName@Lightbringer_Chapter' {X}DO NOT ALTER ANYTHING BUT YOUR NAME{X}",
     "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live The Old Gods! {triangle}",
     "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever." }
@@ -1102,6 +1104,248 @@ end
 local SavedChatHistoryWindow = CreateSavedChatHistoryWindow("Chat History")
 --#endregion Chat History window
 
+--#region Mail Frame, or fame who knows!
+local frame = CreateFrame("Frame", "OldGodsMailFrame", UIParent, "BasicFrameTemplateWithInset")
+frame:SetSize(380, 460)
+frame:SetPoint("CENTER")
+frame.title = frame:CreateFontString(nil, "OVERLAY")
+frame.title:SetFontObject("GameFontHighlight")
+frame.title:SetPoint("TOP", frame, "TOP", 0, -5)
+frame.title:SetText("Old Gods Grief Mail Manager")
+
+frame.scroll = CreateFrame("ScrollFrame", "OldGodsMailScroll", frame, "UIPanelScrollFrameTemplate")
+frame.scroll:SetSize(360, 285)
+frame.scroll:SetPoint("TOP", frame, "TOP", 0, -30)
+
+local content = CreateFrame("Frame", nil, frame.scroll)
+content:SetSize(360, 285)
+frame.scroll:SetScrollChild(content)
+
+local selectedItemID = nil
+local selectedMailIndex = nil
+local selectedItemIcon = nil
+
+local selectedDisplay = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+selectedDisplay:SetPoint("BOTTOM", frame, "BOTTOM", 0, 75)
+selectedDisplay:SetText("No Item Selected")
+
+local selectedIcon = frame:CreateTexture(nil, "ARTWORK")
+selectedIcon:SetSize(35, 35)
+selectedIcon:SetPoint("BOTTOMLEFT", selectedDisplay, "TOPLEFT", -40, 0)
+
+-- Checkbox for Auto-Return
+local autoReturnCheck = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
+autoReturnCheck:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 3, 46)
+autoReturnCheck.text = autoReturnCheck:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+autoReturnCheck.text:SetPoint("LEFT", autoReturnCheck, "RIGHT", 5, 0)
+autoReturnCheck.text:SetText("|cFFFFFF3CSelect All Items|r then |cFFA0FF0CClick \"Return Selected\"|r")
+autoReturnCheck:SetChecked(OldGods_AutoReturnEnabled)
+
+autoReturnCheck:SetScript("OnClick", function(self)
+    OldGods_AutoReturnEnabled = self:GetChecked() -- Save state
+    print("Auto-Return is now", OldGods_AutoReturnEnabled and "ENABLED" or "DISABLED")
+end)
+
+local returnButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+returnButton:SetSize(140, 30)
+returnButton:SetPoint("BOTTOM", frame, "BOTTOM", 100, 10)
+returnButton:SetText("Return Selected")
+returnButton:SetScript("OnClick", function()
+    if OldGods_AutoReturnEnabled then
+        print("Returning all blacklisted mail...")
+        for i = 1, GetInboxNumItems() do
+            for j = 1, ATTACHMENTS_MAX_RECEIVE do
+                local _, id = GetInboxItem(i, j)
+                if id and tContains(OldGods_BadMailDB, id) then
+                    if InboxItemCanDelete(i) then
+                        DeleteInboxItem(i)
+                    else
+                        ReturnInboxItem(i)
+                    end
+                    print("Processed mail containing:", id)
+                    return -- Stop after returning one item (prevents infinite loop)
+                end
+            end
+        end
+        print("No blacklisted mail found.")
+    else
+        -- Default behavior if auto-return is OFF
+        if selectedMailIndex then
+            if InboxItemCanDelete(selectedMailIndex) then
+                DeleteInboxItem(selectedMailIndex)
+            else
+                print("Cannot delete mail, trying return...")
+                ReturnInboxItem(selectedMailIndex)
+            end
+            selectedItemID = nil
+            selectedMailIndex = nil
+            selectedDisplay:SetText("No Item Selected")
+            selectedIcon:SetTexture(nil)
+        else
+            print("No item selected to return.")
+        end
+    end
+end)
+
+local function UpdateItemList()
+    -- Ensure the buttons table exists before using it
+    content.buttons = content.buttons or {}
+
+    -- Hide all buttons before repopulating
+    for _, btn in pairs(content.buttons) do btn:Hide() end
+
+    local count = 0
+    for _, itemID in ipairs(OldGods_BadMailDB) do
+        local itemName, _, _, _, _, _, _, _, _, itemTexture = C_Item.GetItemInfo(itemID)
+
+        if itemName then
+            count = count + 1
+
+            -- Either reuse an existing button or create a new one, I dont care, I want buttons
+            local btn = content.buttons[count] or CreateFrame("Button", nil, content, "UIPanelButtonTemplate")
+            content.buttons[count] = btn
+
+            -- Configure the button, or youll be sorry
+            btn:SetSize(180, 30) --how wide should they be? 150 ok lets party
+            btn:SetPoint("TOP", content, "TOP", 0, -40 * (count - 1))
+            btn:SetText(itemName)
+            btn:SetScript("OnClick", function()
+                selectedItemID = itemID
+                selectedMailIndex = nil -- Reset this before checking the inbox
+
+                -- Scan the mailbox for a mail containing this item
+                for i = 1, GetInboxNumItems() do
+                    for j = 1, ATTACHMENTS_MAX_RECEIVE do
+                        local _, id = GetInboxItem(i, j)
+                        if id and id == selectedItemID then
+                            selectedMailIndex = i -- Store the mail index
+                            selectedDisplay:SetText("Selected: " .. itemName)
+                            selectedIcon:SetTexture(itemTexture)
+                            print("Selected item found in inbox:", itemName, "Mail index:", i)
+                            return
+                        end
+                    end
+                end
+
+                -- If no mail was found with the selected item
+                print("No mail found containing:", itemName)
+            end)
+
+            -- Add an icon to the button if it doesn't already have one
+            if not btn.icon then
+                btn.icon = btn:CreateTexture(nil, "ARTWORK")
+                btn.icon:SetSize(35, 35) --35 match the hight of the buttons cause im gona be skinning this with themes
+                btn.icon:SetPoint("LEFT", btn, "LEFT", -10, 0)
+            end
+            btn.icon:SetTexture(itemTexture)
+
+            -- Add remove button functionality, this is to remove items from the blacklist
+            if not btn.removeBtn then
+                btn.removeBtn = CreateFrame("Button", nil, btn, "UIPanelButtonTemplate")
+                btn.removeBtn:SetSize(20, 20)
+                btn.removeBtn:SetPoint("RIGHT", btn, "RIGHT", 20, 0)
+                btn.removeBtn:SetText("X")
+                btn.removeBtn:SetPushedTexture(4914679) --inv_shadowflame_orb
+                btn.removeBtn:SetScript("OnClick", function()
+                    for i, id in ipairs(OldGods_BadMailDB) do
+                        if id == itemID then
+                            table.remove(OldGods_BadMailDB, i)
+                            UpdateItemList()
+                            break
+                        end
+                    end
+                end)
+                btn.removeBtn:SetScript("OnEnter", function()
+                    GameTooltip:SetOwner(UIParent, "ANCHOR_BOTTOM")
+                    GameTooltip:ClearLines()
+                    GameTooltip:AddLine("Spell ID: " .. itemID, 1, 1, 1, true)
+                    GameTooltip:AddDoubleLine("CLick to Remove Entry", "Currently in Blacklist", 0.45, 0.92, 0.08, 0.7,
+                        0.85, 0.96)
+                    GameTooltip:Show()
+                end)
+
+                btn.removeBtn:SetScript("OnLeave", function()
+                    GameTooltip:Hide()
+                end)
+            end
+            btn:Show()
+        end
+    end
+end
+
+-- Input Box for Adding Items to the Blacklist
+local OGM_inputBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
+OGM_inputBox:SetSize(110, 35)
+OGM_inputBox:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 25, 10)
+OGM_inputBox:SetAutoFocus(false)
+OGM_inputBox:SetText("Enter Item ID")
+OGM_inputBox:EnableMouse(true)
+OGM_inputBox:SetHyperlinksEnabled(true)
+OGM_inputBox:SetMaxLetters(3999)
+OGM_inputBox:SetScript("OnMouseDown", function(self)
+    self:SetFocus() -- Ensure inputBox is focused
+    --self:HighlightText()    -- Highlight the text? no why the hell would you do that?
+end)
+
+--The magic hooksecurefunc we need to learn more about this, and we are now, so there!
+hooksecurefunc("ChatEdit_InsertLink", function(link)
+    if link and OGM_inputBox:HasFocus() then
+        local itemID = link:match("item:(%d+)") -- Extract the item ID from the link, dont ask I match and I extract
+        if itemID then                          -- but I ask chatGPT everytime I have to make a pattern, one day!!!
+            OGM_inputBox:SetText(itemID)        -- Set the inputBox text to the item ID numbers
+            --print("Shift+Click detected! Item ID:", itemID) no need for a debug message I can see the results ;)
+        end
+        OGM_inputBox:ClearFocus() -- Clear focus
+        return true
+    end
+end)
+
+-- Shift+Click to Auto-Fill Item ID
+OGM_inputBox:SetScript("OnTextChanged", function(self)
+    local text = self:GetText()
+    local itemID = tonumber(text)
+    if itemID then
+        local itemName = C_Item.GetItemInfo(itemID)
+        if itemName then
+            self:SetText(itemID) -- Keep it clean if user types invalid stuff
+        end
+    end
+end)
+
+-- Add Items to the blacklist - Button
+local addButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+addButton:SetSize(60, 30)
+addButton:SetPoint("LEFT", OGM_inputBox, "RIGHT", 7, 0)
+addButton:SetText("Add")
+addButton:SetScript("OnClick", function()
+    local itemID = tonumber(OGM_inputBox:GetText())
+    if itemID and not tContains(OldGods_BadMailDB, itemID) then
+        table.insert(OldGods_BadMailDB, itemID)
+        print("Added Item ID:", itemID, "to blacklist")
+        UpdateItemList()
+    else
+        print("Invalid or duplicate Item ID")
+    end
+    OGM_inputBox:SetText("")
+end)
+
+-- Populate the Scroll Frame on Mailbox Open
+frame:RegisterEvent("MAIL_SHOW")
+frame:RegisterEvent("MAIL_CLOSED")
+frame:SetScript("OnEvent", function(self, event)
+    if event == "MAIL_SHOW" then
+        frame:Show()
+        UpdateItemList()
+    elseif event == "MAIL_CLOSED" then
+        if frame:IsShown() then
+            frame:Hide()
+        end
+    end
+end)
+
+frame:Hide()
+--#endregion Mail Frame, or fame who knows!
+
 --#region Guild Chat Window
 local function CreateGuildChatWindow(title)
     -- Create the parent frame for the Guild Chat GUI
@@ -1284,7 +1528,7 @@ local function CreateGuildChatWindow(title)
     local toggleGuildChatWindow = true
     local toggleButton = CreateFrame("Button", "toggleButton", UIParent, "BackdropTemplate")
     toggleButton:SetSize(120, 30)
-    toggleButton:SetPoint("CENTER", UIParent) -- Adjust position as needed
+    toggleButton:SetPoint("CENTER", UIParent) -- Initially center the button on the screen
     toggleButton:SetText("Toggle Chat")
     toggleButton:SetNormalFontObject("GameFontNormal")
     toggleButton:SetHighlightFontObject("GameFontHighlight")
@@ -1295,7 +1539,7 @@ local function CreateGuildChatWindow(title)
     toggleButton:SetScript("OnDragStart", toggleButton.StartMoving)
     toggleButton:SetScript("OnDragStop", toggleButton.StopMovingOrSizing)
     toggleButton:SetScript("OnEnter", function(self, _)
-        GameTooltip:SetOwner(self, "ANCHOR_PRESERVE")
+        GameTooltip:SetOwner(UIParent, "ANCHOR_BOTTOM")
         GameTooltip:AddLine("Drag Me!")
         GameTooltip:AddLine("it's easy to position", .45, .895, 0)
         GameTooltip:AddLine("This button toggles the Guild Chat window, " ..
@@ -1333,7 +1577,7 @@ local function CreateGuildChatWindow(title)
         toggleGuildChatWindow = not toggleGuildChatWindow -- Flip the toggle state
         toggleButton:SetText(toggleGuildChatWindow and "Hide Chat" or "Show Chat")
         if toggleGuildChatWindow then
-            GuildChatWindow:Show()
+            GuildChatWindow:Show() -- this is the same as the toggleButton:OnClick function but it will never be called
         else
             PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
             GuildChatWindow:Hide()
@@ -1357,11 +1601,12 @@ local function CreateGuildChatWindow(title)
     inputBox:SetAutoFocus(false)                                  -- Prevent auto-focusing the input box
     inputBox:EnableMouse(true)
     inputBox:SetHyperlinksEnabled(true)
-    inputBox:SetMaxLetters(255) -- Limit message length to 255 characters
+    inputBox:SetMaxLetters(3999) -- Set the maximum number of characters I seen this in a movie once
     inputBox:SetScript("OnMouseDown", function(self)
         self:SetFocus()         -- Ensure inputBox is focused
     end)
-    --The magic hooksecurefunc we need to learn more about this
+
+    --The magic hooksecurefunc we need to learn more about this, used again in the mail manager with some changes
     hooksecurefunc("ChatEdit_InsertLink", function(link)
         if link and inputBox:HasFocus() then
             inputBox:Insert(link) -- Insert the item link into the inputBox
@@ -1393,8 +1638,12 @@ local function CreateGuildChatWindow(title)
                     ChatFrame1EditBox:SetText("/afk")
                     ChatFrame1EditBox:SetFocus()
                     print("Press Enter to confirm /afk status.")
-                elseif command == "nerd" then
-                    print("Yes you are!")
+                elseif command == "ogg" then
+                    ChatFrame1EditBox:Show()
+                    ChatFrame1EditBox:SetText("/og guild")
+                    ChatFrame1EditBox:SetFocus()
+                    print("Enter a # to send message to guild chat.")
+                    print(" |cFF00F0FF[1]|r-|cFF00FF00Welcome Message|r\n".."|cFF00F0FF[2]|r-|cFFF0F002Purge Notice|r\n".."|cFF00F0FF[3]|r-|cFFFF0040Purge Completed|r\n")
                 end
             else
                 -- Send the final message (fancy or normal) to guild chat
@@ -1646,12 +1895,12 @@ local function PopulateInactiveInitiates(frame, scrollChild, data)
         nameButton:SetNormalFontObject("GameFontNormal")
         nameButton:SetHighlightFontObject("GameFontHighlight")
         nameButton:GetFontString():SetWordWrap(false)
-        nameButton:RegisterForClicks("LeftButtonDown")
+        nameButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
         nameButton:SetScript("OnClick", function(self, button)
-            if button == "LeftButton" then
-                PlaySound(541008)
-                UIErrorsFrame:AddMessage("PRESS F5", 0.57, 0.62, 0, 1)
+            if button == "LeftButtonUp" then
+                PlaySoundFile(541008, "Master")
+                UIErrorsFrame:AddMessage("{star}PRESS F5{star}", 1, 1, .05, 1)
             end
         end)
 
@@ -1700,7 +1949,7 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
     end)
 
     inputBox:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT")
+        GameTooltip:SetOwner(UIParent, "ANCHOR_BOTTOM")
         GameTooltip:AddLine("Search")
         GameTooltip:AddDoubleLine(
             "|cFF00FF00Enter # (1 to 31)|r", "|cFFF0FF00offline|r days\n", 1, 1, 1, 1, 1, 1)
@@ -2306,7 +2555,7 @@ local function CreateOptionsFrame()
     --local navtitle = "Old Gods Settings and Options"
     optionsFrame.title = optionsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
     optionsFrame.title:SetPoint("CENTER", titleTexture, "CENTER")
-    optionsFrame.title:SetText "Old Gods Settings and Options"
+    optionsFrame.title:SetText("Old Gods Settings and Options")
     --optionsFrame.title:SetFormattedText("%s", navtitle)
     optionsFrame.title:SetTextColor(0.88, 0.88, 0.08, 1)
 
@@ -2555,12 +2804,12 @@ local function tooltipSpice(sender, level, class, zone, rank, publicN, officerN)
 
     -- format the string varibales are in order of tokens:
     local formattedTooltip = string.format(tooltipFormat,
-        classColor, sender, class, 
-        level,              
-        rankColor, rank,    
-        zone,               
-        publicN,            
-        officerN            
+        classColor, sender, class,
+        level,
+        rankColor, rank,
+        zone,
+        publicN,
+        officerN
     )
 
     return formattedTooltip
