@@ -11,21 +11,40 @@ Key Features
 🔹 Guild Chat Enhancements
 
     Replaces standard /guild chat with a custom chat window for improved visibility and usability.
-    The Chat Window comes with some pre-made Themes to select from and loads with "Your Custom Theme" by default.
-    The Custom Theme has options to choose colors via selectors - and your Theme is persistent, saving selected colors
-    as they are picked. There is a 6 fonts to choose from, plans to include more with options like size and outline etc.
-    These fonts are set at 20px which makes guild chat easy to read for us older gamers ;)
+    The Chat Window comes with some pre-made Themes to select from and loads with "Your Custom Theme".
+    The Custom Theme has options to choose colors via selectors; your Theme is persistent, 
+    saving selected colors as they are picked. 
+    
+    There are currently 6 fonts to choose from, plans to include more with options for size/color.
+    The fonts are set at 20px which makes guild chat easy to read for us older gamers ;)
+    
+    Chat window can be resized to 800*600  and a handy  ToggleButton can be dragged and positioned
+    which hides or shows the guild chat window when clicked!
     
     The chat appears in an Edit Box frame, put simply you can copy paste from this chat window
-    an advantage over in the in game chat, and one of the inspirations for creating this add on.
-    the edit box approach is helpful for copying names/links/info etc... from the chat directly!
+    an advantage over in the in game chat, and one of the inspirations for creating this addon.
+    The edit box approach is helpful for copying names/links/info etc... from the chat directly!
     
     Chat can be saved and cleared to free up some memory, Chat History is where all saved chats
     appear, and can be accessed by typing /ogch or pressing the Save & Clear button. 
     Saved chats are persistent, meaning available and accessable to all your toons in any guild.
+
+    Sound notification on new guild chat message, a small pop alert signals a new message in
+    guild chat, as of now its perma on untill I do more work on the sounds options, its a nice
+    click, and depending on the guild might not be to bad, although I do want to add otpions to
+    the sounds used by the addon so users can toggle them on or off at minimum.
+    
+    Easter Eggs and  Clicking linked items, right now the logic used to clcik items linked in 
+    chat are set to be expanded with the the right mouse button, the left mouse button is hooked
+    for clicking on player nameds in the Chat window, which will display a custom tool tip with
+    information on the player, Name, Class, Rank, Zone, Public Note, and Officer Note if ranked
+    permits. Xalatath will ask you "Did you feel it cease to exist?" when clicking a player name
+    and a large percent of the games tooltips will be skinned with a custom border and background
+    uniquely styled to reflect the Old Gods guild theme, /reload will reset to normal.
     
     Plan on adding a KB limit to alert user when it's a good time Save & Clear.
     Plan to make chat text color customizable and some enhancements to custom theme options.
+    Plan to update General settings with persistant options such as toggling easter egg.
 
 🔹 Guild Management Tools
 
@@ -42,7 +61,7 @@ Key Features
     
     Plans for timed data collection to intelligently update guild information. 
     Plans for additional Officer+ rank features like ranking members from search, 
-    and other secure functions which rely on the use of a keybound macro to bypass secure restrictions.
+    and other functions which rely on the use of a keybound macro to bypass "secure" restrictions.
     Plans for making the purge macro binding a user choice and enhance the logic.
 
 🔹 OldGods Mail Manager
