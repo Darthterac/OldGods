@@ -21,19 +21,29 @@ Key Features
     the edit box approach is helpful for copying names/links/info etc... from the chat directly!
     
     Chat can be saved and cleared to free up some memory, Chat History is where all saved chats
-    appear, and can be accessed by typing /ogch or pressing the Save & Clear button, adding the chat to a saved variable.
-    Saved chats are persistent, meaning available and accessable to all toons all guilds.
-    Plan on adding a KB limit to alert user when it's a good time Save & Clear. 
+    appear, and can be accessed by typing /ogch or pressing the Save & Clear button. 
+    Saved chats are persistent, meaning available and accessable to all your toons in any guild.
+    
+    Plan on adding a KB limit to alert user when it's a good time Save & Clear.
+    Plan to make chat text color customizable and some enhancements to custom theme options.
 
 🔹 Guild Management Tools
 
     Macro integration for easy rank and time based pruning for Officers and above.
+    As of now rank is hardcoded as Initiate and the default threshold for the purge
+    is set to 14 days, because of automation limitations when inactive initiates are
+    found at 14 days the macro is created/edited to add the first player from the list
+    to be purged by pressing f5, f5 again refreshes the table adding the next player in
+    and so on.
     
     Member Search, look up players quickly find rank and status, online green, offline red
     The Member Search also includes a handy function that will find Unicode chars. with normal input
     ie. Search: Oldman  Result: Öldman-Lightbringer  Initiate  Offline(1d 23hr)
     
-    Plans for timed data collection to intelligently update guild information. Additional Officer+ abilities for ranking and other secure functions.
+    Plans for timed data collection to intelligently update guild information. 
+    Plans for additional Officer+ rank features like ranking members from search, 
+    and other secure functions which rely on the use of a keybound macro to bypass secure restrictions.
+    Plans for making the purge macro binding a user choice and enhance the logic.
 
 🔹 OldGods Mail Manager
 
@@ -56,8 +66,8 @@ Key Features
     item from database button along side each entry. Build a list of items and check the select all box, 
     any mail containing any of those items will be staged for return to sender.
     
-    Limitations, select all returns all mail that contain a sblacklist attachment, Im not sure
-    whats possible but have plancs to itterate the attachments and keep items that are not listed.
+    Limitations, select all returns all mail that contain a blacklist attachment, Im not sure
+    whats possible but have plans to itterate the attachments per mail and keep items that are not listed.
     
     Due to Blizzards very understandable limitations to automation of such things that can be 
     abused returning items/sending mail, can only by performed by UI interaction. As an example
@@ -66,7 +76,9 @@ Key Features
     
     Future UI enhancements to match the selected Theme aesthetic, and positioning info.
     Plans to make this a stand-alone AddOn, fast relief from mail grief.
-    Known Issues: Will add anything typed in the input box to the db, removing items added to an existing list takes a reload for some reason,
+    
+    Known Issues: Will add anything typed in the input box to the db, 
+    removing items added to an existing list takes a reload for some reason,
 
 Installation
 
@@ -75,7 +87,7 @@ Installation
 
     World of Warcraft/_retail_/Interface/AddOns/
 
-    Navigate to the folder now in:                  World of Warcraft/_retail_/Interface/AddOns/OldGods-master
+    Navigate to the folder now in:           World of Warcraft/_retail_/Interface/AddOns/OldGods-master
     Rename folder to OldGods removing the -master:  World of Warcraft/_retail_/Interface/AddOns/OldGods
    
     Restart WoW and enable the addon in the AddOns menu.
