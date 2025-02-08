@@ -59,10 +59,26 @@ Key Features:
     and so on.
     
     Member Search:  Look up players quickly, find rank and status, online is green, offline is red.
-    The Member Search also includes a handy function that will find Unicode characters with normal input.
-    The search also performs dynamic look-up while typing and will find partial matches to the name,
-    making alts with similar names easy to find.
-    [ie. Search: Oldman  Result: Öldman-Lightbringer  Initiate  Offline (1d 23hr)]
+    The search also performs dynamic look-up while typing and will display partial matches, accented
+    characters remain a puzzle to me at this time, the partial name matching will display names with 
+    accented characters but I haven't solved the dynamic matching for special characters in naems by
+    comparison, If you have a solution for this I would love to hear it. So far finding players with
+    accented characters is down to matching 3 or more letters in the name before the special character.
+    A character map is used that helps find names that begin with an accented character, this lead me to believe 
+    something that wasnt happening.    
+    
+    Search results are sorted then displayed; Online appear first sorted alphabetically; followed by 
+    Offline, sorted by least time offline. For players that have been Offline for less then 1 hour the 
+    displayed result shows 0D 0hr there is no minutes calculated thats just over kill IMO. dont be a 
+    stalker :p
+    
+    Example: partial search/dynamic matching (will match server names)
+    
+    [    Search: roc                                        ]
+    [*   RockStàr-Lightbringer   Officer   Online           ]
+    [-   Zzzzzzz-BlackRock       GM        Offline (0d 0hr) ]
+    [    RocksLock-Lightbringer  Initiate  Offline (1d 23hr)]
+    [    Bobbyrocker-Illadin     Member    Offline (7d 4hr} ]
     
     Plans for timed data collection to intelligently update guild information. 
     Plans for additional Officer + rank features, like ranking members from search 
