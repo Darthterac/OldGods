@@ -1603,7 +1603,7 @@ local function CreateGuildChatWindow(title)
     inputBox:SetHyperlinksEnabled(true)
     inputBox:SetMaxLetters(3999) -- Set the maximum number of characters I seen this in a movie once
     inputBox:SetScript("OnMouseDown", function(self)
-        self:SetFocus()         -- Ensure inputBox is focused
+        self:SetFocus()          -- Ensure inputBox is focused
     end)
 
     --The magic hooksecurefunc we need to learn more about this, used again in the mail manager with some changes
@@ -1628,7 +1628,7 @@ local function CreateGuildChatWindow(title)
             -- Check if the input is a slash command
             if message:sub(1, 1) == "/" then
                 local command = message:lower():match("^/(%S+)")
-                if command == "reload" then
+                if command == "reload" or "rl" then
                     ChatFrame1EditBox:Show()
                     ChatFrame1EditBox:SetText("/reload")
                     ChatFrame1EditBox:SetFocus()
@@ -1640,10 +1640,14 @@ local function CreateGuildChatWindow(title)
                     print("Press Enter to confirm /afk status.")
                 elseif command == "ogg" then
                     ChatFrame1EditBox:Show()
-                    ChatFrame1EditBox:SetText("/og guild")
+                    ChatFrame1EditBox:SetText("/og guild ") --slash command defined in the Slash Commands region
                     ChatFrame1EditBox:SetFocus()
-                    print("Enter a # to send message to guild chat.")
-                    print(" |cFF00F0FF[1]|r-|cFF00FF00Welcome Message|r\n".."|cFF00F0FF[2]|r-|cFFF0F002Purge Notice|r\n".."|cFF00F0FF[3]|r-|cFFFF0040Purge Completed|r\n")
+                    print(
+                        "Set the # then press Enter to message guild chat.\n" ..
+                        "|cFF00F0FF[|r1|cFF00F0FF]|r-|cFF00FF00New Player Welcome Message|r\n" ..
+                        "|cFF00F0FF[|r2|cFF00F0FF]|r-|cFFF0F002Notify|r Purge Begins\n" ..
+                        "|cFF00F0FF[|r3|cFF00F0FF]|r-|cFFF0F002Notify|r Purge Completed|r\n"
+                    )
                 end
             else
                 -- Send the final message (fancy or normal) to guild chat
@@ -1657,31 +1661,78 @@ local function CreateGuildChatWindow(title)
 
     -- Enforce size limits  during resizing
     GuildChatWindow:SetScript("OnSizeChanged", function(self, width, height)
-        local minWidth, minHeight = 524, 260
-        local maxWidth, maxHeight = 872, 640
+        local minWidth, minHeight = 524, 260 -- Minimum size for the frame to keep it from clipping icon and buttons
+        local maxWidth, maxHeight = 872, 640 -- Maximum size for the frame we dont want to go fullscreen, yet ;)
 
+        -- Clamping trick! Keeps 'width' from going out of bounds.
+        -- First, shrink it down if it's too big (math.min).
+        -- Then, bump it up if it's too small (math.max).
+        -- The final safe value is stored back in 'width'.
         width = math.max(minWidth, math.min(maxWidth, width))
+        -- Same trick for 'height'.
         height = math.max(minHeight, math.min(maxHeight, height))
         self:SetSize(width, height)
 
-        cristaFrame:SetSize(width - 41, height - 111)
-        scrollFrame:SetSize(width - 45, height - 115)
-        editBox:SetSize(width - 45, height - 115)
-        editBox:ClearAllPoints()
-        editBox:SetPoint("TOPLEFT", scrollFrame)
+        cristaFrame:SetSize(width - 41, height - 111) --adjust the border around the editBox, hack solved text clipping
+        scrollFrame:SetSize(width - 45, height - 115) --adjust the scrollFrame to fit the new size
+        editBox:SetSize(width - 45, height - 115)     --adjust the editBox to fit the new size
+        editBox:ClearAllPoints()                      --clear the editBox points
+        editBox:SetPoint("TOPLEFT", scrollFrame)      --and set them dynamically to the scrollFrame as size changes
         editBox:SetPoint("BOTTOMRIGHT", scrollFrame)
 
-        scrollFrame:SetVerticalScroll(scrollFrame:GetVerticalScrollRange())
+        scrollFrame:SetVerticalScroll(scrollFrame:GetVerticalScrollRange()) -- Scroll to the bottom after resizing
     end)
 
     ApplyFont(GuildChatWindow.editBox, Fonts["Roboto"])
 
+    -- Update the Guild Chat Window title with the guild name and member count info
+    -- This function is global i should have made it local but I was in a hurry
+    -- I will fix it later, I promise
+    local lastUpdate = 0 -- Tracks the last update timestamp
+    function UpdateGuildChatWindowTitle()
+        -- Throttle the update to prevent spamming the server
+        -- Update the title every 10 seconds
+        if GetTime() - lastUpdate < 10 then return end
+        lastUpdate = GetTime() --10 seconds have passed, function can run again
+
+        -- Var to store the users guild name, avoid nil values with or "No Guild Found"
+        -- which will be displayed the when the addon loads for the first ten seconda
+        -- even though were forcing GUILD_ROSTER_UPDATE to fire on load, sneaky sneaky!
+        local OG_guildName = GetGuildInfo("player") or "No Guild Found"
+        -- Var to store the number of guild members online and total
+        local numTotalGuildMembers, numOnlineGuildMembers, _ = GetNumGuildMembers()
+        -- Check if the and member counts and users guild name are available if not stop the function
+        if not numTotalGuildMembers or not numOnlineGuildMembers or not OG_guildName then
+            print("|CffF0F000Debug: Info missing or nil|r" ..
+                "\nnumTotalGuildMember: " .. numOnlineGuildMembers ..
+                "\nnumOnlineGuildMembers: " .. numOnlineGuildMembers ..
+                "\nOG_guildName: " .. OG_guildName .. "|r")
+            return
+        end
+        -- Update the title with the guild name and member count info
+        -- Store the new title as a string in a var
+        -- perform a simple calculation to get the number of offline members (total - online)
+        local newTitle = OG_guildName ..
+            " (|cFF00FF00" ..
+            numOnlineGuildMembers .. "|r / |cFFAA0000" .. (numTotalGuildMembers - numOnlineGuildMembers) .. "|r)"
+        -- Set the new title - this is why this global function is here, Im to lazy to
+        -- change the make GuildChatWindow.title = title and all the changes that would require for the themeing
+        -- I will do that in time but for now this is the way it is
+        GuildChatWindow.title:SetText(newTitle)
+    end
+
     return GuildChatWindow
 end
---Initialize GuildChatWindow
-local GuildChatWindow = CreateGuildChatWindow("Guild Chat")
+
+-- Initialize GuildChatWindow
+local GuildChatWindow = CreateGuildChatWindow("title") -- Default title
 GuildChatWindow:Show()
---#endregion
+
+local OG_Titlehack_frame = CreateFrame("Frame")
+OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
+OG_Titlehack_frame:RegisterEvent("PLAYER_GUILD_UPDATE")
+OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle)
+--#endregion Guild Chat Window
 
 --#region GUILD_DATA_FUNCTIONS
 
@@ -2008,13 +2059,18 @@ local searchFrame, scrollFrame, SR_scrollChild
 -- Refresh the guild roster cache
 local function RefreshGuildRosterCache()
     wipe(guildRosterCache) -- Clear old data
+
     for i = 1, GetNumGuildMembers() do
         local name, rank, _, _, _, _, _, _, online, _, _, _, _, _ = GetGuildRosterInfo(i)
         local _, _, day, hour = GetGuildRosterLastOnline(i)
+        local hyperlinkName = "|Hplayer:" .. name .. "|h[" .. name .. "]|h"
         day = day and day or 0
         hour = hour and hour or 0
+        NDay = day
+        NHour = hour
+
         table.insert(guildRosterCache, {
-            name       = name,
+            name       = hyperlinkName,
             rank       = rank,
             online     = online,
             day        = day,
@@ -2055,36 +2111,36 @@ local function ClearSearchResults()
     end
 end
 
---helper fuction to make searching players with unicode easy with just normal ascii
+--[[helper fuction to make searching players with unicode easy with just normal ascii
 local function normalizeString(str)
     -- Mapping of ASCII characters to Unicode equivalents
     local charMap = {
-        A = "[AÀÁÂÃÄÅĀĂĄǍǺȀȂȦȺÆ]",
-        B = "[BßƁƂƄ]",
-        C = "[CÇĆĈĊČƇȻ]",
-        D = "[DĎĐƊƋƌ]",
-        E = "[EÈÉÊËĒĔĖĘĚȄȆȨƏƐÆ]",
-        F = "[FƑ]",
-        G = "[GĜĞĠĢƓǤǦǴ]",
-        H = "[HĤĦȞ]",
-        I = "[IÌÍÎÏĨĪĬĮİƗȈȊ]",
-        J = "[JĴ]",
-        K = "[KĶƘǨ]",
-        L = "[LĹĻĽĿŁƚȽ]",
-        M = "[MƜ]",
-        N = "[NÑŃŅŇŊƝȠ]",
-        O = "[OÒÓÔÕÖØŌŎŐǑǪǬǾȌȎȮȰŒ]",
-        P = "[PƤ]",
-        Q = "[QɊ]",
-        R = "[RŔŖŘȐȒɌ]",
-        S = "[SŚŜŞŠȘȿß]",
-        T = "[TŢŤŦƬƮȚȾ]",
-        U = "[UÙÚÛÜŨŪŬŮŰŲȔȖƯǓǕǗǙǛ]",
-        V = "[VƲ]",
-        W = "[WŴẀẂẄẆẈ]",
-        X = "[XẊẌ]",
-        Y = "[YÝŶŸȲƳ]",
-        Z = "[ZŹŻŽƵȤ]"
+        A = "[aAÀÁÂÃÄÅĀĂĄǍǺȀȂȦȺÆ]",
+        B = "[bBß]",
+        C = "[cCÇĆĈĊČƇȻ]",
+        D = "[dDĎĐƊƋƌ]",
+        E = "[eEÈÉÊËĒĔĖĘĚȄȆȨƏƐÆ]",
+        F = "[fFƑ]",
+        G = "[gGĜĞĠĢƓǤǦǴ]",
+        H = "[hHĤĦȞ]",
+        I = "[iIÌÍÎÏĨĪĬĮİƗȈȊ]",
+        J = "[jJĴ]",
+        K = "[kKĶƘǨ]",
+        L = "[lLĹĻĽĿŁƚȽ]",
+        M = "[mMƜ]",
+        N = "[nNÑŃŅŇŊƝȠ]",
+        O = "[oOÒÓÔÕÖØŌŎŐǑǪǬǾȌȎȮȰŒ]",
+        P = "[pPƤ]",
+        Q = "[qQɊ]",
+        R = "[rRŔŖŘȐȒɌ]",
+        S = "[sSŚŜŞŠȘȿß]",
+        T = "[tTŢŤŦƬƮȚȾ]",
+        U = "[uUÙÚÛÜŨŪŬŮŰŲȔȖƯǓǕǗǙǛ]",
+        V = "[vVƲ]",
+        W = "[wWŴẀẂẄẆẈ]",
+        X = "[xXẊẌ]",
+        Y = "[yYÝŶŸȲƳ]",
+        Z = "[zZŹŻŽƵȤ]"
     }
 
     -- Replace each mapped character with the normalized equivalent
@@ -2094,9 +2150,30 @@ local function normalizeString(str)
 
     -- Return the normalized string in uppercase for consistency
     return string.upper(str)
+end]]
+
+local charMap = {
+    ["ÀÁÂÃÄÅĀĂĄǍǺȀȂȦȺÆàáâãäåāăąǎǻȁȃȧȺæ"] = "a",
+    ["ÇĆĈĊČƇȻçćĉċčƈȼ"] = "c",
+    ["ÐĎĐƊƋƌďđƋƌ"] = "d",
+    ["ÈÉÊËĒĔĖĘĚȄȆȨƏƐÆèéêëēĕėęěȅȇȩəɛæ"] = "e",
+    ["ÌÍÎÏĨĪĬĮİƗȈȊìíîïĩīĭįıɨȉȋ"] = "i",
+    ["ÑŃŅŇŊƝȠñńņňŋƞȵ"] = "n",
+    ["ÒÓÔÕÖØŌŎŐǑǪǬǾȌȎȮȰŒòóôõöøōŏőǒǫǭǿȍȏȯȱœ"] = "o",
+    ["ÙÚÛÜŨŪŬŮŰŲȔȖƯǓǕǗǙǛùúûüũūŭůűųȕȗưǔǖǘǚǜ"] = "u",
+    ["ÝŶŸȲƳýŷÿȳƴ"] = "y",
+    ["ŹŻŽƵȤźżžƶȥ"] = "z"
+}
+
+--- Normalize a string by replacing accented characters with their base forms
+local function normalizeString(str)
+    for accentedChars, baseChar in pairs(charMap) do
+        str = str:gsub("[" .. accentedChars .. "]", baseChar)
+    end
+    return str:lower() -- Convert to lowercase for case-insensitive matching
 end
 
--- Dynamic search and Normailzing ascii
+-- Dynamic search and Normalizing ASCII
 local function UpdateSearchResults(searchText)
     ClearSearchResults() -- Remove old results
 
@@ -2113,47 +2190,65 @@ local function UpdateSearchResults(searchText)
 
         -- Compare normalized strings
         if normalizedMemberName:find(normalizedSearch) then
-            -- Create a new row for each matching result
-            local row = CreateFrame("Frame", nil, SR_scrollChild)
-            row:SetSize(440, rowHeight)
-            row:SetPoint("TOPLEFT", SR_scrollChild, "TOPLEFT", 0, -offsetY)
+            if member.name and member.name:lower():find(searchText:lower()) then
+                -- Create a new row for each matching result
+                local row = CreateFrame("Frame", nil, SR_scrollChild)
+                row:SetSize(440, rowHeight)
+                row:SetPoint("TOPLEFT", SR_scrollChild, "TOPLEFT", 0, -offsetY)
 
-            ----------------------------------------------------------
-            -- 1) Name Column
-            ----------------------------------------------------------
-            local nameCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            -- Anchor this to the left edge of the row
-            nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
-            -- Set a fixed width
-            nameCol:SetWidth(190)
-            -- Ensure text is aligned left inside that width
-            nameCol:SetJustifyH("LEFT")
-            nameCol:SetText(member.name)
+                ----------------------------------------------------------
+                -- 1) Name Column
+                ----------------------------------------------------------
 
-            ----------------------------------------------------------
-            -- 2) Rank Column
-            ----------------------------------------------------------
-            local rankCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            -- Position it to the right of the name column, with a small gap
-            rankCol:SetPoint("LEFT", nameCol, "RIGHT", 10, 0)
-            rankCol:SetWidth(85)
-            rankCol:SetJustifyH("LEFT")
-            rankCol:SetText(member.rank)
+                local nameCol = CreateFrame("Button", nil, row)
+                nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
+                nameCol:SetSize(190, rowHeight)
+                nameCol:EnableMouse(true)
+                nameCol:SetHyperlinksEnabled(true)
 
-            ----------------------------------------------------------
-            -- 3) Status Column
-            ----------------------------------------------------------
-            local statusCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            -- Again position it to the right, with a small gap
-            statusCol:SetPoint("LEFT", rankCol, "RIGHT", 10, 0)
-            statusCol:SetWidth(180)
-            statusCol:SetJustifyH("LEFT")
-            statusCol:SetText(status)
+                local playerName = member.name
 
-            -- Increase the offset so the next row appears below
-            offsetY = offsetY + rowHeight
+                local nameText = nameCol:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                nameText:SetAllPoints()
+                nameText:SetJustifyH("LEFT")
+                nameText:SetText(playerName)
+
+                nameCol:SetFontString(nameText)
+                nameCol:SetNormalFontObject("GameFontNormal")
+
+                nameCol:HookScript("OnHyperlinkClick", function(self, link, text, button)
+                    if button == "RightButton" then
+                        ChatFrame_OnHyperlinkShow(self, link, text, button)
+                    end
+                end)
+
+
+                ----------------------------------------------------------
+                -- 2) Rank Column
+                ----------------------------------------------------------
+                local rankCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                -- Position it to the right of the name column, with a small gap
+                rankCol:SetPoint("LEFT", nameCol, "RIGHT", 10, 0)
+                rankCol:SetWidth(85)
+                rankCol:SetJustifyH("LEFT")
+                rankCol:SetText(member.rank)
+
+                ----------------------------------------------------------
+                -- 3) Status Column
+                ----------------------------------------------------------
+                local statusCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+                -- Again position it to the right, with a small gap
+                statusCol:SetPoint("LEFT", rankCol, "RIGHT", 10, 0)
+                statusCol:SetWidth(180)
+                statusCol:SetJustifyH("LEFT")
+                statusCol:SetText(status)
+
+                -- Increase the offset so the next row appears below
+                offsetY = offsetY + rowHeight
+            end
         end
     end
+
 
     -- Adjust scroll child height so it can accommodate all rows
     SR_scrollChild:SetSize(440, math.max(offsetY, scrollFrame:GetHeight()))
@@ -3451,6 +3546,13 @@ local function InitializeTheme()
 
     -- Apply the loaded theme
     ApplyTheme(GuildChatWindow, Themes["Your Custom Theme"])
+    OG_Titlehack = {}
+    OG_Titlehack = C_GuildInfo.GuildRoster()
+    if OG_Titlehack then
+        UpdateGuildChatWindowTitle()
+        wipe(OG_Titlehack)
+        OG_Titlehack = nil
+    end
 end
 --#endregion primary Initialize function ends
 
