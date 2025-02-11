@@ -805,7 +805,7 @@ local function ApplyTheme(frame, theme)
     end
 
     CurrentTheme = theme
-    
+
     -- Set Backdrop and Border for the Main Frame
     if theme.bgFile and theme.edgeFile then
         frame:SetBackdrop({
@@ -1355,6 +1355,8 @@ frame:Hide()
 --#endregion Mail Frame, or fame who knows!
 
 --#region Guild Chat Window
+local OG_Titlehack_frame = CreateFrame("Frame")
+
 local function CreateGuildChatWindow(title)
     -- Create the parent frame for the Guild Chat GUI
     local GuildChatWindow = CreateFrame("Frame", "GuildChatWindow", UIParent, "BackdropTemplate")
@@ -1416,9 +1418,9 @@ local function CreateGuildChatWindow(title)
     editBox:SetHyperlinksEnabled(true)
 
     editBox:HookScript("OnHyperlinkClick", function(self, link, text, button)
-        if button == "RightButton" then
+        if button == "LeftButton" then
             ChatFrame_OnHyperlinkShow(self, link, text, button)
-        elseif button == "LeftButton" then
+        elseif button == "RightButton" then
             local linkType, linkplayer = strsplit(":", link)
             if linkType == "player" and linkplayer then
                 local normalizedSender = Ambiguate(linkplayer, "none")
@@ -1433,11 +1435,11 @@ local function CreateGuildChatWindow(title)
                         ---@diagnostic disable-next-line: undefined-field
                         GameTooltip:SetBackdrop({
                             bgFile = "Interface\\AddOns\\OldGods\\Textures\\tooltipbg.tga",
-                            edgeFile = "Interface\\AddOns\\OldGods\\Textures\\myBorder.tga", -- Use a default border or your own
+                            edgeFile = "Interface\\AddOns\\OldGods\\Textures\\myBorder.tga",
                             tile = false,
-                            tileSize = 0,
-                            edgeSize = 3,
-                            insets = { left = -1, right = -1, top = 0, bottom = 0 },
+                            tileSize = 16,
+                            edgeSize = 4,
+                            insets = { left = 0, right = 0, top = 0, bottom = 0 },
                         })
                         ---@diagnostic disable-next-line: undefined-field
                         GameTooltip:SetBackdropColor(.45, .55, .75, .457)
@@ -1446,25 +1448,25 @@ local function CreateGuildChatWindow(title)
                         GameTooltip.hasCustomBackdrop = true
                     end
                     GameTooltip:Show()
-                    --OG_clickedSoundPlayed = false -- global variable set on event ADDON_LOADED
                     if not OG_clickedSoundPlayed then
                         PlaySoundFile(1391166, "Master")
                         OG_clickedSoundPlayed = true --set global variable to true, only PlaySoundFile once per session
-                    end                              -- Set flag to true to prevent replay
+                    end
                 else
                     print("No tooltip data for player:", normalizedSender)
                 end
             end
         end
+
         editBox:SetScript("OnHyperlinkLeave", function()
             GameTooltip:Hide()
-            --OG_leaveSoundPlayed = false -- global variable set on event ADDON_LOADED
             if not OG_leaveSoundPlayed then
                 PlaySoundFile(5834619, "Master")
                 OG_leaveSoundPlayed = true --set global variable to true, only PlaySoundFile once per session
             end
         end)
     end)
+
     scrollFrame:SetScrollChild(editBox)
     GuildChatWindow.editBox = editBox
 
@@ -1691,19 +1693,25 @@ local function CreateGuildChatWindow(title)
         scrollFrame:SetVerticalScroll(scrollFrame:GetVerticalScrollRange()) -- Scroll to the bottom after resizing
     end)
 
-    ApplyFont(GuildChatWindow.editBox, Fonts["Roboto"])
-
+    ApplyFont(GuildChatWindow.editBox, Fonts["Roboto"]
+)
+    
     -- Update the Guild Chat Window title with the guild name and member count info
     -- This function is global i should have made it local but I was in a hurry
     -- I will fix it later, I promise
-    local lastUpdate = 0 -- Tracks the last update timestamp
+    local lastUpdate = 11 -- Initial last update timestamp
     function UpdateGuildChatWindowTitle()
+        local now = GetTime()
         -- Throttle the update to prevent spamming the server
         -- Update the title every 10 seconds
-        if GetTime() - lastUpdate < 10 then print("debug: lastupdate = ", lastUpdate) return end
-        lastUpdate = GetTime() --10 seconds have passed, function can run again
-        print("debug: Title update happened at - ", lastUpdate)
-
+        if now - lastUpdate < 10 then
+            print("|cFFFF0000NO UPDATE|r since: ", lastUpdate)
+            return
+        end
+        lastUpdate = now --10 seconds have passed, function can run again
+        print("|cFF00FF00UPDATE|r at: ", lastUpdate)
+        -- Temporarily stop event spam (unregister it once, re-enable after update)
+        OG_Titlehack_frame:UnregisterEvent("GUILD_ROSTER_UPDATE")
         -- Var to store the users guild name, avoid nil values with or "No Guild Found"
         -- which will be displayed the when the addon loads for the first ten seconda
         -- even though were forcing GUILD_ROSTER_UPDATE to fire on load, sneaky sneaky!
@@ -1716,6 +1724,7 @@ local function CreateGuildChatWindow(title)
                 "\nnumTotalGuildMember: " .. numOnlineGuildMembers ..
                 "\nnumOnlineGuildMembers: " .. numOnlineGuildMembers ..
                 "\nOG_guildName: " .. OG_guildName .. "|r")
+            -- Delay event re-registration for 3 seconds (to let data settle)
             return
         end
         -- Update the title with the guild name and member count info
@@ -1728,19 +1737,19 @@ local function CreateGuildChatWindow(title)
         -- change the make GuildChatWindow.title = title and all the changes that would require for the themeing
         -- I will do that in time but for now this is the way it is
         GuildChatWindow.title:SetText(newTitle)
+        -- Re-register event after update is complete
+        C_Timer.After(10, function()
+            OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
+        end)
     end
-
     return GuildChatWindow
 end
 
 -- Initialize GuildChatWindow
 local GuildChatWindow = CreateGuildChatWindow("IF YOU SEE THIS LAZYEYEZ IS AWESOME") -- Default title
 GuildChatWindow:Show()
-
-local OG_Titlehack_frame = CreateFrame("Frame")
-OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE") --Any roster changes
-OG_Titlehack_frame:RegisterEvent("PLAYER_GUILD_UPDATE") --Any guild changes
-OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle) -- and this bad boy jumps in to update the title for us
+OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")             --Any roster changes
+OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle) --The Fuction get called
 --#endregion Guild Chat Window
 
 --#region GUILD_DATA_FUNCTIONS
@@ -2161,26 +2170,42 @@ local function normalizeString(str)
     return string.upper(str)
 end]]
 
-local charMap = {
-    ["ÀÁÂÃÄÅĀĂĄǍǺȀȂȦȺÆàáâãäåāăąǎǻȁȃȧȺæ"] = "a",
-    ["ÇĆĈĊČƇȻçćĉċčƈȼ"] = "c",
-    ["ÐĎĐƊƋƌďđƋƌ"] = "d",
-    ["ÈÉÊËĒĔĖĘĚȄȆȨƏƐÆèéêëēĕėęěȅȇȩəɛæ"] = "e",
-    ["ÌÍÎÏĨĪĬĮİƗȈȊìíîïĩīĭįıɨȉȋ"] = "i",
-    ["ÑŃŅŇŊƝȠñńņňŋƞȵ"] = "n",
-    ["ÒÓÔÕÖØŌŎŐǑǪǬǾȌȎȮȰŒòóôõöøōŏőǒǫǭǿȍȏȯȱœ"] = "o",
-    ["ÙÚÛÜŨŪŬŮŰŲȔȖƯǓǕǗǙǛùúûüũūŭůűųȕȗưǔǖǘǚǜ"] = "u",
-    ["ÝŶŸȲƳýŷÿȳƴ"] = "y",
-    ["ŹŻŽƵȤźżžƶȥ"] = "z"
+
+local accent_map = {
+    { accent = "á", repl = "a" }, { accent = "à", repl = "a" }, { accent = "â", repl = "a" }, { accent = "ä", repl = "a" }, { accent = "å", repl = "a" }, { accent = "æ", repl = "ae" },
+    { accent = "Á", repl = "A" }, { accent = "À", repl = "A" }, { accent = "Â", repl = "A" }, { accent = "Ä", repl = "A" }, { accent = "Å", repl = "A" }, { accent = "Æ", repl = "AE" },
+
+    { accent = "ç", repl = "c" }, { accent = "Ç", repl = "C" },
+    { accent = "œ", repl = "oe" }, { accent = "Œ", repl = "OE" },
+    { accent = "ß", repl = "ss" }, -- Special German character ß → "ss"
+    
+    { accent = "é", repl = "e" }, { accent = "è", repl = "e" }, { accent = "ê", repl = "e" }, { accent = "ë", repl = "e" },
+    { accent = "É", repl = "E" }, { accent = "È", repl = "E" }, { accent = "Ê", repl = "E" }, { accent = "Ë", repl = "E" },
+
+    { accent = "í", repl = "i" }, { accent = "ì", repl = "i" }, { accent = "î", repl = "i" }, { accent = "ï", repl = "i" },
+    { accent = "Í", repl = "I" }, { accent = "Ì", repl = "I" }, { accent = "Î", repl = "I" }, { accent = "Ï", repl = "I" },
+
+    { accent = "ó", repl = "o" }, { accent = "ò", repl = "o" }, { accent = "ô", repl = "o" }, { accent = "ö", repl = "o" }, { accent = "ø", repl = "o" },
+    { accent = "Ó", repl = "O" }, { accent = "Ò", repl = "O" }, { accent = "Ô", repl = "O" }, { accent = "Ö", repl = "O" }, { accent = "Ø", repl = "O" },
+
+    { accent = "ú", repl = "u" }, { accent = "ù", repl = "u" }, { accent = "û", repl = "u" }, { accent = "ü", repl = "u" },
+    { accent = "Ú", repl = "U" }, { accent = "Ù", repl = "U" }, { accent = "Û", repl = "U" }, { accent = "Ü", repl = "U" },
+
+    { accent = "ñ", repl = "n" }, { accent = "Ñ", repl = "N" },
+    { accent = "ý", repl = "y" }, { accent = "ÿ", repl = "y" }, { accent = "Ý", repl = "Y" }
 }
 
+
 --- Normalize a string by replacing accented characters with their base forms
-local function normalizeString(str)
-    for accentedChars, baseChar in pairs(charMap) do
-        str = str:gsub("[" .. accentedChars .. "]", baseChar)
+local function NormalizeAccent(char)
+    for _, entry in ipairs(accent_map) do
+        if entry.accent == char then
+            return entry.repl
+        end
     end
-    return str:lower() -- Convert to lowercase for case-insensitive matching
+    return char -- If it's not an accented character, return the original character
 end
+
 
 -- Dynamic search and Normalizing ASCII
 local function UpdateSearchResults(searchText)
@@ -2190,71 +2215,68 @@ local function UpdateSearchResults(searchText)
     local rowHeight = 20
 
     -- Normalize the search text
-    local normalizedSearch = normalizeString(searchText)
+    local normalizedSearch = NormalizeAccent(searchText)
 
     for _, member in ipairs(guildRosterCache) do
-        local normalizedMemberName = normalizeString(member.name)
+        local normalizedMemberName = NormalizeAccent(member.name)
         local status = member.online and "|cff00ff00Online|r" or
             string.format("|cffff0000Offline|r (%s)", member.lastOnline)
 
         -- Compare normalized strings
         if normalizedMemberName:find(normalizedSearch) then
-            if member.name and member.name:lower():find(searchText:lower()) then
-                -- Create a new row for each matching result
-                local row = CreateFrame("Frame", nil, SR_scrollChild)
-                row:SetSize(440, rowHeight)
-                row:SetPoint("TOPLEFT", SR_scrollChild, "TOPLEFT", 0, -offsetY)
+            -- Create a new row for each matching result
+            local row = CreateFrame("Frame", nil, SR_scrollChild)
+            row:SetSize(440, rowHeight)
+            row:SetPoint("TOPLEFT", SR_scrollChild, "TOPLEFT", 0, -offsetY)
 
-                ----------------------------------------------------------
-                -- 1) Name Column
-                ----------------------------------------------------------
+            ----------------------------------------------------------
+            -- 1) Name Column
+            ----------------------------------------------------------
+            local nameCol = CreateFrame("Button", nil, row)
+            nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
+            nameCol:SetSize(190, rowHeight)
+            nameCol:EnableMouse(true)
+            nameCol:SetHyperlinksEnabled(true)
 
-                local nameCol = CreateFrame("Button", nil, row)
-                nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
-                nameCol:SetSize(190, rowHeight)
-                nameCol:EnableMouse(true)
-                nameCol:SetHyperlinksEnabled(true)
+            local playerName = member.name
 
-                local playerName = member.name
+            local nameText = nameCol:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            nameText:SetAllPoints()
+            nameText:SetJustifyH("LEFT")
+            nameText:SetText(playerName)
 
-                local nameText = nameCol:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                nameText:SetAllPoints()
-                nameText:SetJustifyH("LEFT")
-                nameText:SetText(playerName)
+            nameCol:SetFontString(nameText)
+            nameCol:SetNormalFontObject("GameFontNormal")
 
-                nameCol:SetFontString(nameText)
-                nameCol:SetNormalFontObject("GameFontNormal")
-
-                nameCol:HookScript("OnHyperlinkClick", function(self, link, text, button)
-                    if button == "RightButton" then
-                        ChatFrame_OnHyperlinkShow(self, link, text, button)
-                    end
-                end)
+            nameCol:HookScript("OnHyperlinkClick", function(self, link, text, button)
+                if button == "RightButton" then
+                    ChatFrame_OnHyperlinkShow(self, link, text, button)
+                end
+            end)
 
 
-                ----------------------------------------------------------
-                -- 2) Rank Column
-                ----------------------------------------------------------
-                local rankCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                -- Position it to the right of the name column, with a small gap
-                rankCol:SetPoint("LEFT", nameCol, "RIGHT", 10, 0)
-                rankCol:SetWidth(85)
-                rankCol:SetJustifyH("LEFT")
-                rankCol:SetText(member.rank)
+            ----------------------------------------------------------
+            -- 2) Rank Column
+            ----------------------------------------------------------
+            local rankCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            -- Position it to the right of the name column, with a small gap
+            rankCol:SetPoint("LEFT", nameCol, "RIGHT", 10, 0)
+            rankCol:SetWidth(85)
+            rankCol:SetJustifyH("LEFT")
+            rankCol:SetText(member.rank)
 
-                ----------------------------------------------------------
-                -- 3) Status Column
-                ----------------------------------------------------------
-                local statusCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                -- Again position it to the right, with a small gap
-                statusCol:SetPoint("LEFT", rankCol, "RIGHT", 10, 0)
-                statusCol:SetWidth(180)
-                statusCol:SetJustifyH("LEFT")
-                statusCol:SetText(status)
+            ----------------------------------------------------------
+            -- 3) Status Column
+            ----------------------------------------------------------
+            local statusCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            -- Again position it to the right, with a small gap
+            statusCol:SetPoint("LEFT", rankCol, "RIGHT", 10, 0)
+            statusCol:SetWidth(180)
+            statusCol:SetJustifyH("LEFT")
+            statusCol:SetText(status)
 
-                -- Increase the offset so the next row appears below
-                offsetY = offsetY + rowHeight
-            end
+            -- Increase the offset so the next row appears below
+            offsetY = offsetY + rowHeight
         end
     end
 
@@ -2410,27 +2432,31 @@ local function AddResetButton(parent, theme, themeName, colorOptions)
     button:SetNormalFontObject("GameFontNormalMed2Outline")
     button:SetHighlightFontObject("GameFontHighlightMed2Outline")
     button:SetText("Reset to Default")
+
     button:SetScript("OnClick", function()
-        local defaults = theme
+        local defaults = theme -- Themes[themeName]
         if not defaults then
             print("Theme " .. themeName .. " not found in default Themes, this will erase all custom colors.")
             return
         end
 
-        for _, option in ipairs(colorOptions) do
-            local key = option.key
-            local OG_DefaultTheme = ResolveNestedKey(defaults, key) -- Get the default color from the Themes table
-            if OG_DefaultTheme then
-                ResolveNestedKey(defaults, key, OG_DefaultTheme)    -- Set the default color in CurrentTheme
-                OldGodsSavedColors[key] = nil                    -- Save the default color to SavedVariables
+        -- For each option in colorOptions list store the key value and get the original key!
+        for _, option in ipairs(colorOptions) do                          -- colorOptions; ipairs: For strictly indexed tables with no gaps you fn poser
+            local key = option
+                .key                                                      -- Get the key from the colorOptions list and store it in a var named key
+            local OG_DefaultTheme = ResolveNestedKey(defaults, key)       -- match the key from the defaults var; Themes[themeName] and store its value in OG_DefaultTheme
+            if OG_DefaultTheme then                                       -- If the key is found in the defaults and the value is stored then OG_DefaultTheme is not nil
+                ResolveNestedKey(Themes[themeName], key, OG_DefaultTheme) -- we load the original value back into the custom theme, Theme[themeName]
+                OldGodsSavedColors[key] = nil                             -- and we clear the SavedVariable so a when /reload or log out login happens were back to factory new
             else
                 print("Warning: Key " .. key .. " not found in defaults.")
             end
         end
 
-        ApplyTheme(GuildChatWindow, Themes["Your Custom Theme"])
+        ApplyTheme(GuildChatWindow, Themes[themeName])
         print("Theme reset to defaults!")
     end)
+
     return button
 end
 
@@ -3233,11 +3259,11 @@ local function addScanButtonToGuildDataWindow()
 
     scanButton:SetScript("OnClick", function()
         --if IsInGuild() then
-            --C_GuildInfo.GuildRoster()
-            --eventFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+        --C_GuildInfo.GuildRoster()
+        --eventFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
         --else
-            print("this is getting axed")
-        end)
+        print("this is getting axed")
+    end)
 end
 
 -- Function to process guild roster data
@@ -3523,6 +3549,7 @@ end
 local function InitializeTheme()
     -- Ensure the saved table exists
     OldGodsSavedColors = OldGodsSavedColors or {}
+    OG_Titlehack = {} -- whats this all about?
 
 
     --Load saved colors into CurrentTheme
@@ -3531,26 +3558,31 @@ local function InitializeTheme()
         local resolvedValue = ResolveNestedKey(Themes["Your Custom Theme"], key)
         -- if so apply the saved value to the theme
         if resolvedValue then
-            --and the magic is completed
             ResolveNestedKey(Themes["Your Custom Theme"], key, value)
+            --and the magic is completed ChatGPT before he can say "I'm sorry Dave, I'm afraid I can't do that"
+            --was whiping up some grade A functions now he teaches me by making me do it myself, I wouldnt have it any other way
         end
     end
 
     -- Apply the user saved theme to the GuildChatWindow
     ApplyTheme(GuildChatWindow, Themes["Your Custom Theme"])
     --and now we can all go home
-    OG_Titlehack = {}
     -- wait a second whats this?
-    OG_Titlehack = C_GuildInfo.GuildRoster()
-    -- did you see that? I think we just got the guild roster to trigger the GUILD_ROSTER_UPDATE event
-    if OG_Titlehack then
-        --its called by the event but lets double down and call it here too
-        UpdateGuildChatWindowTitle()
-        --and then we
-        wipe(OG_Titlehack)
-        --and then we treat it like it never happened
-        OG_Titlehack = nil
-    end
+    C_Timer.After(4, function()
+        OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
+        OG_Titlehack = C_GuildInfo.GuildRoster()
+        -- did you see that? I think we just got the guild roster to trigger the GUILD_ROSTER_UPDATE event
+        if OG_Titlehack then
+            --and then we
+            wipe(OG_Titlehack)
+            --and then we treat it like it never happened
+            OG_Titlehack = nil
+            -- what global table full of guild data?
+            -- I dont know what you're talking about
+            -- but really this is an attempt to force the event to trigger the GuildChatWindow title update function ;)
+            -- We wait 10 seconds for suspense and for everything to be ready, for all I know it could be a bug
+        end
+    end)
 end
 --#endregion primary Initialize function ends
 
@@ -3564,7 +3596,8 @@ frame:SetScript("OnEvent", function(self, event, name)
         OG_clickedSoundPlayed = false
 
         -- Print addon loaded message in chat frame
-        print("|T3194610:20:20:0|t " .. "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r.\nCollecting Guild Data... standby.")
+        print("|T3194610:20:20:0|t " ..
+            "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r.\nCollecting Guild Data... standby.")
 
         if OGsavedChat then
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)
