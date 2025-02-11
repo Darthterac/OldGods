@@ -7,6 +7,7 @@ OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
 
 Themes = {
     ["Your Custom Theme"] = {
+        dropDownIcon = "|TInterface\\Icons\\Achievement_RankedPvP_07:16:16|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -76,6 +77,7 @@ Themes = {
         iconSize = { width = 48, height = 48 },
     }, -- Custom theme saved to saved variables
     ["Horde"] = {
+        dropDownIcon = "|TInterface\\Timer\\Horde-Logo:16:16|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -145,6 +147,7 @@ Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["Alliance"] = {
+        dropDownIcon = "|TInterface\\Timer\\Alliance-Logo:16:16|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -214,6 +217,7 @@ Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["Hacker"] = {
+        dropDownIcon = "|TInterface\\Icons\\INV_Artifact_DimensionalRift:16:16|t",
         bgFile = "Interface\\AddOns\\OldGods\\Textures\\hacker.tga",
         edgeFile = "Interface\\AddOns\\OldGods\\Textures\\hackerborder.tga",
         tile = false,
@@ -283,6 +287,7 @@ Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["ChatGPT"] = {
+        dropDownIcon = "|TInterface\\Icons\\Ability_Monk_TigerPalm:16:16|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -352,6 +357,7 @@ Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["WoW Theme"] = {
+        dropDownIcon = "|TInterface\\ChatFrame\\UI-ChatIcon-WoW:16:16|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -797,7 +803,9 @@ local function ApplyTheme(frame, theme)
     if frame.editBox then
         ApplyEditBoxTheme(frame.editBox, theme)
     end
+
     CurrentTheme = theme
+    
     -- Set Backdrop and Border for the Main Frame
     if theme.bgFile and theme.edgeFile then
         frame:SetBackdrop({
@@ -1692,13 +1700,14 @@ local function CreateGuildChatWindow(title)
     function UpdateGuildChatWindowTitle()
         -- Throttle the update to prevent spamming the server
         -- Update the title every 10 seconds
-        if GetTime() - lastUpdate < 10 then return end
+        if GetTime() - lastUpdate < 10 then print("debug: lastupdate = ", lastUpdate) return end
         lastUpdate = GetTime() --10 seconds have passed, function can run again
+        print("debug: Title update happened at - ", lastUpdate)
 
         -- Var to store the users guild name, avoid nil values with or "No Guild Found"
         -- which will be displayed the when the addon loads for the first ten seconda
         -- even though were forcing GUILD_ROSTER_UPDATE to fire on load, sneaky sneaky!
-        local OG_guildName = GetGuildInfo("player") or "No Guild Found"
+        local OG_guildName = GetGuildInfo("player") or "|T986486:20:16:0|t Loading Guild Info!"
         -- Var to store the number of guild members online and total
         local numTotalGuildMembers, numOnlineGuildMembers, _ = GetNumGuildMembers()
         -- Check if the and member counts and users guild name are available if not stop the function
@@ -1725,13 +1734,13 @@ local function CreateGuildChatWindow(title)
 end
 
 -- Initialize GuildChatWindow
-local GuildChatWindow = CreateGuildChatWindow("title") -- Default title
+local GuildChatWindow = CreateGuildChatWindow("IF YOU SEE THIS LAZYEYEZ IS AWESOME") -- Default title
 GuildChatWindow:Show()
 
 local OG_Titlehack_frame = CreateFrame("Frame")
-OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
-OG_Titlehack_frame:RegisterEvent("PLAYER_GUILD_UPDATE")
-OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle)
+OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE") --Any roster changes
+OG_Titlehack_frame:RegisterEvent("PLAYER_GUILD_UPDATE") --Any guild changes
+OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle) -- and this bad boy jumps in to update the title for us
 --#endregion Guild Chat Window
 
 --#region GUILD_DATA_FUNCTIONS
@@ -2371,10 +2380,10 @@ local function CreateColorPicker(defaultR, defaultG, defaultB, defaultA, onColor
     end
 
     -- Set up the ColorPickerFrame
-    ColorPickerFrame.opacity = 1 - (defaultA or 1)                               -- WoW inverts opacity logic
-    ColorPickerFrame.hasOpacity = (defaultA ~= nil)
-    ColorPickerFrame.opacity = 1 - (defaultA or 1)                               -- WoW inverts opacity logic
+
     ColorPickerFrame.previousValues = { defaultR, defaultG, defaultB, defaultA } -- Store original color
+    ColorPickerFrame.opacity = (defaultA or 1)                                   -- Default opacity
+    ColorPickerFrame.hasOpacity = (defaultA ~= nil)
 
     -- Callback for when color is confirmed
     local function applyColor()
@@ -2397,79 +2406,74 @@ end
 
 local function AddResetButton(parent, theme, themeName, colorOptions)
     local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    button:SetSize(140, 25)
-    button:SetText("Reset Colors")
-
-
+    button:SetSize(150, 30)
+    button:SetNormalFontObject("GameFontNormalMed2Outline")
+    button:SetHighlightFontObject("GameFontHighlightMed2Outline")
+    button:SetText("Reset to Default")
     button:SetScript("OnClick", function()
-        local defaults = theme --Themes[themeName]
+        local defaults = theme
         if not defaults then
-            print("Error: Theme '" .. themeName .. "' not found in Themes.")
+            print("Theme " .. themeName .. " not found in default Themes, this will erase all custom colors.")
             return
         end
 
         for _, option in ipairs(colorOptions) do
             local key = option.key
-            local defaultColor = ResolveNestedKey(defaults, key)
-
-            if defaultColor then
-                ResolveNestedKey(theme, key, defaultColor) -- Set the default color in CurrentTheme
-                OldGodsSavedColors[key] = nil              -- Clear the saved color for this key
+            local OG_DefaultTheme = ResolveNestedKey(defaults, key) -- Get the default color from the Themes table
+            if OG_DefaultTheme then
+                ResolveNestedKey(defaults, key, OG_DefaultTheme)    -- Set the default color in CurrentTheme
+                OldGodsSavedColors[key] = nil                    -- Save the default color to SavedVariables
             else
-                print("Warning: Key '" .. key .. "' not found in defaults.")
+                print("Warning: Key " .. key .. " not found in defaults.")
             end
         end
 
-        -- Apply the default theme
-        ApplyTheme(GuildChatWindow, defaults)
+        ApplyTheme(GuildChatWindow, Themes["Your Custom Theme"])
         print("Theme reset to defaults!")
     end)
-
     return button
 end
 
 local function PopulateContentFrame_ThemeColorSettings(optionsFrame, theme)
     local buttons = {}
-    local yOffset = -10 -- Initial Y offset
+    local yOffset = -15 -- Initial Y offset
     local contentFrame = optionsFrame.contentFrame
 
     -- Define the colors you want to modify
     local colorOptions = {
-        { label = "Title Color",        key = "titleColor" },
-        { label = "Main Background",    key = "backgroundColor" },
-        { label = "Outter Border",      key = "borderColor" },
-        { label = "Chat Window",        key = "theAtari.isEditBoxBG" },
-        { label = "Chat Window Border", key = "theStefak.cristaFrameBorderColor" },
-        { label = "Button Color",       key = "buttonBgColor" },
-        { label = "Button Border",      key = "buttonBorderColor" },
+        { label = "Window (Title)",           key = "titleColor" },
+        { label = "Window [Border]",          key = "borderColor" },
+        { label = "Window (Background)",      key = "backgroundColor" },
+        { label = "Button [Border]",          key = "buttonBorderColor" },
+        { label = "Button (Background)",      key = "buttonBgColor" },
+        { label = "Chat Window [Border]",     key = "theStefak.cristaFrameBorderColor" },
+        { label = "Chat Window (Background)", key = "theAtari.isEditBoxBG" },
     }
 
     -- Create a button for each color option
     for _, option in ipairs(colorOptions) do
         local button = CreateFrame("Button", nil, contentFrame, "UIPanelButtonTemplate")
-        button:SetSize(250, 27)
+        button:SetSize(300, 30)
+        button:SetNormalFontObject("GameFontNormalMed2Outline")
+        button:SetHighlightFontObject("GameFontHighlightMed2Outline")
         button:SetText("Change " .. option.label)
-
         button:SetScript("OnClick", function()
             -- Resolve the color from the theme (handles both direct and nested keys)
             local color = ResolveNestedKey(theme, option.key) or { r = 1, g = 1, b = 1, a = 1 }
-
             -- Show the color picker
             CreateColorPicker(color.r, color.g, color.b, color.a, function(r, g, b, a)
                 -- Update the theme with the new color
                 ResolveNestedKey(theme, option.key, { r = r, g = g, b = b, a = a })
                 -- Save the color to SavedVariables
                 OldGodsSavedColors[option.key] = { r = r, g = g, b = b, a = a }
-
-
                 -- Apply the updated theme
                 ApplyTheme(GuildChatWindow, theme)
             end)
         end)
 
-        -- Position the button
-        button:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 10, yOffset)
-        yOffset = yOffset - 30 -- Move down for the next button
+        -- Position the buttons
+        button:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 15, yOffset)
+        yOffset = yOffset - 35 -- Move down for the next button
         table.insert(buttons, button)
     end
 
@@ -2487,58 +2491,44 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     -- Create a label for the Font Dropdown
     local fontLabel = contentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     fontLabel:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 20, -20)
-    fontLabel:SetText("Guild Chat Font:")
-    fontLabel:SetTextColor(1, 1, 1, 1) -- White text (R, G, B, A)
+    fontLabel:SetText("Guild Chat Fonts")
+    fontLabel:SetTextColor(1, 1, 1, 1)
 
     -- Create the Font Dropdown
-    local fontDropdown = CreateFrame("Frame", "FontDropdown", contentFrame, "UIDropDownMenuTemplate")
+    local fontDropdown = CreateFrame("DropdownButton", "FontDropdown", contentFrame, "WowStyle1DropdownTemplate")
     fontDropdown:SetPoint("TOPLEFT", fontLabel, "BOTTOMLEFT", -5, -5)
-
-    UIDropDownMenu_Initialize(fontDropdown, function(self, level)
+    fontDropdown:SetWidth(200)
+    fontDropdown:SetHeight(30)
+    fontDropdown:SetDefaultText("Select Font")
+    fontDropdown:SetupMenu(function(self, rootDescription)
         for fontName, fontData in pairs(Fonts) do
-            local info = UIDropDownMenu_CreateInfo()
-            info.text = fontName
-            info.value = fontName
-            info.func = function()
-                -- Apply the selected font to the content frame (or specific elements)
+            rootDescription:CreateButton("|TInterface\\Icons\\INV_Letter_01:16:16|t " .. fontName, function(data)
                 ApplyFont(GuildChatWindow.editBox, fontData)
-                UIDropDownMenu_SetSelectedValue(fontDropdown, fontName)
                 print("Selected Font:", fontName)
-            end
-            UIDropDownMenu_AddButton(info, level)
+            end)
         end
     end)
-
-    UIDropDownMenu_SetWidth(fontDropdown, 80)
-    UIDropDownMenu_SetSelectedValue(fontDropdown, "Acme") -- Default selection
 
     -- Create a label for the Theme Dropdown
     local themeLabel = contentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     themeLabel:SetPoint("TOPLEFT", fontDropdown, "BOTTOMLEFT", 5, -20)
-    themeLabel:SetText("Guild Chat Theme:")
-    themeLabel:SetTextColor(1, 1, 1, 1) -- White text (R, G, B, A)
+    themeLabel:SetText("Guild Chat Themes")
+    themeLabel:SetTextColor(1, 1, 1, 1)
 
     -- Create the Theme Dropdown
-    local themeDropdown = CreateFrame("Frame", "ThemeDropdown", contentFrame, "UIDropDownMenuTemplate")
+    local themeDropdown = CreateFrame("DropdownButton", "ThemeDropdown", contentFrame, "WowStyle1DropdownTemplate")
     themeDropdown:SetPoint("TOPLEFT", themeLabel, "BOTTOMLEFT", -5, -5)
-
-    UIDropDownMenu_Initialize(themeDropdown, function(self, level)
+    themeDropdown:SetWidth(200)
+    themeDropdown:SetHeight(30)
+    themeDropdown:SetDefaultText("Select Theme")
+    themeDropdown:SetupMenu(function(self, rootDescription)
         for themeName, themeData in pairs(Themes) do
-            local info = UIDropDownMenu_CreateInfo()
-            info.text = themeName
-            info.value = themeName
-            info.func = function()
-                -- Apply the selected theme to the content frame
+            rootDescription:CreateButton(themeData.dropDownIcon .. themeName, function(data)
                 ApplyTheme(GuildChatWindow, themeData)
-                --CurrentTheme = themeData
-                UIDropDownMenu_SetSelectedValue(themeDropdown, themeName)
                 print("Selected Theme:", themeName)
-            end
-            UIDropDownMenu_AddButton(info, level)
+            end)
         end
     end)
-    UIDropDownMenu_SetWidth(themeDropdown, 80)
-    UIDropDownMenu_SetSelectedValue(themeDropdown, "Your Custom Theme") -- Default selection
 end
 --#endregion populate General settings
 
@@ -3242,13 +3232,12 @@ local function addScanButtonToGuildDataWindow()
     scanButton:SetHighlightFontObject("GameFontHighlight")
 
     scanButton:SetScript("OnClick", function()
-        if IsInGuild() then
-            C_GuildInfo.GuildRoster()
-            eventFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
-        else
-            print("You are not in a guild.")
-        end
-    end)
+        --if IsInGuild() then
+            --C_GuildInfo.GuildRoster()
+            --eventFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+        --else
+            print("this is getting axed")
+        end)
 end
 
 -- Function to process guild roster data
@@ -3323,17 +3312,17 @@ local function createRoleFilterDropdown()
     return roleFilter
 end
 -- Event handler for guild updates
-local function onEvent(self, event)
+local function OG_onEvent(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
         self:UnregisterEvent("GUILD_ROSTER_UPDATE")
-        processGuildRoster()
+        --processGuildRoster()
     end
 end
 -- Attach dropdown and scan button to GuildDataWindow
 createRoleFilterDropdown()
 addScanButtonToGuildDataWindow()
 -- Set up event handling
-eventFrame:SetScript("OnEvent", onEvent)
+eventFrame:SetScript("OnEvent", OG_onEvent)
 --#endregion Guild Info REWORK ends
 
 --#region Slash Command called functions
@@ -3536,21 +3525,30 @@ local function InitializeTheme()
     OldGodsSavedColors = OldGodsSavedColors or {}
 
 
-    -- Load saved colors into CurrentTheme
+    --Load saved colors into CurrentTheme
     for key, value in pairs(OldGodsSavedColors) do
+        -- Theme keys match the saved keys?
         local resolvedValue = ResolveNestedKey(Themes["Your Custom Theme"], key)
+        -- if so apply the saved value to the theme
         if resolvedValue then
+            --and the magic is completed
             ResolveNestedKey(Themes["Your Custom Theme"], key, value)
         end
     end
 
-    -- Apply the loaded theme
+    -- Apply the user saved theme to the GuildChatWindow
     ApplyTheme(GuildChatWindow, Themes["Your Custom Theme"])
+    --and now we can all go home
     OG_Titlehack = {}
+    -- wait a second whats this?
     OG_Titlehack = C_GuildInfo.GuildRoster()
+    -- did you see that? I think we just got the guild roster to trigger the GUILD_ROSTER_UPDATE event
     if OG_Titlehack then
+        --its called by the event but lets double down and call it here too
         UpdateGuildChatWindowTitle()
+        --and then we
         wipe(OG_Titlehack)
+        --and then we treat it like it never happened
         OG_Titlehack = nil
     end
 end
@@ -3566,9 +3564,7 @@ frame:SetScript("OnEvent", function(self, event, name)
         OG_clickedSoundPlayed = false
 
         -- Print addon loaded message in chat frame
-        local loadMessage = string.format(
-            "|cF9a070FF%s|r has loaded |cFF7AA86Csuccessfully!|r type |cFFFFB700/OGHELP|r for details", name)
-        DEFAULT_CHAT_FRAME:AddMessage(loadMessage)
+        print("|T3194610:20:20:0|t " .. "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r.\nCollecting Guild Data... standby.")
 
         if OGsavedChat then
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)
