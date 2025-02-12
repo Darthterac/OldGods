@@ -60,12 +60,11 @@ Key Features:
     
     Member Search:  Look up players quickly, find rank and status, online is green, offline is red.
     The search also performs dynamic look-up while typing and will display partial matches, accented
-    characters remain a puzzle to me at this time, the partial name matching will display names with 
-    accented characters but I haven't solved the dynamic matching for special characters in naems by
-    comparison, If you have a solution for this I would love to hear it. So far finding players with
-    accented characters is down to matching 3 or more letters in the name before the special character.
-    A character map is used that helps find names that begin with an accented character, this lead me to believe 
-    something that wasnt happening.    
+    characters no problem, dynamicly finds players in the roster with UTF8 letters using plain ascii
+    as the search, search is case-insensitive:
+    
+    [      search: alex                                     ]
+    [      Áléx-Lightbringer     Coolrank   Online          ] 
     
     Search results are sorted then displayed; Online appear first sorted alphabetically; followed by 
     Offline, sorted by least time offline. For players that have been Offline for less then 1 hour the 
@@ -81,9 +80,9 @@ Key Features:
     [    Bobbyrocker-Illadin     Member    Offline (7d 4hr} ]
     
     Plans for timed data collection to intelligently update guild information. 
-    Plans for additional Officer + rank features, like ranking members from search 
-    and other functions, which rely on the use of a keybound macro to bypass "secure" restrictions.
-    Plans for making the purge macro binding a user choice and enhance the logic.
+    Plans for additional Guild Managment features, such as ranking members from search 
+    search results and other useful utilities to really make this shine.
+    Plans for making the purge macro key binding a user choice plus enhance the logic and clean up the debug output.
 
 🔹 OldGods Mail Manager
 
