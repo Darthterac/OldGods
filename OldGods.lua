@@ -11,8 +11,8 @@ OG_TooltipInfoTable = {}
 
 --#region Global table OG_Themes
 OG_Themes = {
-    ["Your Custom Theme"] = {
-        dropDownIcon = "|TInterface\\Icons\\Achievement_RankedPvP_07:16:16|t",
+    ["Your Custom Theme"] = { -- Custom theme default when user resets theme or first time addon loads - the reset function nils the keys,values in the OldGodsSavedColors SavedVariable
+        dropDownIcon = "|T1455894:18:18:0|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -80,9 +80,9 @@ OG_Themes = {
         buttonBorderColor = { r = 0.0, g = 0.0, b = 0.0, a = 1 },
         iconTexture = 1455894,
         iconSize = { width = 48, height = 48 },
-    }, -- Custom theme saved to saved variables
+    },
     ["Horde"] = {
-        dropDownIcon = "|TInterface\\Timer\\Horde-Logo:16:16|t",
+        dropDownIcon = "|TInterface\\Timer\\Horde-Logo:26:26|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -152,7 +152,7 @@ OG_Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["Alliance"] = {
-        dropDownIcon = "|TInterface\\Timer\\Alliance-Logo:16:16|t",
+        dropDownIcon = "|TInterface\\Timer\\Alliance-Logo:26:26|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -222,7 +222,7 @@ OG_Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["Hacker"] = {
-        dropDownIcon = "|TInterface\\Icons\\INV_Artifact_DimensionalRift:16:16|t",
+        dropDownIcon = "|T4667414:18:18:0|t",
         bgFile = "Interface\\AddOns\\OldGods\\Textures\\hacker.tga",
         edgeFile = "Interface\\AddOns\\OldGods\\Textures\\hackerborder.tga",
         tile = false,
@@ -292,7 +292,7 @@ OG_Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["ChatGPT"] = {
-        dropDownIcon = "|TInterface\\Icons\\Ability_Monk_TigerPalm:16:16|t",
+        dropDownIcon = "|T5648287:18:18:0|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -362,7 +362,7 @@ OG_Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["WoW Theme"] = {
-        dropDownIcon = "|TInterface\\ChatFrame\\UI-ChatIcon-WoW:16:16|t",
+        dropDownIcon = "|T1120721:18:18:0|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -377,7 +377,7 @@ OG_Themes = {
         backgroundColor = { r = 0.388, g = 0.286, b = 0.18, a = 0.750 }, -- rgb01(0.388, 0.286, 0.18, 0.8)
         borderColor = { r = 0.122, g = 0.224, b = 0.271, a = 0.750 },    --BROWN rgb01(0.62, 0.549, 0.408)
         thescrlfrm = {
-            bgFile = "Interface\\AddOns\\OldGods\\Textures\\WoWlogo.tga",
+            bgFile = "Interface\\AddOns\\OldGods\\Textures\\WOWLogo.tga",
             edgeFile = "Interface\\Buttons\\WHITE8x8",
             tile = false,
             tileSize = 0,
@@ -388,7 +388,7 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollFrameBGColor = { r = 1, g = 1, b = 1, a = 0.35 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
         },
         theStefak = {
@@ -1662,27 +1662,35 @@ local function CreateGuildChatWindow(title)
     function UpdateGuildChatWindowTitle()
         local now = GetTime()
         -- Throttle the update to prevent spamming the server
-        -- Update the title every 10 seconds
+        -- This is a debug print that I was using to catch eventspam
+        -- its rarely seen now that I used the C_Timer.After to reregister 
+        -- GUILD_ROSTER_UPDATE 10 seconds after the function runs
         if now - lastUpdate < 10 then
             print("|cFFFF0000NO UPDATE|r since: ", lastUpdate)
             return
         end
-        lastUpdate = now --10 seconds have passed, function can run again
-        print("|cFF00FF00UPDATE|r at: ", lastUpdate)
+        --10 seconds have passed, function can run again
+        local elapesedSeconds = string.format("|T986486:18:18:0|t |cFFF0F005[|r%.0f seconds|cFFF0F005]|r", (now - lastUpdate))
+        --Debug print to get the seconds between each call to the function
+        --Showing I got the event Spam undercontrol, addons a lot better now
+        print("|cFF00FF00Func|r: " .. elapesedSeconds)
+        --reset the cool down var 
+        lastUpdate = now
+        
         -- Temporarily stop event spam (unregister it once, re-enable after update)
         OG_Titlehack_frame:UnregisterEvent("GUILD_ROSTER_UPDATE")
         -- Var to store the users guild name, avoid nil values with or "No Guild Found"
         -- which will be displayed the when the addon loads for the first ten seconda
         -- even though were forcing GUILD_ROSTER_UPDATE to fire on load, sneaky sneaky!
-        local OG_guildName = GetGuildInfo("player") or "|T986486:20:16:0|t Loading Guild Info!"
+        local OG_guildName = GetGuildInfo("player")
         -- Var to store the number of guild members online and total
         local numTotalGuildMembers, numOnlineGuildMembers, _ = GetNumGuildMembers()
         -- Check if the and member counts and users guild name are available if not stop the function
         if not numTotalGuildMembers or not numOnlineGuildMembers or not OG_guildName then
             print("|CffF0F000Debug: Info missing or nil|r" ..
-                "\nnumTotalGuildMember: " .. numOnlineGuildMembers ..
-                "\nnumOnlineGuildMembers: " .. numOnlineGuildMembers ..
-                "\nOG_guildName: " .. OG_guildName .. "|r")
+                "\nnumTotalGuildMember: " .. tostring(numOnlineGuildMembers) or "|cFFFF0000MISSING|r" ..
+                "\nnumOnlineGuildMembers: " .. tostring(numOnlineGuildMembers) or "|cFFFF0000MISSING|r" ..
+                "\nOG_guildName: " .. OG_guildName or "|cFFFF0000MISSING|r")
             -- Delay event re-registration for 3 seconds (to let data settle)
             return
         end
@@ -1706,11 +1714,12 @@ local function CreateGuildChatWindow(title)
 end
 
 -- Initialize GuildChatWindow
-local GuildChatWindow = CreateGuildChatWindow("IF YOU SEE THIS LAZYEYEZ IS AWESOME") -- Default title
+local GuildChatWindow = CreateGuildChatWindow("|T986486:18:18:0|t Collecting data...")  -- Default title shows before the update function is triggered
 GuildChatWindow:Show()
--- currently trying to limit event spam this is set up in InitializeTheme() called after 10 second delay after ADDON_LOADED is finished  
+
+-- currently trying to limit event spam this is registered in InitializeTheme() called after ADDON_LOADED fires, and has a 10 second delay before triggering  
 --OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
-OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle)                  --The Fuction get called
+OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle) --called in the InitializeTheme function first, subsequently call on GUILD_ROSTER_UPDATE
 --#endregion Guild Chat Window
 
 --#region GUILD_DATA_FUNCTIONS
@@ -2610,7 +2619,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     fontDropdown:SetDefaultText("Select Font")
     fontDropdown:SetupMenu(function(self, rootDescription)
         for fontName, fontData in pairs(OG_Fonts) do
-            rootDescription:CreateButton("|TInterface\\Icons\\INV_Letter_01:16:16|t " .. fontName, function(data)
+            rootDescription:CreateButton("|TInterface\\Icons\\INV_Letter_01:24:24:0|t " .. fontName, function(data)
                 ApplyFont(GuildChatWindow.editBox, fontData)
                 print("Selected Font:", fontName)
             end)
