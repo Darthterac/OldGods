@@ -59,17 +59,20 @@ Key Features:
     and so on.
     
     Member Search:  Look up players quickly, find rank and status, online is green, offline is red.
-    The search also performs dynamic look-up while typing and will display partial matches, accented
-    characters no problem, dynamicly finds players in the roster with UTF8 letters using plain ascii
-    as the search, search is case-insensitive:
+    The search also performs dynamic look-up while typing and will display matches as the user types in
+    the search input. UTF-8 characters? no problem, dynamicly finds players returned in the roster with 
+    UTF-8 letters with plain ascii input as the search, search is case-insensitive:
     
     [      search: alex                                     ]
     [      Áléx-Lightbringer     Coolrank   Online          ] 
     
     Search results are sorted then displayed; Online appear first sorted alphabetically; followed by 
-    Offline, sorted by least time offline. For players that have been Offline for less then 1 hour the 
-    displayed result shows 0D 0hr there is no minutes calculated thats just over kill IMO. dont be a 
-    stalker :p
+    Offline, sorted by least time offline. Selecting "Member Search" in the "Guild" content from of the
+    "Options" main menu will populate the search with the full roster, the roster is cached so for now to
+    get the latest roster update, close and reopen the "Member Search" window to refresh. All the player 
+    names returned in the list are hyperlinks, you can interact with the names by clicking on them such as
+    invite/whisper the option to copy the name is blocked and I am working on solving that and additional
+    options.
     
     Example: partial search/dynamic matching (will match server names)
     
