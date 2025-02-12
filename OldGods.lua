@@ -2446,14 +2446,14 @@ local function AddResetButton(parent, theme, themeName, colorOptions)
                 .key                                                      -- Get the key from the colorOptions list and store it in a var named key
             local OG_DefaultTheme = ResolveNestedKey(defaults, key)       -- match the key from the defaults var; Themes[themeName] and store its value in OG_DefaultTheme
             if OG_DefaultTheme then                                       -- If the key is found in the defaults and the value is stored then OG_DefaultTheme is not nil
-                ResolveNestedKey(Themes[themeName], key, OG_DefaultTheme) -- we load the original value back into the custom theme, Theme[themeName]
+                ResolveNestedKey(defaults, key, OG_DefaultTheme) -- we load the original value back into the custom theme, Theme[themeName]
                 OldGodsSavedColors[key] = nil                             -- and we clear the SavedVariable so a when /reload or log out login happens were back to factory new
             else
                 print("Warning: Key " .. key .. " not found in defaults.")
             end
         end
 
-        ApplyTheme(GuildChatWindow, Themes[themeName])
+        ApplyTheme(GuildChatWindow, Themes["Your Custom Theme"])
         print("Theme reset to defaults!")
     end)
 
