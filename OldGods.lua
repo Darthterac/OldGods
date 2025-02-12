@@ -2442,11 +2442,10 @@ local function AddResetButton(parent, theme, themeName, colorOptions)
 
         -- For each option in colorOptions list store the key value and get the original key!
         for _, option in ipairs(colorOptions) do                          -- colorOptions; ipairs: For strictly indexed tables with no gaps you fn poser
-            local key = option
-                .key                                                      -- Get the key from the colorOptions list and store it in a var named key
+            local key = option.key                                        -- Get the key from the colorOptions list and store it in a var named key
             local OG_DefaultTheme = ResolveNestedKey(defaults, key)       -- match the key from the defaults var; Themes[themeName] and store its value in OG_DefaultTheme
             if OG_DefaultTheme then                                       -- If the key is found in the defaults and the value is stored then OG_DefaultTheme is not nil
-                ResolveNestedKey(defaults, key, OG_DefaultTheme) -- we load the original value back into the custom theme, Theme[themeName]
+                ResolveNestedKey(defaults, key, OG_DefaultTheme)          -- we load the original value back into the custom theme, Theme[themeName]
                 OldGodsSavedColors[key] = nil                             -- and we clear the SavedVariable so a when /reload or log out login happens were back to factory new
             else
                 print("Warning: Key " .. key .. " not found in defaults.")
