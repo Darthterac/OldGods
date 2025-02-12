@@ -1,11 +1,16 @@
---#region Global SavedVariables and Tables
+--#region Global savedvariables
 OGsavedChat = OGsavedChat or {}
-ChatMessageTable = {}
-TooltipInfoTable = {}
+OldGodsSavedColors = OldGodsSavedColors or {}
 OldGods_BadMailDB = OldGods_BadMailDB or {}
 OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
+--#endregion Global savedvariables
 
-Themes = {
+--#region Global Tables
+OG_ChatMessageTable = {}
+OG_TooltipInfoTable = {}
+
+--#region Global table OG_Themes
+OG_Themes = {
     ["Your Custom Theme"] = {
         dropDownIcon = "|TInterface\\Icons\\Achievement_RankedPvP_07:16:16|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -427,8 +432,10 @@ Themes = {
         iconSize = { width = 52, height = 52 },
     },
 }
+--#endregion Global table OG_Themes
 
-Fonts = {
+--#region Global table OG_Fonts
+OG_Fonts = {
     ["Acme"] = {
         fPath = "Interface\\AddOns\\OldGods\\Fonts\\Acme-Regular.ttf",
         fSize = 20,
@@ -465,22 +472,9 @@ Fonts = {
         fFlag = "OUTLINE",
     },
 }
+--#endregion Global table OG_Fonts
 
-FrameBackdrop = {
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Buttons\\WHITE8x8",
-    tile = false,
-    tileSize = 0,
-    edgeSize = 2,
-    insets = {
-        left = 2,
-        right = 2,
-        top = 2,
-        bottom = 2
-    }
-}
-
---#endregion Global Variables and Tables
+--#endregion Global Tables
 
 --#region Jokes Quotes Guild Tables
 local JokeData = { "Why cant you trust an atom? Because they make up literally everything.",
@@ -653,7 +647,7 @@ local function tContains(table, value)
 end
 
 local function GetCurrentThemeName()
-    for name, data in pairs(Themes) do
+    for name, data in pairs(OG_Themes) do
         if data == CurrentTheme then
             return name
         end
@@ -761,7 +755,7 @@ end
 
 --#endregion UTILITY FUNCTIONS ends
 
---#region Themes and Fonts functions
+--#region OG_Themes and OG_Fonts functions
 local function ApplyEditBoxTheme(editBox, theme)
     if not editBox.hasCustomBackdrop then
         Mixin(editBox, BackdropTemplateMixin)
@@ -976,55 +970,7 @@ local function ApplyFont(editBox, font)
         print("Error: Invalid font data provided.")
     end
 end
-
---[[ Drop Downs moved to optionsFrame General tab
-local function CreateThemeDropdown(window, themes)
-    local dropdown = CreateFrame("Frame", "ThemeDropdown", window, "UIDropDownMenuTemplate")
-    dropdown:SetPoint("BOTTOMRIGHT", -138, 5)
-
-    -- Set default text for the dropdown
-    UIDropDownMenu_SetText(dropdown, "Themes")
-
-    UIDropDownMenu_Initialize(dropdown, function(self, level)
-        local info = UIDropDownMenu_CreateInfo()
-        for themeName, themeData in pairs(themes) do
-            info.text = themeName
-            info.value = themeName
-            info.func = function()
-                -- Update dropdown text
-                UIDropDownMenu_SetText(dropdown, themeName)
-                -- Apply the theme to the window
-                ApplyTheme(window, themeData)
-            end
-            UIDropDownMenu_AddButton(info, level)
-        end
-    end)
-end
-local function CreateFontDropdown(window, fonts)
-    local fdropdown = CreateFrame("Frame", "FontDropdown", window, "UIDropDownMenuTemplate")
-    fdropdown:SetPoint("TOPLEFT", 5, -5) -- Adjust positioning
-
-    -- Set default text for the dropdown
-    UIDropDownMenu_SetText(fdropdown, "Fonts")
-
-    UIDropDownMenu_Initialize(fdropdown, function(self, level)
-        local info = UIDropDownMenu_CreateInfo()
-        for fontName, fontData in pairs(fonts) do
-            info.text = fontName
-            info.value = fontName
-            info.func = function()
-                -- Update dropdown text
-                UIDropDownMenu_SetText(fdropdown, fontName)
-                -- Apply the font to the edit box
-                ApplyFont(window.editBox, fontData)
-                window.editBox:SetTextInsets(5, 5, 5, 5)
-                window.ScrollFrame:SetVerticalScroll(window.ScrollFrame:GetVerticalScrollRange())
-            end
-            UIDropDownMenu_AddButton(info, level)
-        end
-    end)
-end]]
---#endregion Themes and Fonts ends
+--#endregion OG_Themes and OG_Fonts ends
 
 --#region Chat History Window
 local function CreateSavedChatHistoryWindow(title)
@@ -1242,7 +1188,7 @@ local function UpdateItemList()
             -- Add an icon to the button if it doesn't already have one
             if not btn.icon then
                 btn.icon = btn:CreateTexture(nil, "ARTWORK")
-                btn.icon:SetSize(35, 35) --35 match the hight of the buttons cause im gona be skinning this with themes
+                btn.icon:SetSize(35, 35) --35 match the hight of the buttons cause im gona be skinning this with OG_Themes
                 btn.icon:SetPoint("LEFT", btn, "LEFT", -10, 0)
             end
             btn.icon:SetTexture(itemTexture)
@@ -1424,7 +1370,7 @@ local function CreateGuildChatWindow(title)
             local linkType, linkplayer = strsplit(":", link)
             if linkType == "player" and linkplayer then
                 local normalizedSender = Ambiguate(linkplayer, "none")
-                local playerData = TooltipInfoTable[normalizedSender]
+                local playerData = OG_TooltipInfoTable[normalizedSender]
                 if playerData then
                     GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT")
                     GameTooltip:ClearLines()
@@ -1509,9 +1455,9 @@ local function CreateGuildChatWindow(title)
     SaveClearButton:SetPushedTexture(5926319)
     SaveClearButton:SetSize(120, 25)
     SaveClearButton:SetScript("OnClick", function()
-        if type(ChatMessageTable) == "table" then
+        if type(OG_ChatMessageTable) == "table" then
             PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert3.mp3")
-            for _, message in ipairs(ChatMessageTable) do
+            for _, message in ipairs(OG_ChatMessageTable) do
                 if not tContains(OGsavedChat, message) then
                     table.insert(OGsavedChat, message)
                 end
@@ -1519,17 +1465,17 @@ local function CreateGuildChatWindow(title)
 
             SavedChatHistoryWindow:Show()
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)
-            local SaveMessage = saveDateMessage(ChatMessageTable)
+            local SaveMessage = saveDateMessage(OG_ChatMessageTable)
 
             updateTargetEditBoxText(SavedChatHistoryWindow.editBox, OGsavedChat)
             SavedChatHistoryWindow.title:SetText(updatedTitle)
 
-            wipe(ChatMessageTable)
-            ChatMessageTable = {}
-            table.insert(ChatMessageTable, SaveMessage)
+            wipe(OG_ChatMessageTable)
+            OG_ChatMessageTable = {}
+            table.insert(OG_ChatMessageTable, SaveMessage)
 
             C_Timer.After(0.1, function()
-                updateTargetEditBoxText(GuildChatWindow.editBox, ChatMessageTable)
+                updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
             end)
         end
     end)
@@ -1580,6 +1526,19 @@ local function CreateGuildChatWindow(title)
     topRightCloseButton:SetHighlightFontObject("GameFontHighlight")
     topRightCloseButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
     topRightCloseButton:SetText("X")
+    local FrameBackdrop = {
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        tile = false,
+        tileSize = 0,
+        edgeSize = 2,
+        insets = {
+            left = 2,
+            right = 2,
+            top = 2,
+            bottom = 2
+        }
+    }
     topRightCloseButton:SetBackdrop(FrameBackdrop)
     topRightCloseButton:SetBackdropColor(0.204, 0.227, 0.329, 1)
     topRightCloseButton:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
@@ -1693,9 +1652,9 @@ local function CreateGuildChatWindow(title)
         scrollFrame:SetVerticalScroll(scrollFrame:GetVerticalScrollRange()) -- Scroll to the bottom after resizing
     end)
 
-    ApplyFont(GuildChatWindow.editBox, Fonts["Roboto"]
-)
-    
+    ApplyFont(GuildChatWindow.editBox, OG_Fonts["Roboto"]
+    )
+
     -- Update the Guild Chat Window title with the guild name and member count info
     -- This function is global i should have made it local but I was in a hurry
     -- I will fix it later, I promise
@@ -1742,14 +1701,16 @@ local function CreateGuildChatWindow(title)
             OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
         end)
     end
+
     return GuildChatWindow
 end
 
 -- Initialize GuildChatWindow
 local GuildChatWindow = CreateGuildChatWindow("IF YOU SEE THIS LAZYEYEZ IS AWESOME") -- Default title
 GuildChatWindow:Show()
-OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")             --Any roster changes
-OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle) --The Fuction get called
+-- currently trying to limit event spam this is set up in InitializeTheme() called after 10 second delay after ADDON_LOADED is finished  
+--OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
+OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle)                  --The Fuction get called
 --#endregion Guild Chat Window
 
 --#region GUILD_DATA_FUNCTIONS
@@ -1913,13 +1874,6 @@ local function CreateInactiveInitiatesFrame(parent)
     --local headerstext = { "Name", "Rank", "Last Online" }
     local padding = 5                                                                  -- Padding between columns
     local headerWidth = (scrollFrame:GetWidth() - (#headers - 1) * padding) / #headers -- Dynamic width calc
-
-    --[[for i, headername in ipairs(headerstext) do
-        local header = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        header:SetPoint("TOPLEFT", (i - 1) * (headerWidth + padding), 0)
-        header:SetSize(headerWidth, 20)
-        header:SetText(headername)
-    end]]
     --#endregion HeadersIIF
     return frame, scrollChild, headerWidth
 end
@@ -2071,7 +2025,6 @@ end
 
 --#region Sub_region_OldGods_MemberSearch
 local guildRosterCache = {}
-local searchText
 local searchFrame, scrollFrame, SR_scrollChild
 
 -- Refresh the guild roster cache
@@ -2088,7 +2041,8 @@ local function RefreshGuildRosterCache()
         NHour = hour
 
         table.insert(guildRosterCache, {
-            name       = hyperlinkName,
+            linkName   = hyperlinkName,
+            name       = name,
             rank       = rank,
             online     = online,
             day        = day,
@@ -2129,101 +2083,233 @@ local function ClearSearchResults()
     end
 end
 
---[[helper fuction to make searching players with unicode easy with just normal ascii
-local function normalizeString(str)
-    -- Mapping of ASCII characters to Unicode equivalents
-    local charMap = {
-        A = "[aAÀÁÂÃÄÅĀĂĄǍǺȀȂȦȺÆ]",
-        B = "[bBß]",
-        C = "[cCÇĆĈĊČƇȻ]",
-        D = "[dDĎĐƊƋƌ]",
-        E = "[eEÈÉÊËĒĔĖĘĚȄȆȨƏƐÆ]",
-        F = "[fFƑ]",
-        G = "[gGĜĞĠĢƓǤǦǴ]",
-        H = "[hHĤĦȞ]",
-        I = "[iIÌÍÎÏĨĪĬĮİƗȈȊ]",
-        J = "[jJĴ]",
-        K = "[kKĶƘǨ]",
-        L = "[lLĹĻĽĿŁƚȽ]",
-        M = "[mMƜ]",
-        N = "[nNÑŃŅŇŊƝȠ]",
-        O = "[oOÒÓÔÕÖØŌŎŐǑǪǬǾȌȎȮȰŒ]",
-        P = "[pPƤ]",
-        Q = "[qQɊ]",
-        R = "[rRŔŖŘȐȒɌ]",
-        S = "[sSŚŜŞŠȘȿß]",
-        T = "[tTŢŤŦƬƮȚȾ]",
-        U = "[uUÙÚÛÜŨŪŬŮŰŲȔȖƯǓǕǗǙǛ]",
-        V = "[vVƲ]",
-        W = "[wWŴẀẂẄẆẈ]",
-        X = "[xXẊẌ]",
-        Y = "[yYÝŶŸȲƳ]",
-        Z = "[zZŹŻŽƵȤ]"
-    }
+local function stripChars(str)
+    local tableAccents = {}
 
-    -- Replace each mapped character with the normalized equivalent
-    for ascii, pattern in pairs(charMap) do
-        str = string.gsub(str, pattern, ascii)
-    end
+    -- Standard Latin Accents
+    tableAccents["À"] = "A"
+    tableAccents["Á"] = "A"
+    tableAccents["Â"] = "A"
+    tableAccents["Ã"] = "A"
+    tableAccents["Ä"] = "A"
+    tableAccents["Å"] = "A"
+    tableAccents["Æ"] = "AE"
+    tableAccents["Ç"] = "C"
+    tableAccents["È"] = "E"
+    tableAccents["É"] = "E"
+    tableAccents["Ê"] = "E"
+    tableAccents["Ë"] = "E"
+    tableAccents["Ì"] = "I"
+    tableAccents["Í"] = "I"
+    tableAccents["Î"] = "I"
+    tableAccents["Ï"] = "I"
+    tableAccents["Ð"] = "D"
+    tableAccents["Ñ"] = "N"
+    tableAccents["Ò"] = "O"
+    tableAccents["Ó"] = "O"
+    tableAccents["Ô"] = "O"
+    tableAccents["Õ"] = "O"
+    tableAccents["Ö"] = "O"
+    tableAccents["Ø"] = "O"
+    tableAccents["Ù"] = "U"
+    tableAccents["Ú"] = "U"
+    tableAccents["Û"] = "U"
+    tableAccents["Ü"] = "U"
+    tableAccents["Ý"] = "Y"
+    tableAccents["Þ"] = "P"
+    tableAccents["ß"] = "ss"
 
-    -- Return the normalized string in uppercase for consistency
-    return string.upper(str)
-end]]
+    -- Lowercase Variants
+    tableAccents["à"] = "a"
+    tableAccents["á"] = "a"
+    tableAccents["â"] = "a"
+    tableAccents["ã"] = "a"
+    tableAccents["ä"] = "a"
+    tableAccents["å"] = "a"
+    tableAccents["æ"] = "ae"
+    tableAccents["ç"] = "c"
+    tableAccents["è"] = "e"
+    tableAccents["é"] = "e"
+    tableAccents["ê"] = "e"
+    tableAccents["ë"] = "e"
+    tableAccents["ì"] = "i"
+    tableAccents["í"] = "i"
+    tableAccents["î"] = "i"
+    tableAccents["ï"] = "i"
+    tableAccents["ð"] = "d"
+    tableAccents["ñ"] = "n"
+    tableAccents["ò"] = "o"
+    tableAccents["ó"] = "o"
+    tableAccents["ô"] = "o"
+    tableAccents["õ"] = "o"
+    tableAccents["ö"] = "o"
+    tableAccents["ø"] = "o"
+    tableAccents["ù"] = "u"
+    tableAccents["ú"] = "u"
+    tableAccents["û"] = "u"
+    tableAccents["ü"] = "u"
+    tableAccents["ý"] = "y"
+    tableAccents["þ"] = "p"
+    tableAccents["ÿ"] = "y"
 
+    -- **Additional Eastern European Characters**
+    tableAccents["Ā"] = "A"
+    tableAccents["Ă"] = "A"
+    tableAccents["Ą"] = "A"
+    tableAccents["Ć"] = "C"
+    tableAccents["Ĉ"] = "C"
+    tableAccents["Ċ"] = "C"
+    tableAccents["Č"] = "C"
+    tableAccents["Ď"] = "D"
+    tableAccents["Đ"] = "D"
+    tableAccents["Ē"] = "E"
+    tableAccents["Ĕ"] = "E"
+    tableAccents["Ė"] = "E"
+    tableAccents["Ę"] = "E"
+    tableAccents["Ě"] = "E"
+    tableAccents["Ĝ"] = "G"
+    tableAccents["Ğ"] = "G"
+    tableAccents["Ġ"] = "G"
+    tableAccents["Ģ"] = "G"
+    tableAccents["Ĥ"] = "H"
+    tableAccents["Ħ"] = "H"
+    tableAccents["Ĩ"] = "I"
+    tableAccents["Ī"] = "I"
+    tableAccents["Ĭ"] = "I"
+    tableAccents["Į"] = "I"
+    tableAccents["İ"] = "I"
+    tableAccents["Ĳ"] = "IJ"
+    tableAccents["Ĵ"] = "J"
+    tableAccents["Ķ"] = "K"
+    tableAccents["Ĺ"] = "L"
+    tableAccents["Ļ"] = "L"
+    tableAccents["Ľ"] = "L"
+    tableAccents["Ŀ"] = "L"
+    tableAccents["Ł"] = "L"
+    tableAccents["Ń"] = "N"
+    tableAccents["Ņ"] = "N"
+    tableAccents["Ň"] = "N"
+    tableAccents["Ŋ"] = "N"
+    tableAccents["Ō"] = "O"
+    tableAccents["Ŏ"] = "O"
+    tableAccents["Ő"] = "O"
+    tableAccents["Ŕ"] = "R"
+    tableAccents["Ŗ"] = "R"
+    tableAccents["Ř"] = "R"
+    tableAccents["Ś"] = "S"
+    tableAccents["Ŝ"] = "S"
+    tableAccents["Ş"] = "S"
+    tableAccents["Š"] = "S"
+    tableAccents["Ţ"] = "T"
+    tableAccents["Ť"] = "T"
+    tableAccents["Ŧ"] = "T"
+    tableAccents["Ũ"] = "U"
+    tableAccents["Ū"] = "U"
+    tableAccents["Ŭ"] = "U"
+    tableAccents["Ů"] = "U"
+    tableAccents["Ű"] = "U"
+    tableAccents["Ų"] = "U"
+    tableAccents["Ŵ"] = "W"
+    tableAccents["Ŷ"] = "Y"
+    tableAccents["Ÿ"] = "Y"
+    tableAccents["Ź"] = "Z"
+    tableAccents["Ż"] = "Z"
+    tableAccents["Ž"] = "Z"
 
-local accent_map = {
-    { accent = "á", repl = "a" }, { accent = "à", repl = "a" }, { accent = "â", repl = "a" }, { accent = "ä", repl = "a" }, { accent = "å", repl = "a" }, { accent = "æ", repl = "ae" },
-    { accent = "Á", repl = "A" }, { accent = "À", repl = "A" }, { accent = "Â", repl = "A" }, { accent = "Ä", repl = "A" }, { accent = "Å", repl = "A" }, { accent = "Æ", repl = "AE" },
+    -- Lowercase versions of Eastern European characters
+    tableAccents["ā"] = "a"
+    tableAccents["ă"] = "a"
+    tableAccents["ą"] = "a"
+    tableAccents["ć"] = "c"
+    tableAccents["ĉ"] = "c"
+    tableAccents["ċ"] = "c"
+    tableAccents["č"] = "c"
+    tableAccents["ď"] = "d"
+    tableAccents["đ"] = "d"
+    tableAccents["ē"] = "e"
+    tableAccents["ĕ"] = "e"
+    tableAccents["ė"] = "e"
+    tableAccents["ę"] = "e"
+    tableAccents["ě"] = "e"
+    tableAccents["ĝ"] = "g"
+    tableAccents["ğ"] = "g"
+    tableAccents["ġ"] = "g"
+    tableAccents["ģ"] = "g"
+    tableAccents["ĥ"] = "h"
+    tableAccents["ħ"] = "h"
+    tableAccents["ĩ"] = "i"
+    tableAccents["ī"] = "i"
+    tableAccents["ĭ"] = "i"
+    tableAccents["į"] = "i"
+    tableAccents["ı"] = "i"
+    tableAccents["ĳ"] = "ij"
+    tableAccents["ĵ"] = "j"
+    tableAccents["ķ"] = "k"
+    tableAccents["ĺ"] = "l"
+    tableAccents["ļ"] = "l"
+    tableAccents["ľ"] = "l"
+    tableAccents["ŀ"] = "l"
+    tableAccents["ł"] = "l"
+    tableAccents["ń"] = "n"
+    tableAccents["ņ"] = "n"
+    tableAccents["ň"] = "n"
+    tableAccents["ŋ"] = "n"
+    tableAccents["ō"] = "o"
+    tableAccents["ŏ"] = "o"
+    tableAccents["ő"] = "o"
+    tableAccents["ŕ"] = "r"
+    tableAccents["ŗ"] = "r"
+    tableAccents["ř"] = "r"
+    tableAccents["ś"] = "s"
+    tableAccents["ŝ"] = "s"
+    tableAccents["ş"] = "s"
+    tableAccents["š"] = "s"
+    tableAccents["ţ"] = "t"
+    tableAccents["ť"] = "t"
+    tableAccents["ŧ"] = "t"
+    tableAccents["ũ"] = "u"
+    tableAccents["ū"] = "u"
+    tableAccents["ŭ"] = "u"
+    tableAccents["ů"] = "u"
+    tableAccents["ű"] = "u"
+    tableAccents["ų"] = "u"
+    tableAccents["ŵ"] = "w"
+    tableAccents["ŷ"] = "y"
+    tableAccents["ź"] = "z"
+    tableAccents["ż"] = "z"
+    tableAccents["ž"] = "z"
 
-    { accent = "ç", repl = "c" }, { accent = "Ç", repl = "C" },
-    { accent = "œ", repl = "oe" }, { accent = "Œ", repl = "OE" },
-    { accent = "ß", repl = "ss" }, -- Special German character ß → "ss"
-    
-    { accent = "é", repl = "e" }, { accent = "è", repl = "e" }, { accent = "ê", repl = "e" }, { accent = "ë", repl = "e" },
-    { accent = "É", repl = "E" }, { accent = "È", repl = "E" }, { accent = "Ê", repl = "E" }, { accent = "Ë", repl = "E" },
+    local normalisedString = ''
+    --its the fucking bytes, its been the bytes the whole time
+    --this function comes from https://stackoverflow.com/questions/50459102/replace-accented-characters-in-string-to-standard-with-lua
+    --credit to the pattern and table is not mine ChatGPT walked me around the edge of nailing this without giving me something to copy paste other then this
+    --table so any mother fucker that thinks using chatGPT means you dont learn I have 5 days of trial and error to prove otherwise. I tried matching and using sets
+    --in a table, I tried key values in every possible combination. I studied pattern matching docs on lua.org and learned the byte difference of UTF8 so I started googling
+    --"lua byte pattern" I found you can print(string.byte('a')) but struggled to with creating a pattern set to use bytes - I didnt give up for 5 fucking days working with
+    --chatGPT as he wouldnt just give me the awnser, he started laughing at at one point the awnswers were so mangled and out of scope I thought he was tormenting me lol.
+    --I thought he gave up on showing me any useful code after naggin him about this ability for my addon with a one track mind.
+    --ChatGPT is a mentor, teacher, how I have his responses set up to me not a addon developer, he certainly tried and the entire scope implementation of this function chatGPT
+    --has given me insight, but the trial error and research I own, the pattern is credit to the user 'aJynks' on stackoverflow
+    normalisedString = str:gsub("[%z\1-\127\194-\244][\128-\191]*", tableAccents)
 
-    { accent = "í", repl = "i" }, { accent = "ì", repl = "i" }, { accent = "î", repl = "i" }, { accent = "ï", repl = "i" },
-    { accent = "Í", repl = "I" }, { accent = "Ì", repl = "I" }, { accent = "Î", repl = "I" }, { accent = "Ï", repl = "I" },
-
-    { accent = "ó", repl = "o" }, { accent = "ò", repl = "o" }, { accent = "ô", repl = "o" }, { accent = "ö", repl = "o" }, { accent = "ø", repl = "o" },
-    { accent = "Ó", repl = "O" }, { accent = "Ò", repl = "O" }, { accent = "Ô", repl = "O" }, { accent = "Ö", repl = "O" }, { accent = "Ø", repl = "O" },
-
-    { accent = "ú", repl = "u" }, { accent = "ù", repl = "u" }, { accent = "û", repl = "u" }, { accent = "ü", repl = "u" },
-    { accent = "Ú", repl = "U" }, { accent = "Ù", repl = "U" }, { accent = "Û", repl = "U" }, { accent = "Ü", repl = "U" },
-
-    { accent = "ñ", repl = "n" }, { accent = "Ñ", repl = "N" },
-    { accent = "ý", repl = "y" }, { accent = "ÿ", repl = "y" }, { accent = "Ý", repl = "Y" }
-}
-
-
---- Normalize a string by replacing accented characters with their base forms
-local function NormalizeAccent(char)
-    for _, entry in ipairs(accent_map) do
-        if entry.accent == char then
-            return entry.repl
-        end
-    end
-    return char -- If it's not an accented character, return the original character
+    return string.lower(normalisedString)
 end
 
-
--- Dynamic search and Normalizing ASCII
+-- Dynamic search matching players with accented names usiing normal ascii search input i wouldnt stop till i got it :D
 local function UpdateSearchResults(searchText)
     ClearSearchResults() -- Remove old results
 
     local offsetY = 10
     local rowHeight = 20
 
-    -- Normalize the search text
-    local normalizedSearch = NormalizeAccent(searchText)
-
     for _, member in ipairs(guildRosterCache) do
-        local normalizedMemberName = NormalizeAccent(member.name)
+        local normalizedMemberName = stripChars(member.name)
+        local playerName = member.linkName
         local status = member.online and "|cff00ff00Online|r" or
             string.format("|cffff0000Offline|r (%s)", member.lastOnline)
 
         -- Compare normalized strings
-        if normalizedMemberName:find(normalizedSearch) then
+        if normalizedMemberName:find(searchText, 1, true) then
             -- Create a new row for each matching result
             local row = CreateFrame("Frame", nil, SR_scrollChild)
             row:SetSize(440, rowHeight)
@@ -2238,8 +2324,6 @@ local function UpdateSearchResults(searchText)
             nameCol:EnableMouse(true)
             nameCol:SetHyperlinksEnabled(true)
 
-            local playerName = member.name
-
             local nameText = nameCol:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             nameText:SetAllPoints()
             nameText:SetJustifyH("LEFT")
@@ -2253,7 +2337,6 @@ local function UpdateSearchResults(searchText)
                     ChatFrame_OnHyperlinkShow(self, link, text, button)
                 end
             end)
-
 
             ----------------------------------------------------------
             -- 2) Rank Column
@@ -2325,7 +2408,8 @@ local function CreateSearchFrame(parent)
     inputBox:SetPoint("LEFT", inputLabel, "RIGHT", 5, 0)
     inputBox:SetAutoFocus(false)
     inputBox:SetScript("OnTextChanged", function(self)
-        searchText = self:GetText()
+        local searchTextGet = self:GetText()
+        local searchText = string.lower(searchTextGet)
         UpdateSearchResults(searchText)
     end)
 
@@ -2335,7 +2419,7 @@ local function CreateSearchFrame(parent)
     closeButton:SetScript("OnClick", function()
         searchFrame:Hide()
     end)
-    --#region Headers_SF
+
     -- Headers for columns
     local headers = {
         { text = "Name",   width = 150, point = "TOPLEFT", offsetX = 10 },
@@ -2349,7 +2433,6 @@ local function CreateSearchFrame(parent)
         headerText:SetPoint(header.point, searchFrame, header.point, header.offsetX, -60)
         headerText:SetText(header.text)
     end
-    --#endregion Headers_SF
 
     -- Scrollable list for results
     scrollFrame = CreateFrame("ScrollFrame", "SearchResultsScrollFrame", searchFrame, "UIPanelScrollFrameTemplate")
@@ -2434,25 +2517,25 @@ local function AddResetButton(parent, theme, themeName, colorOptions)
     button:SetText("Reset to Default")
 
     button:SetScript("OnClick", function()
-        local defaults = theme -- Themes[themeName]
+        local defaults = theme -- OG_Themes[themeName]
         if not defaults then
-            print("Theme " .. themeName .. " not found in default Themes, this will erase all custom colors.")
+            print("Theme " .. themeName .. " not found in default OG_Themes, this will erase all custom colors.")
             return
         end
 
         -- For each option in colorOptions list store the key value and get the original key!
-        for _, option in ipairs(colorOptions) do                          -- colorOptions; ipairs: For strictly indexed tables with no gaps you fn poser
-            local key = option.key                                        -- Get the key from the colorOptions list and store it in a var named key
-            local OG_DefaultTheme = ResolveNestedKey(defaults, key)       -- match the key from the defaults var; Themes[themeName] and store its value in OG_DefaultTheme
-            if OG_DefaultTheme then                                       -- If the key is found in the defaults and the value is stored then OG_DefaultTheme is not nil
-                ResolveNestedKey(defaults, key, OG_DefaultTheme)          -- we load the original value back into the custom theme, Theme[themeName]
-                OldGodsSavedColors[key] = nil                             -- and we clear the SavedVariable so a when /reload or log out login happens were back to factory new
+        for _, option in ipairs(colorOptions) do                    -- colorOptions; ipairs: For strictly indexed tables with no gaps you fn poser
+            local key = option.key                                  -- Get the key from the colorOptions list and store it in a var named key
+            local OG_DefaultTheme = ResolveNestedKey(defaults, key) -- match the key from the defaults var; OG_Themes[themeName] and store its value in OG_DefaultTheme
+            if OG_DefaultTheme then                                 -- If the key is found in the defaults and the value is stored then OG_DefaultTheme is not nil
+                ResolveNestedKey(defaults, key, OG_DefaultTheme)    -- we load the original value back into the custom theme, Theme[themeName]
+                OldGodsSavedColors[key] = nil                       -- and we clear the SavedVariable so a when /reload or log out login happens were back to factory new
             else
                 print("Warning: Key " .. key .. " not found in defaults.")
             end
         end
 
-        ApplyTheme(GuildChatWindow, Themes["Your Custom Theme"])
+        ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
         print("Theme reset to defaults!")
     end)
 
@@ -2526,7 +2609,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     fontDropdown:SetHeight(30)
     fontDropdown:SetDefaultText("Select Font")
     fontDropdown:SetupMenu(function(self, rootDescription)
-        for fontName, fontData in pairs(Fonts) do
+        for fontName, fontData in pairs(OG_Fonts) do
             rootDescription:CreateButton("|TInterface\\Icons\\INV_Letter_01:16:16|t " .. fontName, function(data)
                 ApplyFont(GuildChatWindow.editBox, fontData)
                 print("Selected Font:", fontName)
@@ -2547,7 +2630,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     themeDropdown:SetHeight(30)
     themeDropdown:SetDefaultText("Select Theme")
     themeDropdown:SetupMenu(function(self, rootDescription)
-        for themeName, themeData in pairs(Themes) do
+        for themeName, themeData in pairs(OG_Themes) do
             rootDescription:CreateButton(themeData.dropDownIcon .. themeName, function(data)
                 ApplyTheme(GuildChatWindow, themeData)
                 print("Selected Theme:", themeName)
@@ -2702,7 +2785,7 @@ local function CreateOptionsFrame()
     optionsFrame.contentFrame = contentFrame
 
     ------------------------------------------------------------------
-    -- TEXT LABEL (Example: info text in the content area)
+    -- TEXT LABEL
     ------------------------------------------------------------------
     local fontLabel = optionsFrame.contentFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLeft")
     fontLabel:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 15, -15)
@@ -2717,11 +2800,8 @@ local function CreateOptionsFrame()
         "which are shared with other AddOns.\n\n" ..
         "The |cFF00FF00Guild|r tab is full of useful functions\n" ..
         "to aid with common tasks not found in WoW's Guild Chat!\n")
-    fontLabel:SetTextColor(1, 1, 1, 1) -- White text
+    fontLabel:SetTextColor(1, 1, 1, 1)
 
-    ------------------------------------------------------------------
-    -- CALL ANY NAVIGATION SETUP FUNCTION HERE
-    ------------------------------------------------------------------
     SetupNavigation(optionsFrame)
     return optionsFrame
 end
@@ -2958,7 +3038,7 @@ local function OnChatMessage(self, event, message, sender)
     end
 
     -- Check existing data
-    local existingData = TooltipInfoTable[normalizedSender]
+    local existingData = OG_TooltipInfoTable[normalizedSender]
     if existingData then
         if existingData.zone ~= zone then
             existingData.zone = zone
@@ -2977,7 +3057,7 @@ local function OnChatMessage(self, event, message, sender)
             existingData.rank, publicN, officerN)
     else
         -- Add new data
-        TooltipInfoTable[normalizedSender] = {
+        OG_TooltipInfoTable[normalizedSender] = {
             sender = sender,
             level = level,
             class = class,
@@ -2991,12 +3071,12 @@ local function OnChatMessage(self, event, message, sender)
 
     --setup varible to store the return of chatMessageSpice
     local chatMessage = chatMessageSpice(sender, message, class)
-    -- Add chatMessage to ChatMessageTable
-    if not tContains(ChatMessageTable, chatMessage) then
-        table.insert(ChatMessageTable, chatMessage)
+    -- Add chatMessage to OG_ChatMessageTable
+    if not tContains(OG_ChatMessageTable, chatMessage) then
+        table.insert(OG_ChatMessageTable, chatMessage)
         --Wait .1 seconds for table to be updated then on it goes
         C_Timer.After(0.1, function()
-            updateTargetEditBoxText(GuildChatWindow.editBox, ChatMessageTable)
+            updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
         end)
     end
     --Play a click for each CHAT_MSG_GUILD event
@@ -3546,40 +3626,30 @@ end
 
 --#region Load Saved Data: Event ADDON_LOADED
 local function InitializeTheme()
-    -- Ensure the saved table exists
-    OldGodsSavedColors = OldGodsSavedColors or {}
     OG_Titlehack = {} -- whats this all about?
-
-
+    
     --Load saved colors into CurrentTheme
     for key, value in pairs(OldGodsSavedColors) do
         -- Theme keys match the saved keys?
-        local resolvedValue = ResolveNestedKey(Themes["Your Custom Theme"], key)
+        local resolvedValue = ResolveNestedKey(OG_Themes["Your Custom Theme"], key)
         -- if so apply the saved value to the theme
         if resolvedValue then
-            ResolveNestedKey(Themes["Your Custom Theme"], key, value)
-            --and the magic is completed ChatGPT before he can say "I'm sorry Dave, I'm afraid I can't do that"
-            --was whiping up some grade A functions now he teaches me by making me do it myself, I wouldnt have it any other way
+            ResolveNestedKey(OG_Themes["Your Custom Theme"], key, value)
         end
     end
 
     -- Apply the user saved theme to the GuildChatWindow
-    ApplyTheme(GuildChatWindow, Themes["Your Custom Theme"])
-    --and now we can all go home
-    -- wait a second whats this?
-    C_Timer.After(4, function()
+    ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
+
+    -- this is an attempt to force the GUILD_ROSTER_UPDATE event to trigger
+    -- We wait 10 seconds for to get in game, for all I know it could be a bug
+    C_Timer.After(10, function()
         OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
         OG_Titlehack = C_GuildInfo.GuildRoster()
-        -- did you see that? I think we just got the guild roster to trigger the GUILD_ROSTER_UPDATE event
         if OG_Titlehack then
-            --and then we
+            UpdateGuildChatWindowTitle()
             wipe(OG_Titlehack)
-            --and then we treat it like it never happened
             OG_Titlehack = nil
-            -- what global table full of guild data?
-            -- I dont know what you're talking about
-            -- but really this is an attempt to force the event to trigger the GuildChatWindow title update function ;)
-            -- We wait 10 seconds for suspense and for everything to be ready, for all I know it could be a bug
         end
     end)
 end
