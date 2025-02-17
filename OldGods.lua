@@ -616,9 +616,27 @@ local GuildData = {
     "Welcome to the Old Gods {skull} Lightbringer Chapter {skull} Join our Discord @ https://discord.gg/oldgods to rankup to Member! {star} Make a post in #new_member_info exactly as 'YourName@Lightbringer_Chapter' {X}DO NOT ALTER ANYTHING BUT YOUR NAME{X}",
     "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live The Old Gods! {triangle}",
     "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever." }
+
+    --[[ might use this table dont know yet
+local CLASS_ROLES = {
+    ["Death Knight"] = { "DPS", "Tank" },
+    ["Demon Hunter"] = { "DPS", "Tank" },
+    ["Druid"] = { "DPS", "Tank", "Healer" },
+    ["Evoker"] = { "DPS", "Healer" },
+    ["Hunter"] = { "DPS" },
+    ["Mage"] = { "DPS" },
+    ["Monk"] = { "DPS", "Tank", "Healer" },
+    ["Paladin"] = { "DPS", "Tank", "Healer" },
+    ["Priest"] = { "DPS", "Healer" },
+    ["Rogue"] = { "DPS" },
+    ["Shaman"] = { "DPS", "Healer" },
+    ["Warlock"] = { "DPS" },
+    ["Warrior"] = { "DPS", "Tank" }
+}
+]]
 --#endregion tables end
 
---#region Main and Utility functions
+--#region Utility and Other functions
 local function SumTableData(table_name)
     local size = 0
     if type(table_name) == "table" then
@@ -626,16 +644,17 @@ local function SumTableData(table_name)
             size = size + #tostring(key) + #tostring(value)
         end
     end
-    return size -- return the result when loop breaks
+    return size
 end
 
+--[[ unused function wipe(table) is more efficient
 local function deleteTable(tableName)
     if type(tableName) == "table" then
         for key in pairs(tableName) do
             tableName[key] = nil
         end
     end
-end
+end]]
 
 local function tContains(table, value)
     for _, v in ipairs(table) do
@@ -647,12 +666,12 @@ local function tContains(table, value)
 end
 
 local function GetCurrentThemeName()
-    for name, data in pairs(OG_Themes) do
-        if data == CurrentTheme then
-            return name
+    for k, v in pairs(OG_Themes) do
+        if v == CurrentTheme then
+            return k
         end
     end
-    return nil -- Fallback if no match is found
+    return "Your Custom Theme" -- Fallback if no match is found
 end
 
 local function ResolveNestedKey(tbl, key, value)
@@ -793,11 +812,10 @@ local function ApplyEditBoxTheme(editBox, theme)
 end
 
 local function ApplyTheme(frame, theme)
+    CurrentTheme = theme
     if frame.editBox then
         ApplyEditBoxTheme(frame.editBox, theme)
     end
-
-    CurrentTheme = theme
 
     -- Set Backdrop and Border for the Main Frame
     if theme.bgFile and theme.edgeFile then
@@ -1011,7 +1029,7 @@ local function CopiedNameTrickframe(CopiedName)
     trickFrame:SetBackdropColor(0.204, 0.227, 0.329, 1)
     trickFrame:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
 
-    -- Enable mouse interaction & make it movable
+    -- Enable mouse interaction
     trickFrame:EnableMouse(true)
 
     -- EditBox properties
@@ -1027,7 +1045,7 @@ local function CopiedNameTrickframe(CopiedName)
         UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
         PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
         C_Timer.After(0.1, function()
-        self:HighlightText(0, -1)
+            self:HighlightText(0, -1)
         end)
     end)
 
@@ -1042,9 +1060,9 @@ local function CopiedNameTrickframe(CopiedName)
     trickButton:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
 
     trickButton:SetScript("OnClick", function()
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
-            trickFrame:Hide()
-        end)
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        trickFrame:Hide()
+    end)
 
     trickFrame:Show() -- Ensure it appears
 end
@@ -1204,7 +1222,7 @@ local function CreateGuildChatWindow(title)
     end)
 
     -- Add a title to the frame
-    GuildChatWindow.title = GuildChatWindow:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    GuildChatWindow.title = GuildChatWindow:CreateFontString("titlesrting", "OVERLAY", "GameFontHighlightLarge")
     GuildChatWindow.title:SetPoint("CENTER", GuildChatWindow, "TOP", 0, -15)
     GuildChatWindow.title:SetText(title)
 
@@ -1534,76 +1552,70 @@ local function CreateGuildChatWindow(title)
         scrollFrame:SetVerticalScroll(scrollFrame:GetVerticalScrollRange()) -- Scroll to the bottom after resizing
     end)
 
-    ApplyFont(GuildChatWindow.editBox, OG_Fonts["Roboto"]
-    )
-
-    -- Update the Guild Chat Window title with the guild name and member count info
-    -- This function is global i should have made it local but I was in a hurry
-    -- I will fix it later, I promise
-    local lastUpdate = 20 -- Initial last update timestamp
-    function UpdateGuildChatWindowTitle()
-        if not GuildChatWindow or not GuildChatWindow:IsShown() then return end
-        local now = GetTime()
-        -- Throttle the update to prevent spamming the server
-        -- This is a debug print that I was using to catch eventspam
-        -- it has not been seen since I set the C_Timer.After(20, function() UpdateGuildChatWindowTitle() end)
-        -- to reregister GUILD_ROSTER_UPDATE 20 seconds after the ADDON_LOADED event fires
-        if now - lastUpdate < 20 then
-            print("|cFFFF0000NO UPDATE|r since: ", lastUpdate)
-            return
-        end
-        --20 seconds have passed, function can run again
-        local elapesedSeconds = string.format("|T986486:18:18:0|t |cFFF0F005[|r%.0f seconds|cFFF0F005]|r",
-            (now - lastUpdate))
-        --Debug print to get the seconds between each call to the function
-        --Showing I got the event Spam undercontrol, addons a lot better now
-        print("|cFF00FF00Func|r: " .. elapesedSeconds)
-        --reset the cool down var
-        lastUpdate = now
-
-        -- Temporarily stop event spam (unregister it once, re-enable after update)
-        OG_Titlehack_frame:UnregisterEvent("GUILD_ROSTER_UPDATE")
-        -- Var to store the users guild name, avoid nil values with or "No Guild Found"
-        -- which will be displayed the when the addon loads for the first ten seconda
-        -- even though were forcing GUILD_ROSTER_UPDATE to fire on load, sneaky sneaky!
-        local OG_guildName = GetGuildInfo("player")
-        -- Var to store the number of guild members online and total
-        local numTotalGuildMembers, numOnlineGuildMembers, _ = GetNumGuildMembers()
-        -- Check if the and member counts and users guild name are available if not stop the function
-        if not numTotalGuildMembers or not numOnlineGuildMembers or not OG_guildName then
-            print("|CffF0F000Debug: Info missing or nil|r" ..
-                "\nnumTotalGuildMember: " .. tostring(numOnlineGuildMembers) or "|cFFFF0000MISSING|r" ..
-                "\nnumOnlineGuildMembers: " .. tostring(numOnlineGuildMembers) or "|cFFFF0000MISSING|r" ..
-                "\nOG_guildName: " .. OG_guildName or "|cFFFF0000MISSING|r")
-            -- Delay event re-registration for 3 seconds (to let data settle)
-            return
-        end
-        -- Update the title with the guild name and member count info
-        -- Store the new title as a string in a var
-        -- perform a simple calculation to get the number of offline members (total - online)
-        local newTitle = OG_guildName ..
-            " (|cFF00FF00" ..
-            numOnlineGuildMembers .. "|r / |cFFAA0000" .. (numTotalGuildMembers - numOnlineGuildMembers) .. "|r)"
-        -- Set the new title - this is why this global function is here, Im to lazy to
-        -- change the make GuildChatWindow.title = title and all the changes that would require for the themeing
-        -- I will do that in time but for now this is the way it is
-        GuildChatWindow.title:SetText(newTitle)
-        -- Re-register event after update is complete
-        C_Timer.After(20, function()
-            OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
-        end)
-    end
-
+    ApplyFont(GuildChatWindow.editBox, OG_Fonts["Roboto"])
     return GuildChatWindow
 end
 
 -- Initialize GuildChatWindow
 local GuildChatWindow = CreateGuildChatWindow("|T986486:18:18:0|t Collecting data...") -- Default title shows before the update function is triggered
 GuildChatWindow:Show()
+local lastUpdate = 0                                                                   -- Initial timestamp
+local ogGuildTitle = CreateFrame("Frame")
+ogGuildTitle:RegisterEvent("GUILD_ROSTER_UPDATE")
 
--- currently trying to limit event spam this is registered in InitializeTheme() called after ADDON_LOADED fires, and has a 10 second delay before triggering
---OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
-OG_Titlehack_frame:SetScript("OnEvent", UpdateGuildChatWindowTitle) --called in the InitializeTheme function first, subsequently call on GUILD_ROSTER_UPDATE
+local function UpdateGuildChatWindowTitle()
+    local elapsedSec = GetTime() - lastUpdate
+    local elapsedTime = string.format(
+        "|T986486:18:18:0|t Last call to UpdateGuildChatWindowTitle() was |cFFF0F005[|r%.1f seconds|cFFF0F005]|r ago",
+        elapsedSec)
+
+    -- Condition 1: Ensure frame and title exist & window is visible
+    if not GuildChatWindow or not GuildChatWindow.title or not GuildChatWindow:IsShown() then
+        --print("Condition 1 failed |cFFFF0000Function Halted|r\n")
+        return
+    end
+    --print("Condition 1 |cFF00FF00PASSED|r\n")
+
+    -- Condition 2: Prevent excessive updates (minimum interval of 25 seconds)
+    if elapsedSec < 25 then
+        --print("Condition 2 failed |cFFFF0000Function Halted|r\n" .. elapsedTime)
+        return
+    end
+    --print("Condition 2 |cFF00FF00PASSED|r\n")
+
+    local guildName, _, _, _ = GetGuildInfo("player")                        -- Get player's guild name
+    local numTotalGuildMembers, numOnlineGuildMembers = GetNumGuildMembers() -- Get guild member counts
+
+    -- Condition 3: Ensure valid data is retrieved
+    if not guildName or not numTotalGuildMembers or not numOnlineGuildMembers then
+       -- print("Condition 3 failed |cFFFF0000Function Halted|r\n")
+        return
+    end
+    --print("Condition 3 |cFF00FF00PASSED|r\n")
+
+    -- Set new title with formatted online/offline counts
+    local newTitle = string.format("%s (|cFF00FF00%d|r / |cFFAc0302%d|r)", guildName, numOnlineGuildMembers,
+        (numTotalGuildMembers - numOnlineGuildMembers))
+    --print("|cFF00FF00SETING TITLE")
+
+    GuildChatWindow.title:SetText(newTitle)
+    lastUpdate = GetTime() -- Update timestamp
+    --print("FUNCTION COMPLETE\n" .. elapsedTime)
+end
+
+local lastRosterUpdate = 0 -- Timestamp tracking
+
+ogGuildTitle:SetScript("OnEvent", function(self, event)
+    if event == "GUILD_ROSTER_UPDATE" then
+        local now = GetTime()
+        if now - lastRosterUpdate > 25 then -- Prevent spamming
+            if IsInGuild() then
+                lastRosterUpdate = now
+                UpdateGuildChatWindowTitle()
+            end
+        end
+    end
+end)
 --#endregion Guild Chat Window
 
 --#region Grief Mail
@@ -1852,13 +1864,11 @@ frame:Hide()
 --#region Content Frame Guild Functions
 
 --#region Inactive players
-
 local frame, scrollChild
 
 local function closeFrame()
     if frame and frame:IsShown() then
         frame:Hide()
-        print("|cFF00FF00OldGods|r: Existing frame closed.")
     end
 end
 
@@ -1875,15 +1885,16 @@ local function GetInactiveInitiates(threshold)
 
             if threshold >= 14 then
                 macroa = "/gremove"
-                macrob = "\n" .. "/run OldGods_ShowInactiveInitiates()"
+                macrob = "\n/run OldGods_ShowInactiveInitiates()"
             end
 
             if threshold < 14 then
-                macroa = "/who"
-                macrob = "\n" .. "/salute"
+                macroa = "/run print(\"" .. name .. "\")"
+                macrob = "/shrug"
             end
 
-            if days == threshold then
+
+            if days >= threshold then
                 -- Add to inactiveInitiates
                 table.insert(inactiveInitiates, {
                     name = name,
@@ -1900,8 +1911,8 @@ local function GetInactiveInitiates(threshold)
         return a.name < b.name
     end)
 
-    -- Process the macro_Data
-    C_Timer.After(0.1, function()
+     -- Process the macro_Data
+     C_Timer.After(0.1, function()
         if #inactiveInitiates > 0 then -- Take the first player and create a macro
             local macro_Data = table.remove(inactiveInitiates, 1)
             local TEMP_STRING = macro_Data.macro .. " " .. macro_Data.name .. macro_Data.macro_n
@@ -1950,6 +1961,7 @@ local function GetInactiveInitiates(threshold)
 
     return inactiveInitiates
 end
+
 
 local function CreateInactiveInitiatesFrame(parent)
     closeFrame()
@@ -2007,11 +2019,8 @@ local function CreateInactiveInitiatesFrame(parent)
     local scrollChild = CreateFrame("Frame")
     scrollFrame:SetScrollChild(scrollChild)
     scrollChild:SetSize(scrollFrame:GetWidth(), 1) -- Dynamic height based on content
-    --#region HeadersIIF
-    --local headerstext = { "Name", "Rank", "Last Online" }
     local padding = 5                                                                  -- Padding between columns
     local headerWidth = (scrollFrame:GetWidth() - (#headers - 1) * padding) / #headers -- Dynamic width calc
-    --#endregion HeadersIIF
     return frame, scrollChild, headerWidth
 end
 
@@ -2058,10 +2067,8 @@ local function PopulateInactiveInitiates(frame, scrollChild, data)
         nameButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
         nameButton:SetScript("OnClick", function(self, button)
-            if button == "LeftButtonUp" then
                 PlaySoundFile(541008, "Master")
-                UIErrorsFrame:AddMessage("{star}PRESS F5{star}", 1, 1, .05, 1)
-            end
+                UIErrorsFrame:AddMessage("PRESS F5", 1, 1, 0, 5)
         end)
 
         -- Optional: Add additional columns like Rank and Last Online
@@ -2082,10 +2089,8 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
     local inputBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
     inputBox:SetSize(100, 25)
     inputBox:SetPoint("TOP", frame, "TOP", 0, -40)
-    inputBox:SetFrameStrata("FULLSCREEN_DIALOG")
-    inputBox:SetFrameLevel(2)
-    inputBox:SetAutoFocus(false) -- Don't auto-focus the input box
-    --inputBox:SetText("14")       -- Default threshold value set in OldGods_ShowInactiveInitiates function
+    inputBox:SetFrameStrata("TOOLTIP")
+    inputBox:SetAutoFocus(false)
 
     -- Add a label
     local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -2105,7 +2110,7 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
             print("Invalid input. Please enter a positive number.")
         end
         frame:Hide()
-        self:ClearFocus() -- Remove focus after pressing Enter
+        --self:ClearFocus() -- Remove focus after pressing Enter
     end)
 
     inputBox:SetScript("OnEnter", function(self)
@@ -2113,13 +2118,7 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
         GameTooltip:AddLine("Search")
         GameTooltip:AddDoubleLine(
             "|cFF00FF00Enter # (1 to 31)|r", "|cFFF0FF00offline|r days\n", 1, 1, 1, 1, 1, 1)
-        GameTooltip:AddLine(
-            "The result is a list showing |cFFF3F000OFFLINE|r players ranked |cFFF0F300Initiate|r" ..
-            " in the guild that match the search terms.\nThe default is set to |cFF00FF0014 days|r. " ..
-            "The list is sorted by alphabet, names beginning with |cFF3FFFC0normal characaters|r appear " ..
-            "befor names beginning with |cFF3FFFC0Unicode characters|r. ",
-            1, 1, 1, true)
-        GameTooltip:Show()
+             GameTooltip:Show()
     end)
 
     inputBox:SetScript("OnLeave", function()
@@ -2129,7 +2128,6 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
     return inputBox
 end
 
---#region sub_nest ShowInactiveInitiates Global function
 function OldGods_ShowInactiveInitiates()
     local threshold = 14 -- Default threshold
     closeFrame()
@@ -2587,10 +2585,36 @@ local function OldGods_MemberSearch()
     searchFrame:Show()
 end
 --#endregion Sub_region_OldGods_MemberSearch
+--#region Fast Options Content Menu
+local OG_Fast_Options = {
+    ["Member Search"] = {
+        fastFunction = OldGods_MemberSearch,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Search.tga:18:18|t",
+    },
+    ["Inactive Purge"] = {
+        fastFunction = OldGods_ShowInactiveInitiates, -- going to ask you later to help me clean this function's functions, get funky :D
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:18:18|t"
+    },
+}
 
+for _, button in ipairs(GuildChatWindow.buttons) do
+    if button:GetName() == "optionsButton" then
+        button:SetScript("OnEnter", function(self)
+            MenuUtil.CreateContextMenu(UIParent, function(region, fastOptionsMenu)
+                fastOptionsMenu:CreateTitle("Old Gods Options")
+                for bLable, bData in pairs(OG_Fast_Options) do
+                    fastOptionsMenu:CreateButton(bData.icon .. bLable, bData.fastFunction)
+                end
+            end)
+        end)
+    end
+end
+
+
+--#endregion Fast Options Content Menu
 --#endregion Content Frame Guild Functions
 
---#region Content Frame optionsFrame.conTent
+--#region Content Frame optionsFrame.contentFrame
 local function ClearContentFrame(optionsFrame)
     local contentFrame = optionsFrame.contentFrame
     if not contentFrame then return end
@@ -2643,7 +2667,8 @@ local function CreateColorPicker(defaultR, defaultG, defaultB, defaultA, onColor
     ColorPickerFrame:Show()
 end
 
-local function AddResetButton(parent, theme, themeName, colorOptions)
+local function AddResetButton(parent, theme, colorOptions)
+    
     local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     button:SetSize(150, 30)
     button:SetNormalFontObject("GameFontNormalMed2Outline")
@@ -2651,26 +2676,26 @@ local function AddResetButton(parent, theme, themeName, colorOptions)
     button:SetText("Reset to Default")
 
     button:SetScript("OnClick", function()
-        local defaults = theme -- OG_Themes[themeName]
+        local defaults = theme
+        --local tName = GetCurrentThemeName()
+        
         if not defaults then
-            print("Theme " .. themeName .. " not found in default OG_Themes, this will erase all custom colors.")
             return
         end
 
-        -- For each option in colorOptions list store the key value and get the original key!
-        for _, option in ipairs(colorOptions) do                    -- colorOptions; ipairs: For strictly indexed tables with no gaps you fn poser
-            local key = option
-                .key                                                -- Get the key from the colorOptions list and store it in a var named key
-            local OG_DefaultTheme = ResolveNestedKey(defaults, key) -- match the key from the defaults var; OG_Themes[themeName] and store its value in OG_DefaultTheme
-            if OG_DefaultTheme then                                 -- If the key is found in the defaults and the value is stored then OG_DefaultTheme is not nil
-                ResolveNestedKey(defaults, key, OG_DefaultTheme)    -- we load the original value back into the custom theme, Theme[themeName]
-                OldGodsSavedColors[key] = nil                       -- and we clear the SavedVariable so a when /reload or log out login happens were back to factory new
+        for _, option in ipairs(colorOptions) do
+            local key = option.key
+            local default = ResolveNestedKey(defaults, key)
+            
+            if default then
+                ResolveNestedKey(defaults, key, default)
+                OldGodsSavedColors[key] = nil
             else
                 print("Warning: Key " .. key .. " not found in defaults.")
             end
         end
 
-        ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
+        ApplyTheme(GuildChatWindow, theme)
         print("Theme reset to defaults!")
     end)
 
@@ -2720,7 +2745,7 @@ local function PopulateContentFrame_ThemeColorSettings(optionsFrame, theme)
         table.insert(buttons, button)
     end
 
-    local resetButton = AddResetButton(contentFrame, theme, nil, colorOptions)
+    local resetButton = AddResetButton(contentFrame, theme, colorOptions)
     resetButton:SetPoint("BOTTOM", contentFrame, "BOTTOM", 0, 50)
 
     return buttons
@@ -3149,7 +3174,6 @@ local function OnChatMessage(self, event, message, sender)
     --Declare vars to hold data collected by GuildRosterInfo
     local class, level, rank, zone, publicN, officerN
     for i = 1, GetNumGuildMembers() do
-        --these variables are the parameters used in GetGuildRoster
         local name, rankName, _, playerLevel, playerClass, playerZone, publicNote, officerNote, isOnline =
             GetGuildRosterInfo(i)
         --Strip server from player name and match to sender
@@ -3261,63 +3285,41 @@ AfkMsg_frame:RegisterEvent("CHAT_MSG_GUILD")
 AfkMsg_frame:SetScript("OnEvent", onTriggerWord)
 --#endregion AUTO MESSAGES ends here
 
---#region REWORK pick out best bits for modern vision of AddOn
-local JokeDataWindow
+--#region reworked Help Window
+local jokeDataWindow
 local quoteDataWindow
 local helpDataWindow
-local GuildDataWindow
 
--- Function to show the Help window
-local function showHelpDataWindow()
-    helpDataWindow:Show()
-end
-
--- Function to show the JokeData window
-local function showJokeDataWindow()
-    JokeDataWindow:Show()
-end
-
--- Function to show the QuoteData window
-local function showQuoteDataWindow()
-    quoteDataWindow:Show()
-end
-
--- Function to show the GuildData window
-local function showGuildDataWindow()
-    GuildDataWindow:Show()
-end
-
-local function createDataWindow(dataTable, titleText, nextPageWindowFunc)
-    -- Create the frame, GUI window that the scrollChild frame fits inside of
-    local frame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
-    frame:SetSize(400, 500)                                 -- Width, Height of main "window"
-    frame:SetPoint("CENTER")                                -- Position in the center of the screen, defaults to UIParent the main game window
-    frame:SetMovable(true)                                  -- Can "window" be dragged? True means yes it can you silly goose
-    frame:EnableMouse(true)                                 -- Can you click things attached to this frame, yep sure can
-    frame:RegisterForDrag("LeftButton")                     -- Left button held down on frame to means its drag time
-    frame:SetScript("OnDragStart", frame.StartMoving)       -- Get your ass in gear "window"
-    frame:SetScript("OnDragStop", frame.StopMovingOrSizing) -- OK "window" take a break
-    frame:Hide()                                            -- Start hidden, nobody like you all up in their face
-
+local function createDataWindow(dataTable, title, nextPageWindowFunc)
+    
+    local DataWindow = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
+    DataWindow:SetSize(400, 500)
+    DataWindow:SetPoint("CENTER")
+    DataWindow:SetMovable(true)
+    DataWindow:EnableMouse(true)
+    DataWindow:RegisterForDrag("LeftButton")
+    DataWindow:SetScript("OnDragStart", DataWindow.StartMoving)
+    DataWindow:SetScript("OnDragStop", DataWindow.StopMovingOrSizing)
+    DataWindow:Hide() --recycle frame
+    
     -- Title position
-    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    frame.title:SetPoint("TOP", frame, "TOP", 0, -5)
-    frame.title:SetText(titleText)
+    DataWindow.title = DataWindow:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    DataWindow.title:SetPoint("TOP", DataWindow, "TOP", 0, -5)
+    DataWindow.title:SetText(title)
 
     -- ScrollFrame
-    local scrollFrame = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -50)
-    scrollFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -30, 50)
+    local scrollFrame = CreateFrame("ScrollFrame", nil, DataWindow, "UIPanelScrollFrameTemplate")
+    scrollFrame:SetPoint("TOPLEFT", DataWindow, "TOPLEFT", 10, -50)
+    scrollFrame:SetPoint("BOTTOMRIGHT", DataWindow, "BOTTOMRIGHT", -30, 50)
 
-    -- Scrollchild - the frame that will house the line strings of the table that calls createDataWindow
     local scrollChild = CreateFrame("Frame")
-    scrollChild:SetWidth(380)               -- Max width of daddy frame -10 for some "window" edges im going -20
-    scrollFrame:SetScrollChild(scrollChild) -- Whos your daddy?
-    -- Save scrollChild to the frame for later hanky panky
-    frame.scrollChild = scrollChild
+    scrollChild:SetWidth(380)
+    scrollFrame:SetScrollChild(scrollChild)
+    DataWindow.scrollChild = scrollChild
 
-    -- Populate the "window" with the table lines from dataTable that called createDataWindow
-    local yOffset = -5 -- initialize the var used in the lineNumber SetPoint stop commenting on everything, ;)
+    -- Populate the "window" with the table lines from the table passed to createDataWindow()
+    local yOffset = -5
+    
     for i, line in ipairs(dataTable) do
         -- Line number position
         local lineNumber = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -3333,236 +3335,68 @@ local function createDataWindow(dataTable, titleText, nextPageWindowFunc)
         if type(line) == "string" then
             lineText:SetText(line)                --
         else
-            lineText:SetText("Invalid line data") -- Or some default text
+            lineText:SetText("Invalid line data")
         end
         -- Adjust the yOffset for the next line
         local lineHeight = lineText:GetStringHeight()
-        yOffset = yOffset - (lineHeight + 10) -- Add blank space between lines
+        yOffset = yOffset - (lineHeight + 10)
     end
 
     -- Adjust scrollChild height dynamically based on content
     scrollChild:SetHeight(math.abs(yOffset) + 10)
 
     -- Close button the X in top right of the window
-    local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-    closeButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT")
+    local closeButton = CreateFrame("Button", nil, DataWindow, "UIPanelCloseButton")
+    closeButton:SetPoint("TOPRIGHT", DataWindow, "TOPRIGHT")
 
     -- "Next Page" Button
-    local nextPageButton = CreateFrame("Button", nil, frame, "GameMenuButtonTemplate")
+    local nextPageButton = CreateFrame("Button", nil, DataWindow, "GameMenuButtonTemplate")
     nextPageButton:SetSize(120, 30)
-    nextPageButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -10, 10)
+    nextPageButton:SetPoint("BOTTOMRIGHT", DataWindow, "BOTTOMRIGHT", -10, 10)
     nextPageButton:SetText("Next Page") -- button text here
     nextPageButton:SetNormalFontObject("GameFontNormal")
     nextPageButton:SetHighlightFontObject("GameFontHighlight")
 
     -- "Help" Button
-    local HelpButton = CreateFrame("Button", nil, frame, "GameMenuButtonTemplate")
+    local HelpButton = CreateFrame("Button", nil, DataWindow, "GameMenuButtonTemplate")
     HelpButton:SetSize(120, 30)
-    HelpButton:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 10, 10)
+    HelpButton:SetPoint("BOTTOMLEFT", DataWindow, "BOTTOMLEFT", 10, 10)
     HelpButton:SetText("Help") -- button text here
     HelpButton:SetNormalFontObject("GameFontNormal")
     HelpButton:SetHighlightFontObject("GameFontHighlight")
+    
     -- define what happens when the Help button is clicked
     HelpButton:SetScript("OnClick", function()
-        frame:Hide()         -- Hide the current "window"
-        showHelpDataWindow() -- callfunction that to create new window, can you guess what its called?
+        DataWindow:Hide()
+        nextPageWindowFunc()
     end)
 
     -- define what happens when the Next Page button is clicked
     nextPageButton:SetScript("OnClick", function()
-        frame:Hide()         -- Hide the current "window" and next....
-        nextPageWindowFunc() -- callback function = 3rd parameter in function createDataWindow(_, _, 3rd)
+        DataWindow:Hide()         
+        nextPageWindowFunc()
     end)
 
-    return frame -- The MAIN GUI "WINDOW" LOGIC IS FINISHED NOW GO AND BE FREE
+    return DataWindow
 end
 
--- global vars calling createDataWindow(dataTable, titleText, nextPageWindowFunc)
-JokeDataWindow = createDataWindow(JokeData, "Jokes Index", showQuoteDataWindow)
-quoteDataWindow = createDataWindow(QuoteData, "Quotes Index", showGuildDataWindow)
-GuildDataWindow = createDataWindow(GuildData, "Guild Index", showJokeDataWindow)
-helpDataWindow = createDataWindow(helpData, "Old Gods - Help", function()
-    helpDataWindow:Hide()
-    JokeDataWindow:Show()
-end)
-
-local CLASS_ROLES = {
-    ["Death Knight"] = { "DPS", "Tank" },
-    ["Demon Hunter"] = { "DPS", "Tank" },
-    ["Druid"] = { "DPS", "Tank", "Healer" },
-    ["Evoker"] = { "DPS", "Healer" },
-    ["Hunter"] = { "DPS" },
-    ["Mage"] = { "DPS" },
-    ["Monk"] = { "DPS", "Tank", "Healer" },
-    ["Paladin"] = { "DPS", "Tank", "Healer" },
-    ["Priest"] = { "DPS", "Healer" },
-    ["Rogue"] = { "DPS" },
-    ["Shaman"] = { "DPS", "Healer" },
-    ["Warlock"] = { "DPS" },
-    ["Warrior"] = { "DPS", "Tank" }
-}
-
-local guildMemberData = {}              -- Table to store scanned guild member data
-local selectedRole = "All Roles"        -- Default role filter
-local eventFrame = CreateFrame("Frame") -- Event frame for handling guild updates
-local currentGuildScanWindow            -- Variable to track the currently open guild scan window
-
--- Function to create a new guild scan window each time
-local function createNewGuildScanWindow(data)
-    -- Create a new window for the scan results
-    local window = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
-    window:SetSize(410, 500)
-    window:SetPoint("CENTER", UIParent, "CENTER", 420, 0)
-    window:Show() -- Show the window immediately
-    window:SetMovable(true)
-    window:EnableMouse(true)
-    window:RegisterForDrag("LeftButton")
-    window:SetScript("OnDragStart", window.StartMoving)
-    window:SetScript("OnDragStop", window.StopMovingOrSizing)
-
-    -- Title
-    window.title = window:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    window.title:SetPoint("TOP", window, "TOP", 0, -5)
-    window.title:SetText("Online Guild Member Info")
-
-    -- ScrollFrame
-    local scrollFrame = CreateFrame("ScrollFrame", nil, window, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", window, "TOPLEFT", 10, -50)
-    scrollFrame:SetPoint("BOTTOMRIGHT", window, "BOTTOMRIGHT", -30, 50)
-
-    -- ScrollChild
-    local scrollChild = CreateFrame("Frame")
-    scrollChild:SetWidth(410) -- Match the scrollable width
-    scrollFrame:SetScrollChild(scrollChild)
-
-    local yOffset = -5
-    -- Add guild members data
-    for _, member in ipairs(data) do
-        if selectedRole == "All Roles" or member.roles:find(selectedRole) then
-            local gmline = string.format(
-                "Level: |cFFFFFFFF%d|r |cFFf5c107(|r|cFFFFFFFF%s|r|cFFf5c107)|r\nName: |cFF00f014%s|r\nRank: |cFF05ffff%s|r\nClass Roles: |cFFFFFFFF%s|r\nPublic Note: |cFFFFFFFF%s|r\n|cFFff0044Offficer Note|r: |cFFf2f7a3%s|r",
-                member.level, member.class, member.name, member.rank, member.roles, member.publicNote,
-                member.officerNote)
-
-            -- Create a new line for each member
-            local line = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            line:SetPoint("TOPLEFT", scrollChild, "TOPLEFT", 0, yOffset)
-            line:SetWidth(340)
-            line:SetWordWrap(true)
-            line:SetText(gmline)
-            -- Left-align the text
-            line:SetJustifyH("LEFT")
-            line:SetFont("Fonts\\FRIZQT__.TTF", 16)
-
-            yOffset = yOffset - line:GetStringHeight() - 10
-        end
-    end
-
-    scrollChild:SetHeight(math.abs(yOffset))
-    return window -- Return the created window
-end
--- Add a scan button to the GuildDataWindow
-local function addScanButtonToGuildDataWindow()
-    local scanButton = CreateFrame("Button", nil, GuildDataWindow, "GameMenuButtonTemplate")
-    scanButton:SetSize(120, 30)
-    scanButton:SetPoint("BOTTOM", GuildDataWindow, "BOTTOM", 0, 10)
-    scanButton:SetText("Scan Guild")
-    scanButton:SetNormalFontObject("GameFontNormal")
-    scanButton:SetHighlightFontObject("GameFontHighlight")
-
-    scanButton:SetScript("OnClick", function()
-        --if IsInGuild() then
-        --C_GuildInfo.GuildRoster()
-        --eventFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
-        --else
-        print("this is getting axed")
-    end)
+--DataWindow initializers functions
+local function showHelpDataWindow()
+    helpDataWindow:Show()
 end
 
--- Function to process guild roster data
-local function processGuildRoster()
-    guildMemberData = {} -- Reset data
-
-    -- Close the currently open window if it exists
-    if currentGuildScanWindow then
-        currentGuildScanWindow:Hide()
-        currentGuildScanWindow = nil -- Clear the reference
-    end
-
-    for i = 1, GetNumGuildMembers() do
-        local name, rank, rankIndex, level, class, _, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-        if isOnline then
-            local possibleRoles = CLASS_ROLES[class] or { "Unknown" }
-            local roleString = table.concat(possibleRoles, ", ") -- Format roles as a string
-
-            -- Filter members based on the selected role
-            if selectedRole == "All Roles" or tContains(possibleRoles, selectedRole) then
-                table.insert(guildMemberData, {
-                    rankIndex = rankIndex,
-                    rank = rank,
-                    level = level,
-                    name = name,
-                    class = class,
-                    roles = roleString,
-                    publicNote = publicNote or "None",
-                    officerNote = officerNote or "None"
-                })
-            end
-        end
-    end
-
-    -- Sort by rankIndex in descending order
-    table.sort(guildMemberData, function(a, b)
-        return a.rankIndex < b.rankIndex
-    end)
-
-    -- Create the new window and save a reference to it
-    currentGuildScanWindow = createNewGuildScanWindow(guildMemberData)
+local function showJokeDataWindow()
+    jokeDataWindow:Show()
 end
--- Create a dropdown for role filtering
-local function createRoleFilterDropdown()
-    local roleFilter = CreateFrame("Frame", "RoleFilterDropdown", GuildDataWindow, "UIDropDownMenuTemplate")
-    roleFilter:SetPoint("TOPLEFT", GuildDataWindow, "TOPLEFT", 10, -30)
 
-    -- Role selection logic
-    local function roleFilter_OnClick(self)
-        selectedRole = self.value                               -- Update the selected role
-        UIDropDownMenu_SetSelectedValue(roleFilter, self.value) -- Update the dropdown display
-        processGuildRoster()                                    -- Reprocess guild data with the updated filter
-    end
-
-    -- Dropdown initialization
-    local function roleFilter_Initialize(self, level)
-        local roles = { "Tank", "Healer", "All Roles" } -- Available roles
-        for _, role in ipairs(roles) do
-            local info = UIDropDownMenu_CreateInfo()
-            info.text = role               -- Displayed text
-            info.value = role              -- Value to match against `selectedRole`
-            info.func = roleFilter_OnClick -- Function to call on click
-            UIDropDownMenu_AddButton(info, level)
-        end
-    end
-
-    -- Initialize the dropdown
-    UIDropDownMenu_Initialize(roleFilter, roleFilter_Initialize)
-    UIDropDownMenu_SetWidth(roleFilter, 150)
-    UIDropDownMenu_SetSelectedValue(roleFilter, selectedRole) -- Set default selection
-
-    return roleFilter
+local function showQuoteDataWindow()
+    quoteDataWindow:Show()
 end
--- Event handler for guild updates
-local function OG_onEvent(self, event)
-    if event == "GUILD_ROSTER_UPDATE" then
-        self:UnregisterEvent("GUILD_ROSTER_UPDATE")
-        --processGuildRoster()
-    end
-end
--- Attach dropdown and scan button to GuildDataWindow
-createRoleFilterDropdown()
-addScanButtonToGuildDataWindow()
--- Set up event handling
-eventFrame:SetScript("OnEvent", OG_onEvent)
---#endregion Guild Info REWORK ends
+
+jokeDataWindow = createDataWindow(JokeData, "Jokes Index", showQuoteDataWindow)
+quoteDataWindow = createDataWindow(QuoteData, "Quotes Index", showJokeDataWindow)
+helpDataWindow = createDataWindow(helpData, "Old Gods - Help", showHelpDataWindow)
+--#endregion reworked Help Window
 
 --#region Slash Command called functions
 local function sendSpecificLineToGuild(lineNumber)
@@ -3678,10 +3512,10 @@ end
 -- Slash commmand to toggle the window for the Jokes page
 SLASH_JokeData1 = "/OGJL"
 SlashCmdList["JOKEDATA"] = function()
-    if JokeDataWindow:IsShown() then
-        JokeDataWindow:Hide()
+    if jokeDataWindow:IsShown() then
+        jokeDataWindow:Hide()
     else
-        JokeDataWindow:Show()
+        jokeDataWindow:Show()
     end
 end
 
@@ -3758,10 +3592,68 @@ if LSM then
 end
 --#endregion LibSharedMedia
 
---#region Load Saved Data: Event ADDON_LOADED
-local function InitializeTheme()
-    OG_Titlehack = {} -- whats this all about?
+--region Cache Roster Track Changes
+local OldGuildRoster = {}
 
+local function CacheGuildRoster()
+    OldGuildRoster = {}
+    for i = 1, GetNumGuildMembers() do
+        local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+        OldGuildRoster[name] = {
+            rank = rankName,
+            rankIndex = rankIndex,
+            level = level,
+            class = class,
+            zone = zone,
+            publicNote = publicNote,
+            officerNote = officerNote,
+            isOnline = isOnline
+        }
+    end
+end
+
+local function CheckGuildRosterChanges()
+    for i = 1, GetNumGuildMembers() do
+        local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+        local previous = OldGuildRoster[name]
+
+        if previous then
+            if previous.rank ~= rankName then
+                print("|cFFFFA500[OldGods]|r Rank change detected for: " .. name)
+            end
+            if previous.isOnline ~= isOnline then
+                print("|cFFFFA500[OldGods]|r Online status changed for: " .. name)
+            end
+            if previous.zone ~= zone then
+                print("|cFFFFA500[OldGods]|r Zone changed for: " .. name)
+            end
+            if previous.level ~= level then
+                print("|cFFFFA500[OldGods]|r Level up detected for: " .. name)
+            end
+            if previous.publicNote ~= publicNote then
+                print("|cFFFFA500[OldGods]|r Public Note changed for: " .. name)
+            end
+            if previous.officerNote ~= officerNote then
+                print("|cFFFFA500[OldGods]|r Officer Note changed for: " .. name)
+            end
+        end
+    end
+
+    -- Cache the new roster after checking
+    CacheGuildRoster()
+end
+
+local frame = CreateFrame("Frame")
+frame:RegisterEvent("GUILD_ROSTER_UPDATE")
+frame:SetScript("OnEvent", function(self, event)
+    if event == "GUILD_ROSTER_UPDATE" then
+        CheckGuildRosterChanges()
+    end
+end)
+--endregion Cache Roster Track Changes
+
+--#region primary initialize function
+local function InitializeTheme()
     --Load saved colors into CurrentTheme
     for key, value in pairs(OldGodsSavedColors) do
         -- Theme keys match the saved keys?
@@ -3774,18 +3666,9 @@ local function InitializeTheme()
 
     -- Apply the user saved theme to the GuildChatWindow
     ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
-
-    -- this is an attempt to force the GUILD_ROSTER_UPDATE event to trigger
-    -- We wait 10 seconds for to get in game, for all I know it could be a bug
-    C_Timer.After(10, function()
-        OG_Titlehack_frame:RegisterEvent("GUILD_ROSTER_UPDATE")
-        OG_Titlehack = C_GuildInfo.GuildRoster()
-        if OG_Titlehack then
-            UpdateGuildChatWindowTitle()
-            wipe(OG_Titlehack)
-            OG_Titlehack = nil
-        end
-    end)
+    
+    -- Initialize roster cache on login
+    CacheGuildRoster()
 end
 --#endregion primary Initialize function ends
 
@@ -3794,13 +3677,13 @@ local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, name)
     if name == "OldGods" then
-        InitializeTheme()
         OG_leaveSoundPlayed = false
         OG_clickedSoundPlayed = false
 
         -- Print addon loaded message in chat frame
-        print("|T3194610:20:20:0|t " ..
-            "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r.\nCollecting Guild Data... standby.")
+        print("|T3194610:16:16:0|t " ..
+            "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r." .."\nWaiting for Guild data....")
+            InitializeTheme()
 
         if OGsavedChat then
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)
