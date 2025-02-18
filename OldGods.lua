@@ -617,7 +617,7 @@ local GuildData = {
     "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live The Old Gods! {triangle}",
     "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever." }
 
-    --[[ might use this table dont know yet
+--[[ might use this table dont know yet
 local CLASS_ROLES = {
     ["Death Knight"] = { "DPS", "Tank" },
     ["Demon Hunter"] = { "DPS", "Tank" },
@@ -771,7 +771,7 @@ local function fancyTransform(text)
 
     return transformed
 end
---#endregion UTILITY FUNCTIONS ends
+--#endregion Utility and other functions
 
 --#region OG_Themes and OG_Fonts functions
 local function ApplyEditBoxTheme(editBox, theme)
@@ -1112,7 +1112,6 @@ Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, conte
         end)
     end
 end)
-
 --#endregion ModifyMenu
 
 --#region Chat History Window
@@ -1197,7 +1196,7 @@ local function CreateSavedChatHistoryWindow(title)
     ChatHistoryWindow.editBox = editBox
     return ChatHistoryWindow
 end
---INITIALIZE
+--Initialize
 local SavedChatHistoryWindow = CreateSavedChatHistoryWindow("Chat History")
 --#endregion Chat History window
 
@@ -1588,7 +1587,7 @@ local function UpdateGuildChatWindowTitle()
 
     -- Condition 3: Ensure valid data is retrieved
     if not guildName or not numTotalGuildMembers or not numOnlineGuildMembers then
-       -- print("Condition 3 failed |cFFFF0000Function Halted|r\n")
+        -- print("Condition 3 failed |cFFFF0000Function Halted|r\n")
         return
     end
     --print("Condition 3 |cFF00FF00PASSED|r\n")
@@ -1619,37 +1618,37 @@ end)
 --#endregion Guild Chat Window
 
 --#region Grief Mail
-local frame = CreateFrame("Frame", "OldGodsMailFrame", UIParent, "BasicFrameTemplateWithInset")
-frame:SetSize(380, 460)
-frame:SetPoint("CENTER")
-frame.title = frame:CreateFontString(nil, "OVERLAY")
-frame.title:SetFontObject("GameFontHighlight")
-frame.title:SetPoint("TOP", frame, "TOP", 0, -5)
-frame.title:SetText("Old Gods Grief Mail Manager")
+local gMailframe = CreateFrame("Frame", "OldGodsMailFrame", UIParent, "BasicFrameTemplateWithInset")
+gMailframe:SetSize(380, 460)
+gMailframe:SetPoint("CENTER")
+gMailframe.title = gMailframe:CreateFontString(nil, "OVERLAY")
+gMailframe.title:SetFontObject("GameFontHighlight")
+gMailframe.title:SetPoint("TOP", gMailframe, "TOP", 0, -5)
+gMailframe.title:SetText("Old Gods Grief Mail Manager")
 
-frame.scroll = CreateFrame("ScrollFrame", "OldGodsMailScroll", frame, "UIPanelScrollFrameTemplate")
-frame.scroll:SetSize(360, 285)
-frame.scroll:SetPoint("TOP", frame, "TOP", 0, -30)
+gMailframe.scroll = CreateFrame("ScrollFrame", "OldGodsMailScroll", gMailframe, "UIPanelScrollFrameTemplate")
+gMailframe.scroll:SetSize(360, 285)
+gMailframe.scroll:SetPoint("TOP", gMailframe, "TOP", 0, -30)
 
-local content = CreateFrame("Frame", nil, frame.scroll)
+local content = CreateFrame("Frame", nil, gMailframe.scroll)
 content:SetSize(360, 285)
-frame.scroll:SetScrollChild(content)
+gMailframe.scroll:SetScrollChild(content)
 
 local selectedItemID = nil
 local selectedMailIndex = nil
 local selectedItemIcon = nil
 
-local selectedDisplay = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-selectedDisplay:SetPoint("BOTTOM", frame, "BOTTOM", 0, 75)
+local selectedDisplay = gMailframe:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+selectedDisplay:SetPoint("BOTTOM", gMailframe, "BOTTOM", 0, 75)
 selectedDisplay:SetText("No Item Selected")
 
-local selectedIcon = frame:CreateTexture(nil, "ARTWORK")
+local selectedIcon = gMailframe:CreateTexture(nil, "ARTWORK")
 selectedIcon:SetSize(35, 35)
 selectedIcon:SetPoint("BOTTOMLEFT", selectedDisplay, "TOPLEFT", -40, 0)
 
 -- Checkbox for Auto-Return
-local autoReturnCheck = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
-autoReturnCheck:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 3, 46)
+local autoReturnCheck = CreateFrame("CheckButton", nil, gMailframe, "UICheckButtonTemplate")
+autoReturnCheck:SetPoint("BOTTOMLEFT", gMailframe, "BOTTOMLEFT", 3, 46)
 autoReturnCheck.text = autoReturnCheck:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 autoReturnCheck.text:SetPoint("LEFT", autoReturnCheck, "RIGHT", 5, 0)
 autoReturnCheck.text:SetText("|cFFFFFF3CSelect All Items|r then |cFFA0FF0CClick \"Return Selected\"|r")
@@ -1660,9 +1659,9 @@ autoReturnCheck:SetScript("OnClick", function(self)
     print("Auto-Return is now", OldGods_AutoReturnEnabled and "ENABLED" or "DISABLED")
 end)
 
-local returnButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+local returnButton = CreateFrame("Button", nil, gMailframe, "UIPanelButtonTemplate")
 returnButton:SetSize(140, 30)
-returnButton:SetPoint("BOTTOM", frame, "BOTTOM", 100, 10)
+returnButton:SetPoint("BOTTOM", gMailframe, "BOTTOM", 100, 10)
 returnButton:SetText("Return Selected")
 returnButton:SetScript("OnClick", function()
     if OldGods_AutoReturnEnabled then
@@ -1788,9 +1787,9 @@ local function UpdateItemList()
 end
 
 -- Input Box for Adding Items to the Blacklist
-local OGM_inputBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
+local OGM_inputBox = CreateFrame("EditBox", nil, gMailframe, "InputBoxTemplate")
 OGM_inputBox:SetSize(110, 35)
-OGM_inputBox:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 25, 10)
+OGM_inputBox:SetPoint("BOTTOMLEFT", gMailframe, "BOTTOMLEFT", 25, 10)
 OGM_inputBox:SetAutoFocus(false)
 OGM_inputBox:SetText("Enter Item ID")
 OGM_inputBox:EnableMouse(true)
@@ -1826,7 +1825,7 @@ OGM_inputBox:SetScript("OnTextChanged", function(self)
 end)
 
 -- Add Items to the blacklist - Button
-local addButton = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
+local addButton = CreateFrame("Button", nil, gMailframe, "UIPanelButtonTemplate")
 addButton:SetSize(60, 30)
 addButton:SetPoint("LEFT", OGM_inputBox, "RIGHT", 7, 0)
 addButton:SetText("Add")
@@ -1843,20 +1842,18 @@ addButton:SetScript("OnClick", function()
 end)
 
 -- Populate the Scroll Frame on Mailbox Open
-frame:RegisterEvent("MAIL_SHOW")
-frame:RegisterEvent("MAIL_CLOSED")
-frame:SetScript("OnEvent", function(self, event)
+gMailframe:RegisterEvent("MAIL_SHOW")
+gMailframe:RegisterEvent("MAIL_CLOSED")
+gMailframe:SetScript("OnEvent", function(self, event)
     if event == "MAIL_SHOW" then
-        frame:Show()
+        gMailframe:Show()
         UpdateItemList()
     elseif event == "MAIL_CLOSED" then
-        if frame:IsShown() then
-            frame:Hide()
-        end
+        gMailframe:Hide()
     end
 end)
 
-frame:Hide()
+gMailframe:Hide() --intialized hidden
 --#endregion Grief Mail
 
 --#region Options UI and Funtions
@@ -1911,8 +1908,8 @@ local function GetInactiveInitiates(threshold)
         return a.name < b.name
     end)
 
-     -- Process the macro_Data
-     C_Timer.After(0.1, function()
+    -- Process the macro_Data
+    C_Timer.After(0.1, function()
         if #inactiveInitiates > 0 then -- Take the first player and create a macro
             local macro_Data = table.remove(inactiveInitiates, 1)
             local TEMP_STRING = macro_Data.macro .. " " .. macro_Data.name .. macro_Data.macro_n
@@ -2018,7 +2015,7 @@ local function CreateInactiveInitiatesFrame(parent)
     -- Scroll Child
     local scrollChild = CreateFrame("Frame")
     scrollFrame:SetScrollChild(scrollChild)
-    scrollChild:SetSize(scrollFrame:GetWidth(), 1) -- Dynamic height based on content
+    scrollChild:SetSize(scrollFrame:GetWidth(), 1)                                     -- Dynamic height based on content
     local padding = 5                                                                  -- Padding between columns
     local headerWidth = (scrollFrame:GetWidth() - (#headers - 1) * padding) / #headers -- Dynamic width calc
     return frame, scrollChild, headerWidth
@@ -2060,16 +2057,14 @@ local function PopulateInactiveInitiates(frame, scrollChild, data)
         local nameButton = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
         nameButton:SetPoint("TOPLEFT", 0, yOffset)
         nameButton:SetSize(maxNameWidth, rowHeight)
-        nameButton:SetText(entry.name)
+        nameButton:GetFontString():SetWordWrap(false)
         nameButton:SetNormalFontObject("GameFontNormal")
         nameButton:SetHighlightFontObject("GameFontHighlight")
-        nameButton:GetFontString():SetWordWrap(false)
-        nameButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-
+        nameButton:SetText(entry.name)
         nameButton:SetScript("OnClick", function(self, button)
-                PlaySoundFile(541008, "Master")
-                UIErrorsFrame:AddMessage("PRESS F5", 1, 1, 0, 5)
-        end)
+                PlaySound(124172)
+                UIErrorsFrame:AddMessage("|T516767:18:18:0|t Secure Actions Blocked" .."\n" .. "To purge press F5", 1.0, 1.0, 0.0, 1, 6)
+            end)
 
         -- Optional: Add additional columns like Rank and Last Online
         local rankText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -2118,7 +2113,7 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
         GameTooltip:AddLine("Search")
         GameTooltip:AddDoubleLine(
             "|cFF00FF00Enter # (1 to 31)|r", "|cFFF0FF00offline|r days\n", 1, 1, 1, 1, 1, 1)
-             GameTooltip:Show()
+        GameTooltip:Show()
     end)
 
     inputBox:SetScript("OnLeave", function()
@@ -2128,6 +2123,7 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
     return inputBox
 end
 
+-- Initial call Global so Macro can call it
 function OldGods_ShowInactiveInitiates()
     local threshold = 14 -- Default threshold
     closeFrame()
@@ -2154,9 +2150,7 @@ function OldGods_ShowInactiveInitiates()
     RefreshFrame(threshold)
 end
 
---#endregion sub_nest ShowInactiveInitiates Global Function
-
---#endregion Sub_region OldGods_ShowInactiveInitiates
+--#endregion Inactive players
 --#region MemberSearch
 local guildRosterCache = {}
 local searchFrame, scrollFrame, SR_scrollChild
@@ -2668,7 +2662,6 @@ local function CreateColorPicker(defaultR, defaultG, defaultB, defaultA, onColor
 end
 
 local function AddResetButton(parent, theme, colorOptions)
-    
     local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     button:SetSize(150, 30)
     button:SetNormalFontObject("GameFontNormalMed2Outline")
@@ -2678,7 +2671,7 @@ local function AddResetButton(parent, theme, colorOptions)
     button:SetScript("OnClick", function()
         local defaults = theme
         --local tName = GetCurrentThemeName()
-        
+
         if not defaults then
             return
         end
@@ -2686,7 +2679,7 @@ local function AddResetButton(parent, theme, colorOptions)
         for _, option in ipairs(colorOptions) do
             local key = option.key
             local default = ResolveNestedKey(defaults, key)
-            
+
             if default then
                 ResolveNestedKey(defaults, key, default)
                 OldGodsSavedColors[key] = nil
@@ -3291,7 +3284,6 @@ local quoteDataWindow
 local helpDataWindow
 
 local function createDataWindow(dataTable, title, nextPageWindowFunc)
-    
     local DataWindow = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
     DataWindow:SetSize(400, 500)
     DataWindow:SetPoint("CENTER")
@@ -3301,7 +3293,7 @@ local function createDataWindow(dataTable, title, nextPageWindowFunc)
     DataWindow:SetScript("OnDragStart", DataWindow.StartMoving)
     DataWindow:SetScript("OnDragStop", DataWindow.StopMovingOrSizing)
     DataWindow:Hide() --recycle frame
-    
+
     -- Title position
     DataWindow.title = DataWindow:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
     DataWindow.title:SetPoint("TOP", DataWindow, "TOP", 0, -5)
@@ -3319,7 +3311,7 @@ local function createDataWindow(dataTable, title, nextPageWindowFunc)
 
     -- Populate the "window" with the table lines from the table passed to createDataWindow()
     local yOffset = -5
-    
+
     for i, line in ipairs(dataTable) do
         -- Line number position
         local lineNumber = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -3333,7 +3325,7 @@ local function createDataWindow(dataTable, title, nextPageWindowFunc)
         lineText:SetWordWrap(true)
         -- Ensure the line is a valid string before setting text
         if type(line) == "string" then
-            lineText:SetText(line)                --
+            lineText:SetText(line) --
         else
             lineText:SetText("Invalid line data")
         end
@@ -3364,7 +3356,7 @@ local function createDataWindow(dataTable, title, nextPageWindowFunc)
     HelpButton:SetText("Help") -- button text here
     HelpButton:SetNormalFontObject("GameFontNormal")
     HelpButton:SetHighlightFontObject("GameFontHighlight")
-    
+
     -- define what happens when the Help button is clicked
     HelpButton:SetScript("OnClick", function()
         DataWindow:Hide()
@@ -3373,7 +3365,7 @@ local function createDataWindow(dataTable, title, nextPageWindowFunc)
 
     -- define what happens when the Next Page button is clicked
     nextPageButton:SetScript("OnClick", function()
-        DataWindow:Hide()         
+        DataWindow:Hide()
         nextPageWindowFunc()
     end)
 
@@ -3666,7 +3658,7 @@ local function InitializeTheme()
 
     -- Apply the user saved theme to the GuildChatWindow
     ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
-    
+
     -- Initialize roster cache on login
     CacheGuildRoster()
 end
@@ -3682,8 +3674,8 @@ frame:SetScript("OnEvent", function(self, event, name)
 
         -- Print addon loaded message in chat frame
         print("|T3194610:16:16:0|t " ..
-            "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r." .."\nWaiting for Guild data....")
-            InitializeTheme()
+            "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r." .. "\nWaiting for Guild data....")
+        InitializeTheme()
 
         if OGsavedChat then
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)

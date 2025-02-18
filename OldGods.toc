@@ -1,8 +1,9 @@
 ## Interface: 110007
+## Version: a2.1
+## IconTexture: 514261
 ## Title: |cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r by |cFaFFD7a0Lazyeyez|r
-## Notes: Just a personal addon, learning LUA and the WoW API
-## Version: 2.0
-## Author: Lazyeyez (with big help from chatGPT)
+## Notes: Guild Interaction and Communication 
+## Author: Lazyeyez-Lightbringer
 ## SavedVariables: OGsavedChat, OldGodsSavedColors, OldGodsSavedThemes, OldGodsSavedLastTheme, OldGods_BadMailDB, OldGods_AutoReturnEnabled
 ## OptionalDeps: LibSharedMedia-3.0
 
