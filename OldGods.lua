@@ -1201,7 +1201,6 @@ local SavedChatHistoryWindow = CreateSavedChatHistoryWindow("Chat History")
 --#endregion Chat History window
 
 --#region Guild Chat Window
-local OG_Titlehack_frame = CreateFrame("Frame")
 local function CreateGuildChatWindow(title)
     -- Create the parent frame for the Guild Chat GUI
     local GuildChatWindow = CreateFrame("Frame", "GuildChatWindow", UIParent, "BackdropTemplate")
@@ -1558,15 +1557,75 @@ end
 -- Initialize GuildChatWindow
 local GuildChatWindow = CreateGuildChatWindow("|T986486:18:18:0|t Collecting data...") -- Default title shows before the update function is triggered
 GuildChatWindow:Show()
+
 local lastUpdate = 0                                                                   -- Initial timestamp
 local ogGuildTitle = CreateFrame("Frame")
 ogGuildTitle:RegisterEvent("GUILD_ROSTER_UPDATE")
+--region Cache Roster Track Changes
+local OldGuildRoster = {
+    ["init"] = {
+        rank = "INIT",
+            rankIndex = "INIT",
+            level = "INIT",
+            class = "INIT",
+            zone = "INIT",
+            publicNote = "INIT",
+            officerNote = "INIT",
+            isOnline = "INIT"
+         },
+}
+
+local function CacheGuildRoster()
+    OldGuildRoster = {}
+    for i = 1, GetNumGuildMembers() do
+        local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+        OldGuildRoster[name] = {
+            rank = rankName,
+            rankIndex = rankIndex,
+            level = level,
+            class = class,
+            zone = zone,
+            publicNote = publicNote,
+            officerNote = officerNote,
+            isOnline = isOnline
+        }
+    end
+end
+
+local function CheckGuildRosterChanges()
+    for i = 1, GetNumGuildMembers() do
+        local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+        local previous = OldGuildRoster[name]
+
+        if previous then
+            if previous.rank ~= rankName then
+                print("|cFFFFA500[OldGods]|r Rank change detected for: " .. name)
+            end
+            if previous.isOnline ~= isOnline then
+                print("|cFFFFA500[OldGods]|r Online status changed for: " .. name)
+            end
+            if previous.zone ~= zone then
+                print("|cFFFFA500[OldGods]|r Zone changed for: " .. name)
+            end
+            if previous.level ~= level then
+                print("|cFFFFA500[OldGods]|r Level up detected for: " .. name)
+            end
+            if previous.publicNote ~= publicNote then
+                print("|cFFFFA500[OldGods]|r Public Note changed for: " .. name)
+            end
+            if previous.officerNote ~= officerNote then
+                print("|cFFFFA500[OldGods]|r Officer Note changed for: " .. name)
+            end
+        end
+    end
+
+    -- Cache the new roster after checking
+    CacheGuildRoster()
+end
 
 local function UpdateGuildChatWindowTitle()
-    local elapsedSec = GetTime() - lastUpdate
-    local elapsedTime = string.format(
-        "|T986486:18:18:0|t Last call to UpdateGuildChatWindowTitle() was |cFFF0F005[|r%.1f seconds|cFFF0F005]|r ago",
-        elapsedSec)
+    --local elapsedSec = GetTime() - lastUpdate
+    --local elapsedTime = string.format("|T986486:18:18:0|t Last call to UpdateGuildChatWindowTitle() was |cFFF0F005[|r%.1f seconds|cFFF0F005]|r ago", elapsedSec)
 
     -- Condition 1: Ensure frame and title exist & window is visible
     if not GuildChatWindow or not GuildChatWindow.title or not GuildChatWindow:IsShown() then
@@ -1576,10 +1635,10 @@ local function UpdateGuildChatWindowTitle()
     --print("Condition 1 |cFF00FF00PASSED|r\n")
 
     -- Condition 2: Prevent excessive updates (minimum interval of 25 seconds)
-    if elapsedSec < 25 then
+    --if elapsedSec < 25 then
         --print("Condition 2 failed |cFFFF0000Function Halted|r\n" .. elapsedTime)
-        return
-    end
+        --return
+    --end
     --print("Condition 2 |cFF00FF00PASSED|r\n")
 
     local guildName, _, _, _ = GetGuildInfo("player")                        -- Get player's guild name
@@ -1598,7 +1657,7 @@ local function UpdateGuildChatWindowTitle()
     --print("|cFF00FF00SETING TITLE")
 
     GuildChatWindow.title:SetText(newTitle)
-    lastUpdate = GetTime() -- Update timestamp
+    --lastUpdate = GetTime() -- Update timestamp
     --print("FUNCTION COMPLETE\n" .. elapsedTime)
 end
 
@@ -2061,10 +2120,11 @@ local function PopulateInactiveInitiates(frame, scrollChild, data)
         nameButton:SetNormalFontObject("GameFontNormal")
         nameButton:SetHighlightFontObject("GameFontHighlight")
         nameButton:SetText(entry.name)
-        nameButton:SetScript("OnClick", function(self, button)
-                PlaySound(124172)
-                UIErrorsFrame:AddMessage("|T516767:18:18:0|t Secure Actions Blocked" .."\n" .. "To purge press F5", 1.0, 1.0, 0.0, 1, 6)
-            end)
+        nameButton:SetScript("OnClick", function()
+            PlaySound(124172)
+            UIErrorsFrame:AddMessage("|T516767:18:18:0|t Secure Actions Blocked" .. "\n" .. "To purge press F5", 1.0, 1.0,
+                0.0, 1, 6)
+        end)
 
         -- Optional: Add additional columns like Rank and Last Online
         local rankText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -3584,66 +3644,6 @@ if LSM then
 end
 --#endregion LibSharedMedia
 
---region Cache Roster Track Changes
-local OldGuildRoster = {}
-
-local function CacheGuildRoster()
-    OldGuildRoster = {}
-    for i = 1, GetNumGuildMembers() do
-        local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-        OldGuildRoster[name] = {
-            rank = rankName,
-            rankIndex = rankIndex,
-            level = level,
-            class = class,
-            zone = zone,
-            publicNote = publicNote,
-            officerNote = officerNote,
-            isOnline = isOnline
-        }
-    end
-end
-
-local function CheckGuildRosterChanges()
-    for i = 1, GetNumGuildMembers() do
-        local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-        local previous = OldGuildRoster[name]
-
-        if previous then
-            if previous.rank ~= rankName then
-                print("|cFFFFA500[OldGods]|r Rank change detected for: " .. name)
-            end
-            if previous.isOnline ~= isOnline then
-                print("|cFFFFA500[OldGods]|r Online status changed for: " .. name)
-            end
-            if previous.zone ~= zone then
-                print("|cFFFFA500[OldGods]|r Zone changed for: " .. name)
-            end
-            if previous.level ~= level then
-                print("|cFFFFA500[OldGods]|r Level up detected for: " .. name)
-            end
-            if previous.publicNote ~= publicNote then
-                print("|cFFFFA500[OldGods]|r Public Note changed for: " .. name)
-            end
-            if previous.officerNote ~= officerNote then
-                print("|cFFFFA500[OldGods]|r Officer Note changed for: " .. name)
-            end
-        end
-    end
-
-    -- Cache the new roster after checking
-    CacheGuildRoster()
-end
-
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("GUILD_ROSTER_UPDATE")
-frame:SetScript("OnEvent", function(self, event)
-    if event == "GUILD_ROSTER_UPDATE" then
-        CheckGuildRosterChanges()
-    end
-end)
---endregion Cache Roster Track Changes
-
 --#region primary initialize function
 local function InitializeTheme()
     --Load saved colors into CurrentTheme
@@ -3658,9 +3658,6 @@ local function InitializeTheme()
 
     -- Apply the user saved theme to the GuildChatWindow
     ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
-
-    -- Initialize roster cache on login
-    CacheGuildRoster()
 end
 --#endregion primary Initialize function ends
 
@@ -3669,14 +3666,16 @@ local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, name)
     if name == "OldGods" then
+        --set Global easter egg sound vars state
         OG_leaveSoundPlayed = false
         OG_clickedSoundPlayed = false
 
         -- Print addon loaded message in chat frame
         print("|T3194610:16:16:0|t " ..
             "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r." .. "\nWaiting for Guild data....")
+        --apply the theme
         InitializeTheme()
-
+        -- and finally load the users save chats
         if OGsavedChat then
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)
             updateTargetEditBoxText(SavedChatHistoryWindow.editBox, OGsavedChat)
