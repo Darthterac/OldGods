@@ -1562,37 +1562,36 @@ local lastUpdate = 0                                                            
 local ogGuildTitle = CreateFrame("Frame")
 ogGuildTitle:RegisterEvent("GUILD_ROSTER_UPDATE")
 --region Cache Roster Track Changes
-local OldGuildRoster = {
-    ["init"] = {
-        rank = "INIT",
-            rankIndex = "INIT",
-            level = "INIT",
-            class = "INIT",
-            zone = "INIT",
-            publicNote = "INIT",
-            officerNote = "INIT",
-            isOnline = "INIT"
-         },
-}
+
+local OldGuildRoster = {}
 
 local function CacheGuildRoster()
-    OldGuildRoster = {}
+    wipe(OldGuildRoster) -- Ensure it's cleared before populating
     for i = 1, GetNumGuildMembers() do
         local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-        OldGuildRoster[name] = {
-            rank = rankName,
-            rankIndex = rankIndex,
-            level = level,
-            class = class,
-            zone = zone,
-            publicNote = publicNote,
-            officerNote = officerNote,
-            isOnline = isOnline
-        }
+        if name then
+            OldGuildRoster[name] = {
+                rank = rankName,
+                rankIndex = rankIndex,
+                level = level,
+                class = class,
+                zone = zone,
+                publicNote = publicNote,
+                officerNote = officerNote,
+                isOnline = isOnline
+            }
+        end
     end
 end
 
 local function CheckGuildRosterChanges()
+    -- Ensure OldGuildRoster is initialized before checking
+    if not next(OldGuildRoster) then
+        print("|cFFFFA500[OldGods]|r Initializing OldGuildRoster...")
+        CacheGuildRoster() -- First-time caching
+        return
+    end
+
     for i = 1, GetNumGuildMembers() do
         local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
         local previous = OldGuildRoster[name]
@@ -1622,6 +1621,9 @@ local function CheckGuildRosterChanges()
     -- Cache the new roster after checking
     CacheGuildRoster()
 end
+
+-- **Ensure Initial Cache**
+CacheGuildRoster()
 
 local function UpdateGuildChatWindowTitle()
     --local elapsedSec = GetTime() - lastUpdate
@@ -1665,6 +1667,7 @@ local lastRosterUpdate = 0 -- Timestamp tracking
 
 ogGuildTitle:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
+        CheckGuildRosterChanges()
         local now = GetTime()
         if now - lastRosterUpdate > 25 then -- Prevent spamming
             if IsInGuild() then
