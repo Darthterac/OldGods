@@ -4,7 +4,7 @@
 ## Title: |cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r by |cFaFFD7a0Lazyeyez|r
 ## Notes: Guild Interaction and Communication 
 ## Author: Lazyeyez-Lightbringer
-## SavedVariables: OGsavedChat, OldGodsSavedColors, OldGodsSavedThemes, OldGodsSavedLastTheme, OldGods_BadMailDB, OldGods_AutoReturnEnabled
+## SavedVariables: OGsavedChat, OldGodsSavedColors, OG_TrackGuildRoster, OldGods_BadMailDB, OldGods_AutoReturnEnabled
 ## OptionalDeps: LibSharedMedia-3.0
 
 OldGods.lua

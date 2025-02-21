@@ -1,6 +1,7 @@
 --#region Global savedvariables
 OGsavedChat = OGsavedChat or {}
 OldGodsSavedColors = OldGodsSavedColors or {}
+OG_TrackGuildRoster = OG_TrackGuildRoster or {}
 OldGods_BadMailDB = OldGods_BadMailDB or {}
 OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
 --#endregion Global savedvariables
@@ -8,7 +9,6 @@ OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
 --#region Global Tables
 OG_ChatMessageTable = {}
 OG_TooltipInfoTable = {}
-OG_TrackGuildRoster = {}
 
 --#region Global table OG_Themes
 OG_Themes = {
@@ -1674,19 +1674,19 @@ local function CheckGuildRosterChanges()
 
         if previous then
             if previous.rankName ~= rankName then
-                print("|cFFFFA500[OldGods]|r Rank change detected for: " .. name .. "\nFrom: " .. previous.rankName .. "To: " .. rankName)
+                print("|cFFFFA500[OldGods]|r Rank change detected for: " .. name .. "\nFrom: " .. previous.rankName .. " To: " .. rankName)
             end
             if previous.level ~= level then
-                print("|cFFFFA500[OldGods]|r Level up detected for: " .. name .. "\nFrom: " .. previous.level .. "To: " .. level)
+                print("|cFFFFA500[OldGods]|r Level up detected for: " .. name .. "\nFrom: " .. previous.level .. " To: " .. level)
             end
             if previous.zone ~= zone then
-                print("|cFFFFA500[OldGods]|r Zone change: " .. name .. "\nFrom: " .. previous.zone .. "To: " .. zone)
+                print("|cFFFFA500[OldGods]|r Zone change: " .. name .. "\nFrom: " .. previous.zone .. " To: " .. zone)
             end
             if previous.publicNote ~= publicNote then
-                print("|cFFFFA500[OldGods]|r Public Note changed: " .. name .. "\nFrom: " .. previous.publicNote .. "To: " .. publicNote)
+                print("|cFFFFA500[OldGods]|r Public Note changed: " .. name .. "\nFrom: " .. previous.publicNote .. " To: " .. publicNote)
             end
             if previous.officerNote ~= officerNote then
-                print("|cFFFFA500[OldGods]|r Officer Note changed: " .. name .. "\nFrom: " .. previous.publicNote .. "To: " .. publicNote)
+                print("|cFFFFA500[OldGods]|r Officer Note changed: " .. name .. "\nFrom: " .. previous.publicNote .. " To: " .. publicNote)
             end
             --[[if previous.isOnline ~= isOnline then
                 print("|cFFFFA500[OldGods]|r Online status changed for: " .. name )
