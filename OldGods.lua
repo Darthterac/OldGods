@@ -8,6 +8,7 @@ OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
 --#region Global Tables
 OG_ChatMessageTable = {}
 OG_TooltipInfoTable = {}
+OG_TrackGuildRoster = {}
 
 --#region Global table OG_Themes
 OG_Themes = {
@@ -1459,7 +1460,29 @@ local function CreateGuildChatWindow(title)
     optionsButton:SetHighlightFontObject("GameFontHighlight")
     optionsButton:EnableMouse(true)
     optionsButton:SetPushedTexture(5926319)
-
+    
+    local fastOptionsMenuZone = CreateFrame("Button", "fastOptionsMenuZone", optionsButton, "BackdropTemplate")
+    fastOptionsMenuZone:SetPoint("BOTTOMRIGHT", optionsButton)
+    fastOptionsMenuZone:SetSize(10, 10)
+    local FrameBackdrop = {
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        tile = false,
+        tileSize = 0,
+        edgeSize = 2,
+        insets = {
+            left = 0,
+            right = 0,
+            top = 0,
+            bottom = 0
+        }
+    }
+    fastOptionsMenuZone:SetBackdrop(FrameBackdrop)
+    fastOptionsMenuZone:SetBackdropColor(0, 1, 0, 0.655)
+    fastOptionsMenuZone:SetBackdropBorderColor(0.5, 0.5, 0.15, 1)
+    fastOptionsMenuZone:EnableMouse(true)
+    
+    GuildChatWindow.CustomFastOptionsZone = { fastOptionsMenuZone }
     GuildChatWindow.buttons = { copyButton, SaveClearButton, optionsButton, toggleButton }
 
     local inputBox = CreateFrame("EditBox", nil, GuildChatWindow, "InputBoxTemplate")
@@ -1557,77 +1580,16 @@ end
 -- Initialize GuildChatWindow
 local GuildChatWindow = CreateGuildChatWindow("|T986486:18:18:0|t Collecting data...") -- Default title shows before the update function is triggered
 GuildChatWindow:Show()
+--#endregion
 
-local lastUpdate = 0                                                                   -- Initial timestamp
+--#region UpdateGuildChatWindowTitle
 local ogGuildTitle = CreateFrame("Frame")
 ogGuildTitle:RegisterEvent("GUILD_ROSTER_UPDATE")
---region Cache Roster Track Changes
-
-local OldGuildRoster = {}
-
-local function CacheGuildRoster()
-    wipe(OldGuildRoster) -- Ensure it's cleared before populating
-    for i = 1, GetNumGuildMembers() do
-        local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-        if name then
-            OldGuildRoster[name] = {
-                rank = rankName,
-                rankIndex = rankIndex,
-                level = level,
-                class = class,
-                zone = zone,
-                publicNote = publicNote,
-                officerNote = officerNote,
-                isOnline = isOnline
-            }
-        end
-    end
-end
-
-local function CheckGuildRosterChanges()
-    -- Ensure OldGuildRoster is initialized before checking
-    if not next(OldGuildRoster) then
-        print("|cFFFFA500[OldGods]|r Initializing OldGuildRoster...")
-        CacheGuildRoster() -- First-time caching
-        return
-    end
-
-    for i = 1, GetNumGuildMembers() do
-        local name, rankName, rankIndex, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-        local previous = OldGuildRoster[name]
-
-        if previous then
-            if previous.rank ~= rankName then
-                print("|cFFFFA500[OldGods]|r Rank change detected for: " .. name)
-            end
-            if previous.isOnline ~= isOnline then
-                print("|cFFFFA500[OldGods]|r Online status changed for: " .. name)
-            end
-            if previous.zone ~= zone then
-                print("|cFFFFA500[OldGods]|r Zone changed for: " .. name)
-            end
-            if previous.level ~= level then
-                print("|cFFFFA500[OldGods]|r Level up detected for: " .. name)
-            end
-            if previous.publicNote ~= publicNote then
-                print("|cFFFFA500[OldGods]|r Public Note changed for: " .. name)
-            end
-            if previous.officerNote ~= officerNote then
-                print("|cFFFFA500[OldGods]|r Officer Note changed for: " .. name)
-            end
-        end
-    end
-
-    -- Cache the new roster after checking
-    CacheGuildRoster()
-end
-
--- **Ensure Initial Cache**
-CacheGuildRoster()
+--local lastUpdate = 0 -- Initial timestamp
 
 local function UpdateGuildChatWindowTitle()
     --local elapsedSec = GetTime() - lastUpdate
-    --local elapsedTime = string.format("|T986486:18:18:0|t Last call to UpdateGuildChatWindowTitle() was |cFFF0F005[|r%.1f seconds|cFFF0F005]|r ago", elapsedSec)
+    --[[local elapsedTime = string.format("|T986486:18:18:0|t Last call to UpdateGuildChatWindowTitle() was |cFFF0F005[|r%.1f seconds|cFFF0F005]|r ago", elapsedSec)]]
 
     -- Condition 1: Ensure frame and title exist & window is visible
     if not GuildChatWindow or not GuildChatWindow.title or not GuildChatWindow:IsShown() then
@@ -1637,9 +1599,9 @@ local function UpdateGuildChatWindowTitle()
     --print("Condition 1 |cFF00FF00PASSED|r\n")
 
     -- Condition 2: Prevent excessive updates (minimum interval of 25 seconds)
-    --if elapsedSec < 25 then
-        --print("Condition 2 failed |cFFFF0000Function Halted|r\n" .. elapsedTime)
-        --return
+    --if elapsedSec < 11 then
+    --print("Condition 2 failed |cFFFF0000Function Halted|r\n" .. elapsedTime)
+    --return
     --end
     --print("Condition 2 |cFF00FF00PASSED|r\n")
 
@@ -1663,21 +1625,88 @@ local function UpdateGuildChatWindowTitle()
     --print("FUNCTION COMPLETE\n" .. elapsedTime)
 end
 
-local lastRosterUpdate = 0 -- Timestamp tracking
+local lastkUP = 0 -- Timestamp tracking
 
 ogGuildTitle:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
-        CheckGuildRosterChanges()
-        local now = GetTime()
-        if now - lastRosterUpdate > 25 then -- Prevent spamming
+        local kUPnow = GetTime()
+        if kUPnow - lastkUP > 11 then
             if IsInGuild() then
-                lastRosterUpdate = now
                 UpdateGuildChatWindowTitle()
+                lastkUP = kUPnow
             end
         end
     end
 end)
---#endregion Guild Chat Window
+--#endregion
+
+--#region Cache Roster Track Changes
+local rosterChanges = CreateFrame("Frame")
+rosterChanges:RegisterEvent("GUILD_ROSTER_UPDATE")
+
+local function CacheGuildRoster()
+    wipe(OG_TrackGuildRoster)
+    C_GuildInfo.GuildRoster()
+    OG_TrackGuildRoster = {}
+    for i = 1, GetNumGuildMembers() do
+        local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+        OG_TrackGuildRoster[name] = {
+            rankName = rankName,
+            level = level,
+            zone = zone,
+            publicNote = publicNote,
+            officerNote = officerNote,
+            isOnline = isOnline
+        }
+    end
+end
+
+local function CheckGuildRosterChanges()
+    -- Ensure OldGuildRoster is initialized before checking
+    if not next(OG_TrackGuildRoster) then
+    CacheGuildRoster()     -- First-time caching
+    return
+    end
+
+    for i = 1, GetNumGuildMembers() do
+        local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+        local previous = OG_TrackGuildRoster[name]
+
+        if previous then
+            if previous.rankName ~= rankName then
+                print("|cFFFFA500[OldGods]|r Rank change detected for: " .. name .. "\nFrom: " .. previous.rankName .. "To: " .. rankName)
+            end
+            if previous.level ~= level then
+                print("|cFFFFA500[OldGods]|r Level up detected for: " .. name .. "\nFrom: " .. previous.level .. "To: " .. level)
+            end
+            if previous.zone ~= zone then
+                print("|cFFFFA500[OldGods]|r Zone change: " .. name .. "\nFrom: " .. previous.zone .. "To: " .. zone)
+            end
+            if previous.publicNote ~= publicNote then
+                print("|cFFFFA500[OldGods]|r Public Note changed: " .. name .. "\nFrom: " .. previous.publicNote .. "To: " .. publicNote)
+            end
+            if previous.officerNote ~= officerNote then
+                print("|cFFFFA500[OldGods]|r Officer Note changed: " .. name .. "\nFrom: " .. previous.publicNote .. "To: " .. publicNote)
+            end
+            --[[if previous.isOnline ~= isOnline then
+                print("|cFFFFA500[OldGods]|r Online status changed for: " .. name )
+            end]]
+        end
+    end
+    -- Cache the new roster after checking
+    CacheGuildRoster()
+end
+
+CacheGuildRoster()
+
+rosterChanges:SetScript("OnEvent", function(self, event)
+    if event == "GUILD_ROSTER_UPDATE" then
+        CheckGuildRosterChanges()
+    end
+end)
+--#endregion Cache Roster Track Changes
+
+
 
 --#region Grief Mail
 local gMailframe = CreateFrame("Frame", "OldGodsMailFrame", UIParent, "BasicFrameTemplateWithInset")
@@ -2654,8 +2683,8 @@ local OG_Fast_Options = {
     },
 }
 
-for _, button in ipairs(GuildChatWindow.buttons) do
-    if button:GetName() == "optionsButton" then
+for _, button in ipairs(GuildChatWindow.CustomFastOptionsZone) do
+    if button:GetName() == "fastOptionsMenuZone" then
         button:SetScript("OnEnter", function(self)
             MenuUtil.CreateContextMenu(UIParent, function(region, fastOptionsMenu)
                 fastOptionsMenu:CreateTitle("Old Gods Options")
