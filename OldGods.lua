@@ -1460,7 +1460,7 @@ local function CreateGuildChatWindow(title)
     optionsButton:SetHighlightFontObject("GameFontHighlight")
     optionsButton:EnableMouse(true)
     optionsButton:SetPushedTexture(5926319)
-    
+
     local fastOptionsMenuZone = CreateFrame("Button", "fastOptionsMenuZone", optionsButton, "BackdropTemplate")
     fastOptionsMenuZone:SetPoint("BOTTOMRIGHT", optionsButton)
     fastOptionsMenuZone:SetSize(10, 10)
@@ -1481,7 +1481,7 @@ local function CreateGuildChatWindow(title)
     fastOptionsMenuZone:SetBackdropColor(0, 1, 0, 0.655)
     fastOptionsMenuZone:SetBackdropBorderColor(0.5, 0.5, 0.15, 1)
     fastOptionsMenuZone:EnableMouse(true)
-    
+
     GuildChatWindow.CustomFastOptionsZone = { fastOptionsMenuZone }
     GuildChatWindow.buttons = { copyButton, SaveClearButton, optionsButton, toggleButton }
 
@@ -1646,8 +1646,8 @@ rosterChanges:RegisterEvent("GUILD_ROSTER_UPDATE")
 
 local function CacheGuildRoster()
     wipe(OG_TrackGuildRoster)
-    C_GuildInfo.GuildRoster()
     OG_TrackGuildRoster = {}
+    C_GuildInfo.GuildRoster()
     for i = 1, GetNumGuildMembers() do
         local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
         OG_TrackGuildRoster[name] = {
@@ -1656,16 +1656,16 @@ local function CacheGuildRoster()
             zone = zone,
             publicNote = publicNote,
             officerNote = officerNote,
-            isOnline = isOnline
+            isOnline = isOnline,
         }
     end
 end
 
+
 local function CheckGuildRosterChanges()
     -- Ensure OldGuildRoster is initialized before checking
-    if not next(OG_TrackGuildRoster) then
-    CacheGuildRoster()     -- First-time caching
-    return
+    if not OG_TrackGuildRoster then
+        CacheGuildRoster()
     end
 
     for i = 1, GetNumGuildMembers() do
@@ -1674,27 +1674,35 @@ local function CheckGuildRosterChanges()
 
         if previous then
             if previous.rankName ~= rankName then
-                print("|cFFFFA500[OldGods]|r Rank change detected for: " .. name .. "\nFrom: " .. previous.rankName .. " To: " .. rankName)
+                print("|cFFFFA500[OldGods]|r Rank change detected for: " ..
+                    name .. "\nFrom: " .. previous.rankName .. " To: " .. rankName)
+                --previous.rankName = rankName
             end
             if previous.level ~= level then
-                print("|cFFFFA500[OldGods]|r Level up detected for: " .. name .. "\nFrom: " .. previous.level .. " To: " .. level)
+                print("|cFFFFA500[OldGods]|r Level up detected for: " ..
+                    name .. "\nFrom: " .. previous.level .. " To: " .. level)
+                --previous.level = level
             end
             if previous.zone ~= zone then
                 print("|cFFFFA500[OldGods]|r Zone change: " .. name .. "\nFrom: " .. previous.zone .. " To: " .. zone)
+                --previous.zone = zone
             end
             if previous.publicNote ~= publicNote then
-                print("|cFFFFA500[OldGods]|r Public Note changed: " .. name .. "\nFrom: " .. previous.publicNote .. " To: " .. publicNote)
+                print("|cFFFFA500[OldGods]|r Public Note changed: " ..
+                    name .. "\nFrom: " .. previous.publicNote .. " To: " .. publicNote)
+                --previous.publicNote = publicNote
             end
             if previous.officerNote ~= officerNote then
-                print("|cFFFFA500[OldGods]|r Officer Note changed: " .. name .. "\nFrom: " .. previous.publicNote .. " To: " .. publicNote)
+                print("|cFFFFA500[OldGods]|r Officer Note changed: " ..
+                    name .. "\nFrom: " .. previous.officerNote .. " To: " .. officerNote)
+                --previous.officerNote = officerNote
             end
             --[[if previous.isOnline ~= isOnline then
                 print("|cFFFFA500[OldGods]|r Online status changed for: " .. name )
             end]]
         end
     end
-    -- Cache the new roster after checking
-    CacheGuildRoster()
+    C_Timer.After(10, function() CacheGuildRoster() end)
 end
 
 CacheGuildRoster()
