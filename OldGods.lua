@@ -1643,22 +1643,29 @@ end)
 --#region Cache Roster Track Changes
 local rosterChanges = CreateFrame("Frame")
 rosterChanges:RegisterEvent("GUILD_ROSTER_UPDATE")
+local isUpdatingRoster = false
 
 local function CacheGuildRoster()
+
+    -- Prevent recursive updates (Flag Check)
+    if isUpdatingRoster then print("|cFFFF0000Condition 2|r") return end
+    isUpdatingRoster = true
+
     wipe(OG_TrackGuildRoster)
-    --OG_TrackGuildRoster = {}
     C_GuildInfo.GuildRoster()
-        for i = 1, GetNumGuildMembers() do
-            local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-            OG_TrackGuildRoster[name] = {
-                rankName = rankName,
-                level = level,
-                zone = zone,
-                publicNote = publicNote,
-                officerNote = officerNote,
-                isOnline = isOnline,
-            }
-        end
+    for i = 1, GetNumGuildMembers() do
+        local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+        OG_TrackGuildRoster[name] = {
+            rankName = rankName,
+            level = level,
+            zone = zone,
+            publicNote = publicNote,
+            officerNote = officerNote,
+            isOnline = isOnline,
+        }
+    end
+    
+    isUpdatingRoster = false
 end
 
 
@@ -1702,7 +1709,7 @@ local function CheckGuildRosterChanges()
             end]]
         end
     end
-    C_Timer.After(10, function() CacheGuildRoster() end)
+    C_Timer.After(10, CacheGuildRoster)
 end
 
 CacheGuildRoster()
@@ -2695,7 +2702,7 @@ for _, button in ipairs(GuildChatWindow.CustomFastOptionsZone) do
     if button:GetName() == "fastOptionsMenuZone" then
         button:SetScript("OnEnter", function(self)
             MenuUtil.CreateContextMenu(UIParent, function(region, fastOptionsMenu)
-                fastOptionsMenu:CreateTitle("Old Gods Options")
+                fastOptionsMenu:CreateTitle("Old Gods: Fast Options")
                 for bLable, bData in pairs(OG_Fast_Options) do
                     fastOptionsMenu:CreateButton(bData.icon .. bLable, bData.fastFunction)
                 end
