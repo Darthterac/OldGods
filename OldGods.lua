@@ -1646,25 +1646,32 @@ rosterChanges:RegisterEvent("GUILD_ROSTER_UPDATE")
 local isUpdatingRoster = false
 
 local function CacheGuildRoster()
-
     -- Prevent recursive updates (Flag Check)
-    if isUpdatingRoster then print("|cFFFF0000Condition 2|r") return end
+    if isUpdatingRoster then
+        print("|cFFFF0000Condition 2|r")
+        return
+    end
     isUpdatingRoster = true
 
     wipe(OG_TrackGuildRoster)
     C_GuildInfo.GuildRoster()
     for i = 1, GetNumGuildMembers() do
         local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-        OG_TrackGuildRoster[name] = {
-            rankName = rankName,
-            level = level,
-            zone = zone,
-            publicNote = publicNote,
-            officerNote = officerNote,
-            isOnline = isOnline,
-        }
+
+        -- Ensure 'zone' is never nil
+        zone = zone or "Unknown Zone"
+        if name and isOnline then
+            OG_TrackGuildRoster[name] = {
+                rankName = rankName,
+                level = level,
+                zone = zone,
+                publicNote = publicNote,
+                officerNote = officerNote,
+                isOnline = isOnline,
+            }
+        end
     end
-    
+
     isUpdatingRoster = false
 end
 
@@ -1678,8 +1685,9 @@ local function CheckGuildRosterChanges()
     for i = 1, GetNumGuildMembers() do
         local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
         local previous = OG_TrackGuildRoster[name]
-
-        if previous then
+        zone = zone or "unknown zone"
+        if previous and isOnline then
+            local oldZone = previous.zone or "Unknown Zone"
             if previous.rankName ~= rankName then
                 print("|cFFFFA500[OldGods]|r Rank change detected for: " ..
                     name .. "\nFrom: " .. previous.rankName .. " To: " .. rankName)
@@ -1690,9 +1698,9 @@ local function CheckGuildRosterChanges()
                     name .. "\nFrom: " .. previous.level .. " To: " .. level)
                 --previous.level = level
             end
-            if previous.zone ~= zone then
-                print("|cFFFFA500[OldGods]|r Zone change: " .. name .. "\nFrom: " .. previous.zone .. " To: " .. zone)
-                --previous.zone = zone
+            if oldZone ~= zone then
+                print("|cFFFFA500[OldGods]|r Zone change: " .. name .. "\nFrom: " .. oldZone .. " To: " .. zone)
+                previous.zone = zone
             end
             if previous.publicNote ~= publicNote then
                 print("|cFFFFA500[OldGods]|r Public Note changed: " ..
