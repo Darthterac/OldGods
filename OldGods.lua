@@ -1646,19 +1646,19 @@ rosterChanges:RegisterEvent("GUILD_ROSTER_UPDATE")
 
 local function CacheGuildRoster()
     wipe(OG_TrackGuildRoster)
-    OG_TrackGuildRoster = {}
+    --OG_TrackGuildRoster = {}
     C_GuildInfo.GuildRoster()
-    for i = 1, GetNumGuildMembers() do
-        local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-        OG_TrackGuildRoster[name] = {
-            rankName = rankName,
-            level = level,
-            zone = zone,
-            publicNote = publicNote,
-            officerNote = officerNote,
-            isOnline = isOnline,
-        }
-    end
+        for i = 1, GetNumGuildMembers() do
+            local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+            OG_TrackGuildRoster[name] = {
+                rankName = rankName,
+                level = level,
+                zone = zone,
+                publicNote = publicNote,
+                officerNote = officerNote,
+                isOnline = isOnline,
+            }
+        end
 end
 
 
