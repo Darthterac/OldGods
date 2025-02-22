@@ -618,6 +618,32 @@ local GuildData = {
     "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live The Old Gods! {triangle}",
     "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever." }
 
+-- Table that is used to match class to its familiar color in game
+local CLASS_COLORS = {
+    ["Druid"] = "FF7D0A",
+    ["Hunter"] = "A9D271",
+    ["Mage"] = "40C7EB",
+    ["Paladin"] = "F58CBA",
+    ["Priest"] = "FFFFFF",
+    ["Rogue"] = "FFF569",
+    ["Shaman"] = "0070DE",
+    ["Warlock"] = "8787ED",
+    ["Warrior"] = "C79C6E",
+    ["Death Knight"] = "C41E3A",
+    ["Monk"] = "00FF96",
+    ["Demon Hunter"] = "A330C9",
+    ["Evoker"] = "33937F"
+}
+
+-- table that is used to assign colors to separate ranks in the guild
+local RANK_COLORS = {
+    ["GM Lightbringer"] = "FFA800", -- Legendary (orange)
+    ["Officer"] = "A335EE",         -- Epic (purple)
+    ["Veteran"] = "17a69a",         -- LUX LOVE YOU BUDDY (turquoise) lux's favorite color!
+    ["Member"] = "0070DD",          -- Rare (blue)
+    ["Initiate"] = "1EFF00"         -- Uncommon (green)
+}
+
 --[[ might use this table dont know yet
 local CLASS_ROLES = {
     ["Death Knight"] = { "DPS", "Tank" },
@@ -731,6 +757,16 @@ local function saveDateMessage(table_name)
     local table_size = SumTableData(table_name)
     local size_in_kb = math.max(table_size / 1024, 0) -- Avoid negative values
     return string.format("MEMORY FREED: (%.2f KB)", size_in_kb)
+end
+
+-- GetClassColor(class) returns the hexColor value assined to the class key in CLASS_COLORS table
+local function GetClassColor(class)
+    return CLASS_COLORS[class] or "FFFFFF" --Default to white if not found
+end
+
+--GetRankColor(rank): returns the hexColor value assigned to the rank key in RANK_COLORS table
+local function GetRankColor(rank)
+    return RANK_COLORS[rank] or "FFFFFF" -- Default to white if rank not listed
 end
 
 local function fancyTransform(text)
@@ -1683,41 +1719,56 @@ local function CheckGuildRosterChanges()
     end
 
     for i = 1, GetNumGuildMembers() do
-        local name, rankName, _, level, _, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+        local name, rankName, _, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
         local previous = OG_TrackGuildRoster[name]
-        zone = zone or "unknown zone"
+        local classColor = GetClassColor(class)      -- Always returns a color, never nil
+        name = name or "Unknown"                     -- Ensure `name` is never nil
+        name = string.format("|cFF%s%s|r", classColor, name) -- Safe formatting
+
         if previous and isOnline then
+            local oldrankName = previous.rankName or "Initializer"
+            local oldlevel = previous.level or "Initializer"
             local oldZone = previous.zone or "Unknown Zone"
-            if previous.rankName ~= rankName then
-                print("|cFFFFA500[OldGods]|r Rank change detected for: " ..
-                    name .. "\nFrom: " .. previous.rankName .. " To: " .. rankName)
-                --previous.rankName = rankName
+            local oldpublicNote = previous.publicNote or "Initializer"
+            local oldofficerNote = previous.officerNote or "Initializer"
+
+            if oldrankName ~= rankName then
+                PlaySound(170271)
+                print("|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r Rank change detected: \n" ..
+                    name .. "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
+                previous.rankName = rankName
             end
-            if previous.level ~= level then
-                print("|cFFFFA500[OldGods]|r Level up detected for: " ..
-                    name .. "\nFrom: " .. previous.level .. " To: " .. level)
-                --previous.level = level
+            if oldlevel ~= level then
+                PlaySound(170271)
+                print(
+                    "|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16|t Level up detected: \n" ..
+                    name .. "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
+                previous.level = level
             end
             if oldZone ~= zone then
-                print("|cFFFFA500[OldGods]|r Zone change: " .. name .. "\nFrom: " .. oldZone .. " To: " .. zone)
+                print(
+                "|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16|t Zone change: \n" ..
+                name .. "\nFrom: |cffF0F000" .. oldZone .. "|r" .. " To: |cff01FF01" .. zone .. "|r")
                 previous.zone = zone
             end
-            if previous.publicNote ~= publicNote then
-                print("|cFFFFA500[OldGods]|r Public Note changed: " ..
-                    name .. "\nFrom: " .. previous.publicNote .. " To: " .. publicNote)
-                --previous.publicNote = publicNote
+            if oldpublicNote ~= publicNote then
+                PlaySound(170271)
+                print("|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r Public Note changed: \n" ..
+                    name .. "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
+                previous.publicNote = publicNote
             end
-            if previous.officerNote ~= officerNote then
-                print("|cFFFFA500[OldGods]|r Officer Note changed: " ..
-                    name .. "\nFrom: " .. previous.officerNote .. " To: " .. officerNote)
-                --previous.officerNote = officerNote
+            if oldofficerNote ~= officerNote then
+                PlaySound(170271)
+                print("|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r Officer Note changed: \n" ..
+                    name .. "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
+                previous.officerNote = officerNote
             end
             --[[if previous.isOnline ~= isOnline then
-                print("|cFFFFA500[OldGods]|r Online status changed for: " .. name )
+                print("|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r Online status changed for: " .. name )
             end]]
         end
     end
-    C_Timer.After(10, CacheGuildRoster)
+    C_Timer.After(10.1, CacheGuildRoster)
 end
 
 CacheGuildRoster()
@@ -3173,41 +3224,6 @@ end
 --#endregion Options UI and Functions
 
 --#region OnChatMessage called Functions
--- Table that is used to match class to its familiar color in game
-local CLASS_COLORS = {
-    ["Druid"] = "FF7D0A",
-    ["Hunter"] = "A9D271",
-    ["Mage"] = "40C7EB",
-    ["Paladin"] = "F58CBA",
-    ["Priest"] = "FFFFFF",
-    ["Rogue"] = "FFF569",
-    ["Shaman"] = "0070DE",
-    ["Warlock"] = "8787ED",
-    ["Warrior"] = "C79C6E",
-    ["Death Knight"] = "C41E3A",
-    ["Monk"] = "00FF96",
-    ["Demon Hunter"] = "A330C9",
-    ["Evoker"] = "33937F"
-}
-
--- table that is used to assign colors to separate ranks in the guild
-local RANK_COLORS = {
-    ["GM Lightbringer"] = "FFA800", -- Legendary (orange)
-    ["Officer"] = "A335EE",         -- Epic (purple)
-    ["Veteran"] = "17a69a",         -- LUX LOVE YOU BUDDY (turquoise) lux's favorite color!
-    ["Member"] = "0070DD",          -- Rare (blue)
-    ["Initiate"] = "1EFF00"         -- Uncommon (green)
-}
-
--- GetClassColor(class) returns the hexColor value assined to the class key in CLASS_COLORS table
-local function GetClassColor(class)
-    return CLASS_COLORS[class] or "FFFFFF" --Default to white if not found
-end
-
---GetRankColor(rank): returns the hexColor value assigned to the rank key in RANK_COLORS table
-local function GetRankColor(rank)
-    return RANK_COLORS[rank] or "FFFFFF" -- Default to white if rank not listed
-end
 
 --chatMessageSpice takes parameters from data gathered in OnChatMessage()
 --this is where all color is added, and string.format then returns chatMessage
