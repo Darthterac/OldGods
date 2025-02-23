@@ -1680,6 +1680,7 @@ end)
 local rosterChanges = CreateFrame("Frame")
 rosterChanges:RegisterEvent("GUILD_ROSTER_UPDATE")
 local isUpdatingRoster = false
+local zoneDataSpam = true
 
 local function CacheGuildRoster()
     -- Prevent recursive updates (Flag Check)
@@ -1714,16 +1715,19 @@ end
 
 local function CheckGuildRosterChanges()
     -- Ensure OldGuildRoster is initialized before checking
+
     if not OG_TrackGuildRoster then
         CacheGuildRoster()
     end
 
     for i = 1, GetNumGuildMembers() do
         local name, rankName, _, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
+
         local previous = OG_TrackGuildRoster[name]
-        local classColor = GetClassColor(class)      -- Always returns a color, never nil
-        name = name or "Unknown"                     -- Ensure `name` is never nil
+        local classColor = GetClassColor(class)              -- Always returns a color, never nil
+        name = name or "Unknown"                             -- Ensure `name` is never nil
         name = string.format("|cFF%s%s|r", classColor, name) -- Safe formatting
+        zone = zone or "Unknown"
 
         if previous and isOnline then
             local oldrankName = previous.rankName or "Initializer"
@@ -1745,10 +1749,10 @@ local function CheckGuildRosterChanges()
                     name .. "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
                 previous.level = level
             end
-            if oldZone ~= zone then
+            if oldZone ~= zone and zoneDataSpam then
                 print(
-                "|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16|t Zone change: \n" ..
-                name .. "\nFrom: |cffF0F000" .. oldZone .. "|r" .. " To: |cff01FF01" .. zone .. "|r")
+                    "|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16|t Zone change: \n" ..
+                    name .. "\nFrom: |cffF0F000" .. oldZone .. "|r" .. " To: |cff01FF01" .. zone .. "|r")
                 previous.zone = zone
             end
             if oldpublicNote ~= publicNote then
@@ -2746,7 +2750,23 @@ local function OldGods_MemberSearch()
 end
 --#endregion Sub_region_OldGods_MemberSearch
 --#region Fast Options Content Menu
-local OG_Fast_Options = {
+
+local function toggle_ZoneSpam()
+    zoneDataSpam = not zoneDataSpam
+    OG_Fast_Options["Toggle Zone Tracking"].icon = zoneDataSpam 
+    and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t" 
+    or "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t"
+    local statetring = zoneDataSpam and "Zone Data On" or "Zone Data Off"
+    print(statetring)
+    if zoneDataSpam then
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert7.mp3")
+    else
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+    end
+end
+
+
+OG_Fast_Options = {
     ["Member Search"] = {
         fastFunction = OldGods_MemberSearch,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\Search.tga:18:18|t",
@@ -2754,6 +2774,10 @@ local OG_Fast_Options = {
     ["Inactive Purge"] = {
         fastFunction = OldGods_ShowInactiveInitiates, -- going to ask you later to help me clean this function's functions, get funky :D
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:18:18|t"
+    },
+    ["Toggle Zone Tracking"] = {
+        fastFunction = toggle_ZoneSpam,
+        icon = zoneDataSpam and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t" or "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t"
     },
 }
 
@@ -3410,35 +3434,35 @@ AfkMsg_frame:SetScript("OnEvent", onTriggerWord)
 --#endregion AUTO MESSAGES ends here
 
 --#region reworked Help Window
-local jokeDataWindow
-local quoteDataWindow
-local helpDataWindow
+local jokedataFrame
+local quotedataFrame
+local helpdataFrame
 
 local function createDataWindow(dataTable, title, nextPageWindowFunc)
-    local DataWindow = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
-    DataWindow:SetSize(400, 500)
-    DataWindow:SetPoint("CENTER")
-    DataWindow:SetMovable(true)
-    DataWindow:EnableMouse(true)
-    DataWindow:RegisterForDrag("LeftButton")
-    DataWindow:SetScript("OnDragStart", DataWindow.StartMoving)
-    DataWindow:SetScript("OnDragStop", DataWindow.StopMovingOrSizing)
-    DataWindow:Hide() --recycle frame
+    local dataFrame = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
+    dataFrame:SetSize(400, 500)
+    dataFrame:SetPoint("CENTER")
+    dataFrame:SetMovable(true)
+    dataFrame:EnableMouse(true)
+    dataFrame:RegisterForDrag("LeftButton")
+    dataFrame:SetScript("OnDragStart", dataFrame.StartMoving)
+    dataFrame:SetScript("OnDragStop", dataFrame.StopMovingOrSizing)
+    dataFrame:Hide() --recycle frame
 
     -- Title position
-    DataWindow.title = DataWindow:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    DataWindow.title:SetPoint("TOP", DataWindow, "TOP", 0, -5)
-    DataWindow.title:SetText(title)
+    dataFrame.title = dataFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    dataFrame.title:SetPoint("TOP", dataFrame, "TOP", 0, -5)
+    dataFrame.title:SetText(title)
 
     -- ScrollFrame
-    local scrollFrame = CreateFrame("ScrollFrame", nil, DataWindow, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", DataWindow, "TOPLEFT", 10, -50)
-    scrollFrame:SetPoint("BOTTOMRIGHT", DataWindow, "BOTTOMRIGHT", -30, 50)
+    local scrollFrame = CreateFrame("ScrollFrame", nil, dataFrame, "UIPanelScrollFrameTemplate")
+    scrollFrame:SetPoint("TOPLEFT", dataFrame, "TOPLEFT", 10, -50)
+    scrollFrame:SetPoint("BOTTOMRIGHT", dataFrame, "BOTTOMRIGHT", -30, 50)
 
     local scrollChild = CreateFrame("Frame")
     scrollChild:SetWidth(380)
     scrollFrame:SetScrollChild(scrollChild)
-    DataWindow.scrollChild = scrollChild
+    dataFrame.scrollChild = scrollChild
 
     -- Populate the "window" with the table lines from the table passed to createDataWindow()
     local yOffset = -5
@@ -3469,56 +3493,55 @@ local function createDataWindow(dataTable, title, nextPageWindowFunc)
     scrollChild:SetHeight(math.abs(yOffset) + 10)
 
     -- Close button the X in top right of the window
-    local closeButton = CreateFrame("Button", nil, DataWindow, "UIPanelCloseButton")
-    closeButton:SetPoint("TOPRIGHT", DataWindow, "TOPRIGHT")
+    local closeButton = CreateFrame("Button", nil, dataFrame, "UIPanelCloseButton")
+    closeButton:SetPoint("TOPRIGHT", dataFrame, "TOPRIGHT")
 
     -- "Next Page" Button
-    local nextPageButton = CreateFrame("Button", nil, DataWindow, "GameMenuButtonTemplate")
+    local nextPageButton = CreateFrame("Button", nil, dataFrame, "GameMenuButtonTemplate")
     nextPageButton:SetSize(120, 30)
-    nextPageButton:SetPoint("BOTTOMRIGHT", DataWindow, "BOTTOMRIGHT", -10, 10)
+    nextPageButton:SetPoint("BOTTOMRIGHT", dataFrame, "BOTTOMRIGHT", -10, 10)
     nextPageButton:SetText("Next Page") -- button text here
     nextPageButton:SetNormalFontObject("GameFontNormal")
     nextPageButton:SetHighlightFontObject("GameFontHighlight")
 
+    -- define what happens when the Next Page button is clicked
+    nextPageButton:SetScript("OnClick", function()
+        dataFrame:Hide()
+        nextPageWindowFunc()
+    end)
+
     -- "Help" Button
-    local HelpButton = CreateFrame("Button", nil, DataWindow, "GameMenuButtonTemplate")
+    local HelpButton = CreateFrame("Button", nil, dataFrame, "GameMenuButtonTemplate")
     HelpButton:SetSize(120, 30)
-    HelpButton:SetPoint("BOTTOMLEFT", DataWindow, "BOTTOMLEFT", 10, 10)
+    HelpButton:SetPoint("BOTTOMLEFT", dataFrame, "BOTTOMLEFT", 10, 10)
     HelpButton:SetText("Help") -- button text here
     HelpButton:SetNormalFontObject("GameFontNormal")
     HelpButton:SetHighlightFontObject("GameFontHighlight")
 
-    -- define what happens when the Help button is clicked
     HelpButton:SetScript("OnClick", function()
-        DataWindow:Hide()
-        nextPageWindowFunc()
+        dataFrame:Hide()
+        helpdataFrame:Show()
     end)
 
-    -- define what happens when the Next Page button is clicked
-    nextPageButton:SetScript("OnClick", function()
-        DataWindow:Hide()
-        nextPageWindowFunc()
-    end)
-
-    return DataWindow
+    return dataFrame
 end
 
---DataWindow initializers functions
-local function showHelpDataWindow()
-    helpDataWindow:Show()
+--dataFrame initializers functions
+local function OG_ShowHelpdataFrame()
+    helpdataFrame:Show()
 end
 
-local function showJokeDataWindow()
-    jokeDataWindow:Show()
+local function OG_ShowJokedataFrame()
+    jokedataFrame:Show()
 end
 
-local function showQuoteDataWindow()
-    quoteDataWindow:Show()
+local function OG_ShowQuotedataFrame()
+    quotedataFrame:Show()
 end
 
-jokeDataWindow = createDataWindow(JokeData, "Jokes Index", showQuoteDataWindow)
-quoteDataWindow = createDataWindow(QuoteData, "Quotes Index", showJokeDataWindow)
-helpDataWindow = createDataWindow(helpData, "Old Gods - Help", showHelpDataWindow)
+jokedataFrame = createDataWindow(JokeData, "Jokes Index", OG_ShowQuotedataFrame)
+quotedataFrame = createDataWindow(QuoteData, "Quotes Index", OG_ShowHelpdataFrame)
+helpdataFrame = createDataWindow(helpData, "Old Gods - Help", OG_ShowJokedataFrame)
 --#endregion reworked Help Window
 
 --#region Slash Command called functions
@@ -3635,30 +3658,30 @@ end
 -- Slash commmand to toggle the window for the Jokes page
 SLASH_JokeData1 = "/OGJL"
 SlashCmdList["JOKEDATA"] = function()
-    if jokeDataWindow:IsShown() then
-        jokeDataWindow:Hide()
+    if jokedataFrame:IsShown() then
+        jokedataFrame:Hide()
     else
-        jokeDataWindow:Show()
+        jokedataFrame:Show()
     end
 end
 
 -- Slash command to toggle the window for the Quotes page
 SLASH_QUOTEDATA1 = "/OGQL"
 SlashCmdList["QUOTEDATA"] = function()
-    if quoteDataWindow:IsShown() then
-        quoteDataWindow:Hide()
+    if quotedataFrame:IsShown() then
+        quotedataFrame:Hide()
     else
-        quoteDataWindow:Show()
+        quotedataFrame:Show()
     end
 end
 
 -- Slash command to toggle the window for the Help page
 SLASH_HELPDATA1 = "/OGHELP"
 SlashCmdList["HELPDATA"] = function()
-    if helpDataWindow:IsShown() then
-        helpDataWindow:Hide()
+    if helpdataFrame:IsShown() then
+        helpdataFrame:Hide()
     else
-        helpDataWindow:Show()
+        helpdataFrame:Show()
     end
 end
 --#endregion slash commands ends
@@ -3742,8 +3765,9 @@ frame:SetScript("OnEvent", function(self, event, name)
         OG_clickedSoundPlayed = false
 
         -- Print addon loaded message in chat frame
-        print("|T3194610:16:16:0|t " ..
-            "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFf0f00cAddon Loaded|r." .. "\nWaiting for Guild data....")
+        print(
+            "|cFF0000FF<|rOld Gods|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\addOnOk.tga:18:18|t |cFFf0FF00Addon Loaded|r\n" ..
+            "|cFF0000FF<|rOld Gods|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\fetchData.tga:18:18|t initializing")
         --apply the theme
         InitializeTheme()
         -- and finally load the users save chats
