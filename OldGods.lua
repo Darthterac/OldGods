@@ -1724,10 +1724,10 @@ local function CheckGuildRosterChanges()
         local name, rankName, _, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
 
         local previous = OG_TrackGuildRoster[name]
-        local classColor = GetClassColor(class)              -- Always returns a color, never nil
-        name = name or "Unknown"                             -- Ensure `name` is never nil
-        name = string.format("|cFF%s%s|r", classColor, name) -- Safe formatting
+        name = name or "Unknown"
         zone = zone or "Unknown"
+        local classColor = GetClassColor(class)
+        local shortName = Ambiguate(name, "guild")
 
         if previous and isOnline then
             local oldrankName = previous.rankName or "Initializer"
@@ -1735,41 +1735,37 @@ local function CheckGuildRosterChanges()
             local oldZone = previous.zone or "Unknown Zone"
             local oldpublicNote = previous.publicNote or "Initializer"
             local oldofficerNote = previous.officerNote or "Initializer"
+            local hyperlinkName = "|Hplayer:" .. name .. "|h|r|cFFFFFFFF[|r|cFF" ..classColor..shortName.. "|r|cFFFFFFFF]|r|h"
 
             if oldrankName ~= rankName then
                 PlaySound(170271)
-                print("|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r Rank change detected: \n" ..
-                    name .. "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|r|cFFFFFFFFOG|r|cFF0000FF>|r Rank change for " .. hyperlinkName .. 
+                "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
                 previous.rankName = rankName
             end
             if oldlevel ~= level then
                 PlaySound(170271)
-                print(
-                    "|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16|t Level up detected: \n" ..
-                    name .. "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Level Change for " .. hyperlinkName .. "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16:0|t" ..
+                "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
                 previous.level = level
             end
             if oldZone ~= zone and zoneDataSpam then
-                print(
-                    "|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16|t Zone change: \n" ..
-                    name .. "\nFrom: |cffF0F000" .. oldZone .. "|r" .. " To: |cff01FF01" .. zone .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Zone Change for " .. hyperlinkName .. " |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16:0|t" ..
+                "\n|c9fc4f9d9From|r: |cDCF52727" .. oldZone .. "|r" .. " |c9fc4f9d9To|r: |cDC7DF587" .. zone .. "|r") 
                 previous.zone = zone
             end
             if oldpublicNote ~= publicNote then
                 PlaySound(170271)
-                print("|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r Public Note changed: \n" ..
-                    name .. "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Public Note Changed for " .. hyperlinkName ..
+                "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
                 previous.publicNote = publicNote
             end
             if oldofficerNote ~= officerNote then
                 PlaySound(170271)
-                print("|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r Officer Note changed: \n" ..
-                    name .. "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Officer Note Changed for " .. hyperlinkName ..
+                "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
                 previous.officerNote = officerNote
             end
-            --[[if previous.isOnline ~= isOnline then
-                print("|cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r Online status changed for: " .. name )
-            end]]
         end
     end
     C_Timer.After(10.1, CacheGuildRoster)
@@ -2753,9 +2749,9 @@ end
 
 local function toggle_ZoneSpam()
     zoneDataSpam = not zoneDataSpam
-    OG_Fast_Options["Toggle Zone Tracking"].icon = zoneDataSpam 
-    and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t" 
-    or "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t"
+    OG_Fast_Options["Toggle Zone Tracking"].icon = zoneDataSpam
+        and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t"
+        or "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t"
     local statetring = zoneDataSpam and "Zone Data On" or "Zone Data Off"
     print(statetring)
     if zoneDataSpam then
@@ -2772,12 +2768,13 @@ OG_Fast_Options = {
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\Search.tga:18:18|t",
     },
     ["Inactive Purge"] = {
-        fastFunction = OldGods_ShowInactiveInitiates, -- going to ask you later to help me clean this function's functions, get funky :D
+        fastFunction = OldGods_ShowInactiveInitiates,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:18:18|t"
     },
     ["Toggle Zone Tracking"] = {
         fastFunction = toggle_ZoneSpam,
-        icon = zoneDataSpam and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t" or "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t"
+        icon = zoneDataSpam and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t" or
+            "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t"
     },
 }
 
