@@ -1735,35 +1735,40 @@ local function CheckGuildRosterChanges()
             local oldZone = previous.zone or "Unknown Zone"
             local oldpublicNote = previous.publicNote or "Initializer"
             local oldofficerNote = previous.officerNote or "Initializer"
-            local hyperlinkName = "|Hplayer:" .. name .. "|h|r|cFFFFFFFF[|r|cFF" ..classColor..shortName.. "|r|cFFFFFFFF]|r|h"
+            local hyperlinkName = "|Hplayer:" ..
+                name .. "|h|r|cFFFFFFFF[|r|cFF" .. classColor .. shortName .. "|r|cFFFFFFFF]|r|h"
 
             if oldrankName ~= rankName then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|r|cFFFFFFFFOG|r|cFF0000FF>|r Rank change for " .. hyperlinkName .. 
-                "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|r|cFFFFFFFFOG|r|cFF0000FF>|r Rank change for " ..
+                    hyperlinkName ..
+                    "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
                 previous.rankName = rankName
             end
             if oldlevel ~= level then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Level Change for " .. hyperlinkName .. "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16:0|t" ..
-                "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Level Change for " ..
+                    hyperlinkName .. "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16:0|t" ..
+                    "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
                 previous.level = level
             end
             if oldZone ~= zone and zoneDataSpam then
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Zone Change for " .. hyperlinkName .. " |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16:0|t" ..
-                "\n|c9fc4f9d9From|r: |cDCF52727" .. oldZone .. "|r" .. " |c9fc4f9d9To|r: |cDC7DF587" .. zone .. "|r") 
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Zone Change for " ..
+                    hyperlinkName .. " |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16:0|t" ..
+                    "\n|c9fc4f9d9From|r: |cDCF52727" .. oldZone .. "|r" .. " |c9fc4f9d9To|r: |cDC7DF587" .. zone .. "|r")
                 previous.zone = zone
             end
             if oldpublicNote ~= publicNote then
                 PlaySound(170271)
                 DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Public Note Changed for " .. hyperlinkName ..
-                "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
+                    "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
                 previous.publicNote = publicNote
             end
             if oldofficerNote ~= officerNote then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Officer Note Changed for " .. hyperlinkName ..
-                "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Officer Note Changed for " ..
+                    hyperlinkName ..
+                    "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
                 previous.officerNote = officerNote
             end
         end
@@ -1772,6 +1777,28 @@ local function CheckGuildRosterChanges()
 end
 
 CacheGuildRoster()
+
+local function PopulateEmptyGuildNotes()
+    for i = 1, GetNumGuildMembers() do
+        local name, _, _, _, _, _, playerNote, officerNote = GetGuildRosterInfo(i)
+
+        if name then
+            local shortName = Ambiguate(name, "guild")
+
+            -- Update player note if empty
+            if playerNote == "" or not playerNote then
+                GuildRosterSetPublicNote(i, shortName .. " - main")
+            end
+
+            -- Update officer note if empty
+            if officerNote == "" or not officerNote then
+                local currentDate = "Joined: " .. tostring(date("%m/%d/%y"))
+                GuildRosterSetOfficerNote(i, currentDate)
+            end
+        end
+    end
+end
+
 
 rosterChanges:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
@@ -2034,33 +2061,38 @@ local function closeFrame()
     end
 end
 
+
 local function GetInactiveInitiates(threshold)
     local inactiveInitiates = {}
 
     local numGuildMembers = GetNumGuildMembers()
     for i = 1, numGuildMembers do
-        local name, rankName = GetGuildRosterInfo(i)
-        if rankName == "Initiate" then
-            local _, _, days, _ = GetGuildRosterLastOnline(i)
+        local name, rankName, rankIndex = GetGuildRosterInfo(i)
+
+        if rankName then
+            local _, _, days = GetGuildRosterLastOnline(i)
+            days = days or 0 -- Ensure days is never nil
             local macroa, macrob
-            days = days and days or 0
 
-            if threshold >= 14 then
+            local hyperlinkName = "|Hplayer:" .. name .. "|h|r|cFFFFFFFF[|r|cFFF0F000" .. name .. "|r|cFFFFFFFF]|r|h"
+
+            -- Default macros (for ranks other than Initiate/Member)
+            macroa = "/shrug"
+            macrob = "\n/run C_Timer.After(0.5, OldGods_ShowInactiveInitiates)"
+
+            -- Apply `/gremove` only to Initiates (14+) and Members (28+)
+            if (rankName == "Initiate" and days >= 14) or (rankName == "Member" and days >= 28) then
                 macroa = "/gremove"
-                macrob = "\n/run OldGods_ShowInactiveInitiates()"
+                macrob = "\n/run C_Timer.After(0.1, OldGods_ShowInactiveInitiates)"
             end
 
-            if threshold < 14 then
-                macroa = "/run print(\"" .. name .. "\")"
-                macrob = "/shrug"
-            end
-
-
-            if days >= threshold then
-                -- Add to inactiveInitiates
+            -- Add all ranks to the table
+            if days >= threshold and days ~= 0 then
                 table.insert(inactiveInitiates, {
                     name = name,
+                    hyperlinkName = hyperlinkName,
                     rank = rankName,
+                    rankId = rankIndex,
                     macro = macroa,
                     macro_n = macrob,
                     totalDaysOffline = days,
@@ -2070,52 +2102,63 @@ local function GetInactiveInitiates(threshold)
     end
 
     table.sort(inactiveInitiates, function(a, b)
+        if a.rankId ~= b.rankId then
+            return a.rankId > b.rankId
+        end
+        if a.totalDaysOffline ~= b.totalDaysOffline then
+            return a.totalDaysOffline < b.totalDaysOffline
+        end
         return a.name < b.name
     end)
 
-    -- Process the macro_Data
+    -- Process the first inactive player into a macro
     C_Timer.After(0.1, function()
-        if #inactiveInitiates > 0 then -- Take the first player and create a macro
+        if #inactiveInitiates > 0 then
             local macro_Data = table.remove(inactiveInitiates, 1)
             local TEMP_STRING = macro_Data.macro .. " " .. macro_Data.name .. macro_Data.macro_n
+            local chatFrameName = macro_Data.hyperlinkName
 
-            --Create it here were not planning on multiple cases no need to modularize just to maintain code standards
+            -- Macro details
             local macroIDname = "A_OldGods_Tool"
             local icon = 134238
             local macroText = TEMP_STRING
             local keyBind = "F5"
             local macroIndex = GetMacroIndexByName(macroIDname)
 
-            -- Check if the macro exists
+            -- Check if macro exists, else create/update it
             if macroIndex == 0 then
                 C_Timer.After(0.1, function()
                     if GetNumMacros() < MAX_ACCOUNT_MACROS then
-                        CreateMacro(macroIDname, icon, macroText, nil) -- nil for global macros
-                        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert5.mp3",
-                            "MASTER")
-                        print("|cFF0000FF<|rOldGods|cFF0000FF>|r Macro CREATED\n|cFFF0F000Body|r: " .. macroText)
+                        CreateMacro(macroIDname, icon, macroText, nil)
+                        print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created!")
+                        DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
+                            chatFrameName ..
+                            " staged for removal |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t")
                     else
-                        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert4.mp3",
-                            "MASTER")
                         print(
                             "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFC8C800ATTENTION|r - Maximum number of macros reached.|r")
                         return
                     end
                 end)
             else
-                -- Update the existing macro
+                -- Update existing macro
                 EditMacro(macroIndex, macroIDname, icon, macroText)
-                --PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert3.mp3",
-                --"MASTER")
-                print("|cFF0000FF<|rOldGods|cFF0000FF>|r Macro |cFF00FF00UPDATED|r\n|cFFF0F000Body:" .. macroText)
+                print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Updated!")
+                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t " ..
+                    chatFrameName .. " staged for removal")
             end
 
-            -- Bind the macro to a key if provided
+            -- Bind macro to key
             C_Timer.After(0.2, function()
                 if keyBind and keyBind ~= "" then
                     SetBindingMacro(keyBind, macroIndex)
                     SaveBindings(GetCurrentBindingSet())
-                    print("|cFF0000FF<|rOldGods|cFF0000FF>|r Macro |cFFFF00FFKey Bind|r: " .. keyBind)
+                    PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert5.mp3",
+                        "MASTER")
+                    print("[OG]: Press " .. keyBind .. " for action on " .. chatFrameName)
+                    UIErrorsFrame:AddMessage(
+                        "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0,
+                        0.0, 1, 5)
                 end
             end)
         end
@@ -2123,7 +2166,6 @@ local function GetInactiveInitiates(threshold)
 
     return inactiveInitiates
 end
-
 
 local function CreateInactiveInitiatesFrame(parent)
     closeFrame()
@@ -2228,7 +2270,10 @@ local function PopulateInactiveInitiates(frame, scrollChild, data)
         nameButton:SetText(entry.name)
         nameButton:SetScript("OnClick", function()
             PlaySound(124172)
-            UIErrorsFrame:AddMessage("|T516767:18:18:0|t Secure Actions Blocked" .. "\n" .. "To purge press F5", 1.0, 1.0,
+
+            UIErrorsFrame:AddMessage(
+                "|T516767:32:32:0|t Secure Actions Blocked" .. "\n" .. "Run Inactive search from Options or press F5",
+                1.0, 1.0,
                 0.0, 1, 6)
         end)
 
@@ -2299,10 +2344,11 @@ function OldGods_ShowInactiveInitiates()
         local data = GetInactiveInitiates(threshold)
 
         if #data == 0 then
-            print("No Initiates match " .. threshold .. " days offline.")
+            print("No Guild members match " .. threshold .. " days offline.")
         else
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\echo_beep_alert.mp3", "MASTER")
-            print("|cFF00FF00Initiates found|r:" .. #data)
+            print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t |cFF66a8bfFound|r: " ..
+            #data .. " |cFF66a8bfplayers " .. 
+            "\n             that are > =|r " .. threshold)
         end
 
         frame, scrollChild = CreateInactiveInitiatesFrame()
