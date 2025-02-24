@@ -674,15 +674,6 @@ local function SumTableData(table_name)
     return size
 end
 
---[[ unused function wipe(table) is more efficient
-local function deleteTable(tableName)
-    if type(tableName) == "table" then
-        for key in pairs(tableName) do
-            tableName[key] = nil
-        end
-    end
-end]]
-
 local function tContains(table, value)
     for _, v in ipairs(table) do
         if v == value then
@@ -1807,7 +1798,195 @@ rosterChanges:SetScript("OnEvent", function(self, event)
 end)
 --#endregion Cache Roster Track Changes
 
+--#region Encryption By ChatGPT https://openai.com/index/introducing-chatgpt-pro/
+OG_EncryptedNotes = OG_EncryptedNotes or {} -- SavedVariables table
+local userKey = nil  -- Temporary encryption key (deleted on close)
+local currentPlayer = nil  -- Tracks which player’s note is open
 
+-- XOR Encryption Function
+local function XORCipher(input, key)
+    local result = {}
+    for i = 1, #input do
+        local byte = input:byte(i)
+        local keyByte = key:byte(((i - 1) % #key) + 1)  -- Cycle through key bytes
+        table.insert(result, string.char(bit.bxor(byte, keyByte)))
+    end
+    return table.concat(result)
+end
+
+-- Prompt User for Encryption Key
+local function PromptUserForKey(callback)
+    local KeyFrame = CreateFrame("Frame", "OG_EncryptionFrame", UIParent, "BackdropTemplate")
+    KeyFrame:SetSize(250, 80)
+    KeyFrame:SetPoint("CENTER")
+    KeyFrame:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background" })
+
+    local KeyInput = CreateFrame("EditBox", "OG_KeyInput", KeyFrame, "InputBoxTemplate")
+    KeyInput:SetSize(200, 30)
+    KeyInput:SetPoint("TOP", KeyFrame, "TOP", 0, -10)
+    KeyInput:SetAutoFocus(false)
+
+    local SetKeyButton = CreateFrame("Button", "OG_SetKeyButton", KeyFrame, "UIPanelButtonTemplate")
+    SetKeyButton:SetSize(80, 25)
+    SetKeyButton:SetPoint("BOTTOM", KeyFrame, "BOTTOM", 0, 10)
+    SetKeyButton:SetText("Set Key")
+
+    SetKeyButton:SetScript("OnClick", function()
+        local key = KeyInput:GetText()
+        if key and #key >= 6 then
+            userKey = key
+            print("|cFF00FF00[OldGods]|r Encryption Key Set!")
+            KeyFrame:Hide()
+
+            -- Run the callback function after the key is set
+            if callback then
+                callback()
+            end
+        else
+            print("|cFFFF0000[OldGods]|r Key must be at least 6 characters.")
+        end
+    end)
+
+    KeyFrame:Show() -- Make sure it's actually visible!
+end
+
+-- Save Encrypted Note
+local function SaveEncryptedNote()
+    if not userKey then
+        print("|cFFFF0000[OldGods]|r Set an encryption key first!")
+        PromptUserForKey(function()
+            SaveEncryptedNote() -- Retry saving after key is set
+        end)
+        return
+    end
+    if not currentPlayer then
+        print("|cFFFF0000[OldGods]|r No player selected!")
+        return
+    end
+
+    local note = EncryptedPlayerNotpad.editBox:GetText()
+    if note and note ~= "" then
+        OG_EncryptedNotes[currentPlayer] = XORCipher(note, userKey)
+        print("|cFF00FF00[OldGods]|r Note saved for " .. currentPlayer)
+    else
+        print("|cFFFF0000[OldGods]|r Cannot save an empty note!")
+    end
+end
+
+-- Load and Decrypt Note
+local function LoadDecryptedNote()
+    if not currentPlayer then
+        print("|cFFFF0000[OldGods]|r No player selected!")
+        return ""
+    end
+
+    local encryptedNote = OG_EncryptedNotes[currentPlayer]
+    if not encryptedNote then
+        print("|cFFFF0000[OldGods]|r No note found for " .. currentPlayer)
+        return ""
+    end
+
+    -- If userKey is missing, prompt for it first
+    if not userKey then
+        print("|cFFFF0000[OldGods]|r Set an encryption key first!")
+        PromptUserForKey(function()
+            -- Once key is entered, retry loading the note
+            EncryptedPlayerNotpad.editBox:SetText(LoadDecryptedNote())
+        end)
+        return ""
+    end
+
+    -- Decrypt the note
+    return XORCipher(encryptedNote, userKey)
+end
+
+-- Create Encrypted Notepad UI
+local function CreateEncryptedPlayerNotepad()
+    local frame = CreateFrame("Frame", "EncryptedPlayerNotpad", UIParent, "BasicFrameTemplateWithInset")
+    frame:SetSize(430, 300)
+    frame:SetPoint("LEFT", UIParent, "LEFT", 0, 200)
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnDragStart", frame.StartMoving)
+    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+
+    -- Title
+    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    frame.title:SetPoint("TOP", frame, "TOP", 0, -5)
+    frame.title:SetText("Encrypted Notepad")
+
+    -- Scrollable Edit Box
+    local scrollFrame = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
+    scrollFrame:SetSize(365, 210)
+    scrollFrame:SetPoint("TOP", frame, "TOP", 0, -30)
+
+    local editBox = CreateFrame("EditBox", nil, scrollFrame)
+    editBox:SetMultiLine(true)
+    editBox:SetFontObject(GameFontHighlightLarge)
+    editBox:SetTextInsets(1, 1, 1, 1)
+    editBox:SetWidth(360)
+    editBox:SetHeight(205)
+    editBox:SetAutoFocus(true)
+    scrollFrame:SetScrollChild(editBox)
+
+    -- Save Note Button
+    local saveButton = CreateFrame("Button", nil, frame, "GameMenuButtonTemplate")
+    saveButton:SetSize(120, 30)
+    saveButton:SetPoint("BOTTOM", frame, "BOTTOM", 0, 10)
+    saveButton:SetText("Save Note")
+    saveButton:SetScript("OnClick", SaveEncryptedNote)
+
+    -- Close Button
+    local closeButton = CreateFrame("Button", nil, frame, "GameMenuButtonTemplate")
+    closeButton:SetSize(120, 30)
+    closeButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOM", 205, 10)
+    closeButton:SetText("Close")
+    closeButton:SetScript("OnClick", function()
+        frame:Hide()
+        userKey = nil -- Clear key on close for security
+        print("|cFFFF0000[OldGods]|r Encryption key removed from memory.")
+    end)
+
+    frame.editBox = editBox
+    return frame
+end
+
+-- Open Encrypted Notepad for a Player
+local function OpenEncryptedNotepad(playerName)
+    if not EncryptedPlayerNotpad then
+        EncryptedPlayerNotpad = CreateEncryptedPlayerNotepad()
+    end
+
+    currentPlayer = playerName
+    EncryptedPlayerNotpad.title:SetText("Notes for: " .. playerName)
+
+    -- Ensure key is set before attempting to decrypt
+    if not userKey then
+        print("|cFFFF0000[OldGods]|r Set an encryption key first!")
+        PromptUserForKey(function()
+            -- Retry loading note after key is set
+            EncryptedPlayerNotpad.editBox:SetText(LoadDecryptedNote())
+        end)
+    else
+        -- If key is already set, load note immediately
+        EncryptedPlayerNotpad.editBox:SetText(LoadDecryptedNote())
+    end
+
+    EncryptedPlayerNotpad:Show()
+end
+
+-- Slash Command to Open Notepad
+SLASH_OGNOTE1 = "/ognote"
+SlashCmdList["OGNOTE"] = function(msg)
+    local playerName = msg:match("^(%S+)")
+    if playerName then
+        OpenEncryptedNotepad(playerName)
+    else
+        print("|cFFFF0000[OldGods]|r Usage: /ognote <playerName>")
+    end
+end
+--#endregion 
 
 --#region Grief Mail
 local gMailframe = CreateFrame("Frame", "OldGodsMailFrame", UIParent, "BasicFrameTemplateWithInset")
@@ -2347,8 +2526,8 @@ function OldGods_ShowInactiveInitiates()
             print("No Guild members match " .. threshold .. " days offline.")
         else
             print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t |cFF66a8bfFound|r: " ..
-            #data .. " |cFF66a8bfplayers " .. 
-            "\n             that are > =|r " .. threshold)
+                #data .. " |cFF66a8bfplayers " ..
+                "\n             that are > =|r " .. threshold)
         end
 
         frame, scrollChild = CreateInactiveInitiatesFrame()
