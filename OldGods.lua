@@ -1612,44 +1612,21 @@ GuildChatWindow:Show()
 --#region UpdateGuildChatWindowTitle
 local ogGuildTitle = CreateFrame("Frame")
 ogGuildTitle:RegisterEvent("GUILD_ROSTER_UPDATE")
---local lastUpdate = 0 -- Initial timestamp
 
 local function UpdateGuildChatWindowTitle()
-    --local elapsedSec = GetTime() - lastUpdate
-    --[[local elapsedTime = string.format("|T986486:18:18:0|t Last call to UpdateGuildChatWindowTitle() was |cFFF0F005[|r%.1f seconds|cFFF0F005]|r ago", elapsedSec)]]
-
-    -- Condition 1: Ensure frame and title exist & window is visible
     if not GuildChatWindow or not GuildChatWindow.title or not GuildChatWindow:IsShown() then
-        --print("Condition 1 failed |cFFFF0000Function Halted|r\n")
         return
     end
-    --print("Condition 1 |cFF00FF00PASSED|r\n")
-
-    -- Condition 2: Prevent excessive updates (minimum interval of 25 seconds)
-    --if elapsedSec < 11 then
-    --print("Condition 2 failed |cFFFF0000Function Halted|r\n" .. elapsedTime)
-    --return
-    --end
-    --print("Condition 2 |cFF00FF00PASSED|r\n")
-
+    
     local guildName, _, _, _ = GetGuildInfo("player")                        -- Get player's guild name
     local numTotalGuildMembers, numOnlineGuildMembers = GetNumGuildMembers() -- Get guild member counts
 
-    -- Condition 3: Ensure valid data is retrieved
     if not guildName or not numTotalGuildMembers or not numOnlineGuildMembers then
-        -- print("Condition 3 failed |cFFFF0000Function Halted|r\n")
         return
     end
-    --print("Condition 3 |cFF00FF00PASSED|r\n")
-
-    -- Set new title with formatted online/offline counts
-    local newTitle = string.format("%s (|cFF00FF00%d|r / |cFFAc0302%d|r)", guildName, numOnlineGuildMembers,
-        (numTotalGuildMembers - numOnlineGuildMembers))
-    --print("|cFF00FF00SETING TITLE")
-
+    
+    local newTitle = string.format("%s |cFF91a3b0[|r|cFFA0FF07%d|r |cFF91a3b0of|r |cFF5ea3f2%d|r|cFF91a3b0]|r |TInterface\\AddOns\\OldGods\\Textures\\onlineMembers.tga:10:10:0|t", guildName, numOnlineGuildMembers, numTotalGuildMembers)
     GuildChatWindow.title:SetText(newTitle)
-    --lastUpdate = GetTime() -- Update timestamp
-    --print("FUNCTION COMPLETE\n" .. elapsedTime)
 end
 
 local lastkUP = 0 -- Timestamp tracking
@@ -1705,18 +1682,15 @@ end
 
 
 local function CheckGuildRosterChanges()
-    -- Ensure OldGuildRoster is initialized before checking
-
     if not OG_TrackGuildRoster then
         CacheGuildRoster()
     end
 
     for i = 1, GetNumGuildMembers() do
         local name, rankName, _, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
-
-        local previous = OG_TrackGuildRoster[name]
-        name = name or "Unknown"
         zone = zone or "Unknown"
+        name = name or "Unknown" 
+        local previous = OG_TrackGuildRoster[name]
         local classColor = GetClassColor(class)
         local shortName = Ambiguate(name, "guild")
 
@@ -1731,40 +1705,36 @@ local function CheckGuildRosterChanges()
 
             if oldrankName ~= rankName then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|r|cFFFFFFFFOG|r|cFF0000FF>|r Rank change for " ..
-                    hyperlinkName ..
-                    "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\rankChange.tga:16:16:0|t Rank change: " .. hyperlinkName ..
+                "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
                 previous.rankName = rankName
             end
             if oldlevel ~= level then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Level Change for " ..
-                    hyperlinkName .. "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16:0|t" ..
-                    "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16:0|t Level Up: " .. hyperlinkName ..
+                "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
                 previous.level = level
             end
             if oldZone ~= zone and zoneDataSpam then
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Zone Change for " ..
-                    hyperlinkName .. " |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16:0|t" ..
-                    "\n|c9fc4f9d9From|r: |cDCF52727" .. oldZone .. "|r" .. " |c9fc4f9d9To|r: |cDC7DF587" .. zone .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16:0|t  Zone Change: " .. hyperlinkName ..
+                "\n|c9fc4f9d9From|r: |cFFF0F000" .. oldZone .. "|r" .. " |c9fc4f9d9To|r: |cff01FF01" .. zone .. "|r")
                 previous.zone = zone
             end
             if oldpublicNote ~= publicNote then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Public Note Changed for " .. hyperlinkName ..
-                    "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Public Note Changed: " .. hyperlinkName ..
+                "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
                 previous.publicNote = publicNote
             end
             if oldofficerNote ~= officerNote then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("|cFF0000FF<|rOG|cFF0000FF>|r Officer Note Changed for " ..
-                    hyperlinkName ..
-                    "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Officer Note Changed: " .. hyperlinkName ..
+                "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
                 previous.officerNote = officerNote
             end
         end
     end
-    C_Timer.After(10.1, CacheGuildRoster)
+    C_Timer.After(10, CacheGuildRoster)
 end
 
 CacheGuildRoster()
@@ -2990,16 +2960,16 @@ end
 OG_Fast_Options = {
     ["Member Search"] = {
         fastFunction = OldGods_MemberSearch,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Search.tga:18:18|t",
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Search.tga:18:18|t ",
     },
     ["Inactive Purge"] = {
         fastFunction = OldGods_ShowInactiveInitiates,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:18:18|t"
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:18:18|t "
     },
     ["Toggle Zone Tracking"] = {
         fastFunction = toggle_ZoneSpam,
-        icon = zoneDataSpam and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t" or
-            "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t"
+        icon = zoneDataSpam and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t " or
+            "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t "
     },
 }
 
