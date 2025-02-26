@@ -150,6 +150,7 @@ OG_Themes = {
         buttonBgColor = { r = 0.85, g = 0.05, b = 0.05, a = 0.750 }, --DARK DARK GREY
         buttonBorderColor = { r = 0.0, g = 0.0, b = 0.0, a = 1 },    --BLACK
         iconTexture = 132485,                                        --Horde Flag
+        iconVertex = { 0, 0, 0, 0 },
         iconSize = { width = 48, height = 48 },
     },
     ["Alliance"] = {
@@ -974,9 +975,15 @@ local function ApplyTheme(frame, theme)
     end
 
     -- Apply Icon Styling
-    if frame.icon and theme.iconTexture and theme.iconSize then
+    if frame.icon and theme.iconTexture and theme.iconSize and not theme.iconVertex then
         frame.icon:SetTexture(theme.iconTexture)
         frame.icon:SetSize(theme.iconSize.width, theme.iconSize.height)
+    else
+        if frame.icon and theme.iconTexture and theme.iconSize and theme.iconVertex then
+            frame.icon:SetTexture(theme.iconTexture)
+            frame.icon:SetSize(theme.iconSize.width, theme.iconSize.height)
+            frame.icon:SetVertexColor(theme.iconVertex.r, theme.iconVertex.g, theme.iconVertex.b, theme.iconVertex.a)
+        end
     end
 
     -- Apply Button Styling
@@ -1006,7 +1013,6 @@ local function ApplyTheme(frame, theme)
     end
 end
 
-
 local function ApplyFont(editBox, font)
     if font and font.fPath and font.fSize and font.fFlag then
         editBox:SetFont(font.fPath, font.fSize, font.fFlag)
@@ -1015,132 +1021,97 @@ local function ApplyFont(editBox, font)
         print("Error: Invalid font data provided.")
     end
 end
---#endregion OG_Themes and OG_Fonts ends
 
---#region ModifyMenu
-local function ModMenu_SendGuild_Invite(contextData)
-    if not contextData or not contextData.name then
-        print("Old Gods: No player found to invite.")
+local function CreateThemeForPlayersGuild(frame)
+    
+    --Thanks to Fizzlemizz on the forums for helping with the details
+    --https://us.forums.blizzard.com/en/wow/t/explain-this-wizzardry/2065725
+    
+    if not OG_Themes or not frame or type(OG_Themes) ~= "table" then
         return
     end
 
-    local targetPlayer = contextData.name
-    if CanGuildInvite() then
-        C_GuildInfo.Invite(targetPlayer)
-        print("Old Gods: Guild invite sent to " .. targetPlayer .. "!")
-    else
-        print("Old Gods: You do not have guild invite permissions.")
-    end
-end
+    if IsInGuild() then
+        local guildName = GetGuildInfo("player")
 
-local function CopiedNameTrickframe(CopiedName)
-    local FrameBackdrop = {
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        tile = false,
-        tileSize = 0,
-        edgeSize = 2,
-        insets = {
-            left = 2,
-            right = 2,
-            top = 2,
-            bottom = 2
+        if not guildName then return end
+
+        local tbl = C_GuildInfo.GetGuildTabardInfo("player")
+
+        if not tbl then return end
+        local dynamicborderColor = { r = tbl.borderColor.r or 1, g = tbl.borderColor.g or 0, b = tbl.borderColor.b or 0, a =
+        tbl.borderColor.a or 1 }
+        local dynamicbackgroundColor = { r = tbl.backgroundColor.r or 0, g = tbl.backgroundColor.g or 0, b = tbl
+        .backgroundColor.b or 0, a = tbl.backgroundColor.a or 0.75 }
+        local dynamicVertex = { r = tbl.borderColor.r or 0, g = tbl.borderColor.g or 0, b = tbl.borderColor.b or 0, a =
+        tbl.borderColor.a or 1 }
+        -- Ensure the guild has a theme entry, otherwise initialize it
+        OG_Themes[guildName] = OG_Themes[guildName] or {
+            dropDownIcon = "|T" .. tbl.emblemFileID .. ":24:30|t",
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 2,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 },
         }
-    }
 
-    local trickFrame = CreateFrame("EditBox", "trickFrame", UIParent, "BackdropTemplate")
-    trickFrame:SetPoint("CENTER", UIParent)
-    trickFrame:SetSize(190, 30) -- Resized for a single-line input
-    trickFrame:SetFrameStrata("TOOLTIP")
-    trickFrame:SetFontObject("GameFontNormal")
-    trickFrame:SetBackdrop(FrameBackdrop)
-    trickFrame:SetBackdropColor(0.204, 0.227, 0.329, 1)
-    trickFrame:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
+        -- Populate primary theme properties
+        OG_Themes[guildName].backgroundColor = dynamicbackgroundColor
+        OG_Themes[guildName].borderColor = dynamicborderColor
+        OG_Themes[guildName].TITLE_font = "Fonts\\FRIZQT__.TTF"
+        OG_Themes[guildName].TITLE_fontSize = 16
+        OG_Themes[guildName].titleColor = dynamicborderColor
+        OG_Themes[guildName].scrollThumbTexture = tbl.emblemFileID
+        OG_Themes[guildName].scrollThumbSize = { width = 30, height = 35 }
+        OG_Themes[guildName].buttonBgColor = dynamicbackgroundColor
+        OG_Themes[guildName].buttonBorderColor = dynamicborderColor
+        OG_Themes[guildName].iconTexture = tbl.emblemFileID
+        OG_Themes[guildName].iconVertex =  dynamicVertex
+        OG_Themes[guildName].iconSize = { width = 72, height = 86 }
 
-    -- Enable mouse interaction
-    trickFrame:EnableMouse(true)
+        OG_Themes[guildName].thescrlfrm = OG_Themes[guildName].thescrlfrm or {
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 2,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 },
+        }
+        OG_Themes[guildName].thescrlfrm.scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 }
+        OG_Themes[guildName].thescrlfrm.scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 }
 
-    -- EditBox properties
-    trickFrame:SetMultiLine(false)
-    trickFrame:SetAutoFocus(false)
-    trickFrame:SetTextInsets(5, 5, 0, 0) -- Prevents text clipping
-    trickFrame:SetText(CopiedName)
+        -- Initialize `theStefak` before setting nested properties
+        OG_Themes[guildName].theStefak = OG_Themes[guildName].theStefak or {
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 3,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 },
+        }
+        OG_Themes[guildName].theStefak.cristaFrameBorderColor = dynamicborderColor
+        OG_Themes[guildName].theStefak.cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 }
 
-    -- Highlight text & play a sound on show
-    trickFrame:SetScript("OnMouseDown", function(self)
-        self:SetText(CopiedName)
-        self:SetFocus()
-        UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
-        C_Timer.After(0.1, function()
-            self:HighlightText(0, -1)
-        end)
-    end)
+        --Initialize `theAtari` before assigning values
+        OG_Themes[guildName].theAtari = OG_Themes[guildName].theAtari or {
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 0,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 },
+        }
+        OG_Themes[guildName].theAtari.isEditBoxBG = { r = 0.05, g = 0.05, b = 0.05, a = 0.75 }
+        OG_Themes[guildName].theAtari.isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 }
 
-    local trickButton = CreateFrame("Button", nil, trickFrame, "BackdropTemplate")
-    trickButton:SetPoint("RIGHT", trickFrame, -5, 0)
-    trickButton:SetSize(20, 20)
-    trickButton:SetNormalTexture("Interface\\AddOns\\OldGods\\Textures\\Delete.tga")
-    trickButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
-    trickButton:SetFrameStrata("TOOLTIP")
-    trickButton:SetBackdrop(FrameBackdrop)
-    trickButton:SetBackdropColor(0.204, 0.227, 0.329, 1)
-    trickButton:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
-
-    trickButton:SetScript("OnClick", function()
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
-        trickFrame:Hide()
-    end)
-
-    trickFrame:Show() -- Ensure it appears
+        -- Debug print for confirmation
+        print("|cFF00FF00Updated Theme|r:", guildName, " |T" .. tbl.emblemFileID .. ":18:18|t")
+        --CreateThemeForPlayersGuild(GuildChatWindow) -- Called after frames creation
+        -- ApplyTheme(frame, OG_Themes[guildName]) -- Called manually via dropdown selection
+    end
 end
-
-local function ModMenu_CopyNameTrick(contextData)
-    if not contextData or not contextData.name then
-        print("Old Gods: No player found to copy.")
-        return
-    end
-
-    -- Ensure we always get the full player name
-    local CopiedName = contextData.name
-    if contextData.realm and contextData.realm ~= "" then
-        CopiedName = CopiedName .. "-" .. contextData.realm
-    end
-
-    CopiedNameTrickframe(CopiedName)
-end
-
-local OG_ModifyMenu_Buttons = {
-    ["Send Guild Invite"] = {
-        lfunction = ModMenu_SendGuild_Invite,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
-    },
-    ["Copy Character Name"] = {
-        lfunction = ModMenu_CopyNameTrick,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
-    },
-}
-
-Menu.ModifyMenu("MENU_UNIT_PLAYER", function(ownerRegion, rootDescription, contextData)
-    rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options")
-    for bLabel, bData in pairs(OG_ModifyMenu_Buttons) do
-        rootDescription:CreateButton(bData.icon .. bLabel, function()
-            bData.lfunction(contextData) -- Pass contextData properly
-        end)
-    end
-end)
-
-Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, contextData)
-    rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options")
-    for bLabel, bData in pairs(OG_ModifyMenu_Buttons) do
-        rootDescription:CreateButton(bData.icon .. bLabel, function()
-            bData.lfunction(contextData) -- Pass contextData properly
-        end)
-    end
-end)
---#endregion ModifyMenu
+--#endregion OG_Themes and OG_Fonts ends
 
 --#region Chat History Window
 local function CreateSavedChatHistoryWindow(title)
@@ -1604,6 +1575,7 @@ local function CreateGuildChatWindow(title)
     return GuildChatWindow
 end
 
+
 -- Initialize GuildChatWindow
 local GuildChatWindow = CreateGuildChatWindow("|T986486:18:18:0|t Collecting data...") -- Default title shows before the update function is triggered
 GuildChatWindow:Show()
@@ -1617,15 +1589,17 @@ local function UpdateGuildChatWindowTitle()
     if not GuildChatWindow or not GuildChatWindow.title or not GuildChatWindow:IsShown() then
         return
     end
-    
+
     local guildName, _, _, _ = GetGuildInfo("player")                        -- Get player's guild name
     local numTotalGuildMembers, numOnlineGuildMembers = GetNumGuildMembers() -- Get guild member counts
 
     if not guildName or not numTotalGuildMembers or not numOnlineGuildMembers then
         return
     end
-    
-    local newTitle = string.format("%s |cFF91a3b0[|r|cFFA0FF07%d|r |cFF91a3b0of|r |cFF5ea3f2%d|r|cFF91a3b0]|r |TInterface\\AddOns\\OldGods\\Textures\\onlineMembers.tga:10:10:0|t", guildName, numOnlineGuildMembers, numTotalGuildMembers)
+
+    local newTitle = string.format(
+        "%s |cFF91a3b0[|r|cFFA0FF07%d|r |cFF91a3b0of|r |cFF5ea3f2%d|r|cFF91a3b0]|r |TInterface\\AddOns\\OldGods\\Textures\\onlineMembers.tga:10:10:0|t",
+        guildName, numOnlineGuildMembers, numTotalGuildMembers)
     GuildChatWindow.title:SetText(newTitle)
 end
 
@@ -1689,7 +1663,7 @@ local function CheckGuildRosterChanges()
     for i = 1, GetNumGuildMembers() do
         local name, rankName, _, level, class, zone, publicNote, officerNote, isOnline = GetGuildRosterInfo(i)
         zone = zone or "Unknown"
-        name = name or "Unknown" 
+        name = name or "Unknown"
         local previous = OG_TrackGuildRoster[name]
         local classColor = GetClassColor(class)
         local shortName = Ambiguate(name, "guild")
@@ -1705,31 +1679,41 @@ local function CheckGuildRosterChanges()
 
             if oldrankName ~= rankName then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\rankChange.tga:16:16:0|t Rank change: " .. hyperlinkName ..
-                "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage(
+                    "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\rankChange.tga:16:16:0|t Rank change: " ..
+                    hyperlinkName ..
+                    "\nFrom: |cffF0F000" .. oldrankName .. "|r" .. " To: |cff01FF01" .. rankName .. "|r")
                 previous.rankName = rankName
             end
             if oldlevel ~= level then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16:0|t Level Up: " .. hyperlinkName ..
-                "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage(
+                    "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16:0|t Level Up: " ..
+                    hyperlinkName ..
+                    "\nFrom: |cffF0F000" .. oldlevel .. "|r" .. " To: |cff01FF01" .. level .. "|r")
                 previous.level = level
             end
             if oldZone ~= zone and zoneDataSpam then
-                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16:0|t  Zone Change: " .. hyperlinkName ..
-                "\n|c9fc4f9d9From|r: |cFFF0F000" .. oldZone .. "|r" .. " |c9fc4f9d9To|r: |cff01FF01" .. zone .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage(
+                    "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\zoneChange.tga:16:16:0|t  Zone Change: " ..
+                    hyperlinkName ..
+                    "\n|c9fc4f9d9From|r: |cFFF0F000" .. oldZone .. "|r" .. " |c9fc4f9d9To|r: |cff01FF01" .. zone .. "|r")
                 previous.zone = zone
             end
             if oldpublicNote ~= publicNote then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Public Note Changed: " .. hyperlinkName ..
-                "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage(
+                    "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Public Note Changed: " ..
+                    hyperlinkName ..
+                    "\nFrom: |cffF0F000" .. oldpublicNote .. "|r" .. " To: |cff01FF01" .. publicNote .. "|r")
                 previous.publicNote = publicNote
             end
             if oldofficerNote ~= officerNote then
                 PlaySound(170271)
-                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Officer Note Changed: " .. hyperlinkName ..
-                "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
+                DEFAULT_CHAT_FRAME:AddMessage(
+                    "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Officer Note Changed: " ..
+                    hyperlinkName ..
+                    "\nFrom: |cffF0F000" .. oldofficerNote .. "|r" .. " To: |cff01FF01" .. officerNote .. "|r")
                 previous.officerNote = officerNote
             end
         end
@@ -1770,15 +1754,15 @@ end)
 
 --#region Encryption By ChatGPT https://openai.com/index/introducing-chatgpt-pro/
 OG_EncryptedNotes = OG_EncryptedNotes or {} -- SavedVariables table
-local userKey = nil  -- Temporary encryption key (deleted on close)
-local currentPlayer = nil  -- Tracks which player’s note is open
+local userKey = nil                         -- Temporary encryption key (deleted on close)
+local currentPlayer = nil                   -- Tracks which player’s note is open
 
 -- XOR Encryption Function
 local function XORCipher(input, key)
     local result = {}
     for i = 1, #input do
         local byte = input:byte(i)
-        local keyByte = key:byte(((i - 1) % #key) + 1)  -- Cycle through key bytes
+        local keyByte = key:byte(((i - 1) % #key) + 1) -- Cycle through key bytes
         table.insert(result, string.char(bit.bxor(byte, keyByte)))
     end
     return table.concat(result)
@@ -1956,7 +1940,132 @@ SlashCmdList["OGNOTE"] = function(msg)
         print("|cFFFF0000[OldGods]|r Usage: /ognote <playerName>")
     end
 end
---#endregion 
+--#endregion
+
+--#region ModifyMenu
+local function ModMenu_SendGuild_Invite(contextData)
+    if not contextData or not contextData.name then
+        print("Old Gods: No player found to invite.")
+        return
+    end
+
+    local targetPlayer = contextData.name
+    if CanGuildInvite() then
+        C_GuildInfo.Invite(targetPlayer)
+        print("Old Gods: Guild invite sent to " .. targetPlayer .. "!")
+    else
+        print("Old Gods: You do not have guild invite permissions.")
+    end
+end
+
+local function CopiedNameTrickframe(CopiedName)
+    local FrameBackdrop = {
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        tile = false,
+        tileSize = 0,
+        edgeSize = 2,
+        insets = {
+            left = 2,
+            right = 2,
+            top = 2,
+            bottom = 2
+        }
+    }
+
+    local trickFrame = CreateFrame("EditBox", "trickFrame", UIParent, "BackdropTemplate")
+    trickFrame:SetPoint("CENTER", UIParent)
+    trickFrame:SetSize(190, 30) -- Resized for a single-line input
+    trickFrame:SetFrameStrata("TOOLTIP")
+    trickFrame:SetFontObject("GameFontNormal")
+    trickFrame:SetBackdrop(FrameBackdrop)
+    trickFrame:SetBackdropColor(0.204, 0.227, 0.329, 1)
+    trickFrame:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
+
+    -- Enable mouse interaction
+    trickFrame:EnableMouse(true)
+
+    -- EditBox properties
+    trickFrame:SetMultiLine(false)
+    trickFrame:SetAutoFocus(false)
+    trickFrame:SetTextInsets(5, 5, 0, 0) -- Prevents text clipping
+    trickFrame:SetText(CopiedName)
+
+    -- Highlight text & play a sound on show
+    trickFrame:SetScript("OnMouseDown", function(self)
+        self:SetText(CopiedName)
+        self:SetFocus()
+        UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+        C_Timer.After(0.1, function()
+            self:HighlightText(0, -1)
+        end)
+    end)
+
+    local trickButton = CreateFrame("Button", nil, trickFrame, "BackdropTemplate")
+    trickButton:SetPoint("RIGHT", trickFrame, -5, 0)
+    trickButton:SetSize(20, 20)
+    trickButton:SetNormalTexture("Interface\\AddOns\\OldGods\\Textures\\Delete.tga")
+    trickButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    trickButton:SetFrameStrata("TOOLTIP")
+    trickButton:SetBackdrop(FrameBackdrop)
+    trickButton:SetBackdropColor(0.204, 0.227, 0.329, 1)
+    trickButton:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
+
+    trickButton:SetScript("OnClick", function()
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        trickFrame:Hide()
+    end)
+
+    trickFrame:Show() -- Ensure it appears
+end
+
+local function ModMenu_CopyNameTrick(contextData)
+    if not contextData or not contextData.name then
+        print("Old Gods: No player found to copy.")
+        return
+    end
+
+    -- Ensure we always get the full player name
+    local CopiedName = contextData.name
+    if contextData.realm and contextData.realm ~= "" then
+        CopiedName = CopiedName .. "-" .. contextData.realm
+    end
+
+    CopiedNameTrickframe(CopiedName)
+end
+
+local OG_ModifyMenu_Buttons = {
+    ["Send Guild Invite"] = {
+        lfunction = ModMenu_SendGuild_Invite,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
+    },
+    ["Copy Character Name"] = {
+        lfunction = ModMenu_CopyNameTrick,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
+    },
+}
+
+Menu.ModifyMenu("MENU_UNIT_PLAYER", function(ownerRegion, rootDescription, contextData)
+    rootDescription:CreateDivider()
+    rootDescription:CreateTitle("Old Gods Options")
+    for bLabel, bData in pairs(OG_ModifyMenu_Buttons) do
+        rootDescription:CreateButton(bData.icon .. bLabel, function()
+            bData.lfunction(contextData) -- Pass contextData properly
+        end)
+    end
+end)
+
+Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, contextData)
+    rootDescription:CreateDivider()
+    rootDescription:CreateTitle("Old Gods Options")
+    for bLabel, bData in pairs(OG_ModifyMenu_Buttons) do
+        rootDescription:CreateButton(bData.icon .. bLabel, function()
+            bData.lfunction(contextData) -- Pass contextData properly
+        end)
+    end
+end)
+--#endregion ModifyMenu
 
 --#region Grief Mail
 local gMailframe = CreateFrame("Frame", "OldGodsMailFrame", UIParent, "BasicFrameTemplateWithInset")
@@ -3929,6 +4038,44 @@ if LSM then
     LSM:Register("sound", "timer_finsished_bell", [[Interface\AddOns\OldGods\Sounds\timer_finsished_bell.mp3]])
 end
 --#endregion LibSharedMedia
+local function DeepPrintTable(tbl, indent)
+    indent = indent or ""
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            print(indent .. tostring(k) .. " = {")
+            DeepPrintTable(v, indent .. "    ")
+            print(indent .. "},")
+        else
+            print(indent .. tostring(k) .. " = " .. tostring(v))
+        end
+    end
+end
+
+function GetIT()
+    if IsInGuild() then
+        local tabard = CreateFrame("Frame") -- Hidden frame to hold the tabard
+        tabard:SetSize(64, 64)
+        tabard:SetPoint("CENTER")
+
+        local emblemTexture = tabard:CreateTexture(nil, "ARTWORK")
+        SetGuildTabardTextures(nil, nil, nil, emblemTexture) -- Forces the emblem onto the texture
+        print(emblemTexture:GetTexture())
+    end
+end
+
+OG_tHax = {}
+function Gcopy(ChatHistoryWindow, str)
+    if ChatHistoryWindow then
+        local haxA = ChatHistoryWindow.editBox
+        local str_ = str .. "\n"
+        table.insert(OG_tHax, str_)
+        print(str_)
+        C_Timer.After(1, function()
+            local haxB = table.concat(OG_tHax, "\n")
+            haxA:SetText(haxB)
+        end)
+    end
+end
 
 --#region primary initialize function
 local function InitializeTheme()
@@ -3944,6 +4091,10 @@ local function InitializeTheme()
 
     -- Apply the user saved theme to the GuildChatWindow
     ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
+    
+    C_Timer.After(10, function() 
+        CreateThemeForPlayersGuild(GuildChatWindow)
+    end)
 end
 --#endregion primary Initialize function ends
 
