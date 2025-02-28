@@ -40,6 +40,10 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
+            myAtlas = "jailerstower-scenario-TrackerHeader",
+            myAtlasVertex = resetVertex,
+            myAtlasTexCoord = { 0, 1, 0, 1 },
+            --myAtlasSetRotation = math.pi/2,
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollThumbTexture = 2022762,
@@ -107,11 +111,14 @@ OG_Themes = {
             tileSize = 0,
             edgeSize = 0,
             insets = {
-                left = 2,
-                right = 2,
-                top = 2,
-                bottom = 2
+                left = 0,
+                right = 0,
+                top = 0,
+                bottom = 0,
             },
+            myAtlas = "HordeScenario-TrackerHeader",
+            myAtlasVertex = resetVertex,
+            myAtlasTexCoord = { 0, 1, 0, 1 },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollThumbTexture = 516953,
@@ -125,10 +132,10 @@ OG_Themes = {
             tileSize = 0,
             edgeSize = 3,
             insets = {
-                left = 1,
-                right = 1,
-                top = 1,
-                bottom = 1
+                left = 0,
+                right = 0,
+                top = 0,
+                bottom = 0
             },
             cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             cristaFrameBorderColor = { r = 0.639, g = 0.565, b = 0.506, a = 1 }, -- Dark Grey Orange rgb01(0.639, 0.565, 0.506)
@@ -145,12 +152,12 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            isEditBoxBG = { r = 0.44, g = 0.114, b = 0.051, a = 0.745 },
+            isEditBoxBG = { r = 0.44, g = 0.114, b = 0.051, a = 0.15 },
             isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 },
         },
         titleColor = { r = 0.8, g = 0.224, b = 0.125, 0.895 },
         TITLE_font = "Fonts\\FRIZQT__.TTF",
-        TITLE_fontSize = 20,
+        TITLE_fontSize = 18,
         buttonBgColor = { r = 0.85, g = 0.05, b = 0.05, a = 0.750 },
         buttonBorderColor = { r = 0.0, g = 0.0, b = 0.0, a = 1 },
         iconTexture = 132485,
@@ -184,6 +191,9 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
+            myAtlas = "AllianceScenario-TrackerHeader",
+            myAtlasVertex = resetVertex,
+            myAtlasTexCoord = { 0, 1, 0, 1 },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollThumbTexture = 516949,
@@ -197,13 +207,13 @@ OG_Themes = {
             tileSize = 0,
             edgeSize = 2,
             insets = {
-                left = 0,
-                right = 0,
-                top = 2,
-                bottom = 2
+                left = 1,
+                right = 1,
+                top = 1,
+                bottom = 1,
             },
-            cristaFrameBGColor = { r = 1, g = 1, b = 1, a = 0 },
-            cristaFrameBorderColor = { r = 1, g = 0.875, b = 0.024, a = 0.785 }, -- Gold, slight orange rgb01(1, 0.875, 0.024, 0.788)
+            cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
+            cristaFrameBorderColor = { r = .650, g = 0.650, b = 0.15, a = 0.455 },
         },
         theAtari = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -217,7 +227,7 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            isEditBoxBG = { r = 0, g = 0, b = 0.275, a = 0.785 }, -- dark blue rgb01(0, 0, 0.278, 0.788)
+            isEditBoxBG = { r = 0, g = 0, b = 0, a = 0 },
             isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 },
         },
         titleColor = { r = 0.894, g = 0.91, b = 0.055, 0.859 }, -- Alliance Gold rgb01(0.894, 0.91, 0.055, 0.859)
@@ -256,6 +266,9 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
+            myAtlas = "legioninvasion-ScenarioTrackerToast",
+            myAtlasVertex = resetVertex,
+            myAtlasTexCoord = { 0, 1, 0, 1 },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollThumbTexture = 1394890,
@@ -317,7 +330,7 @@ OG_Themes = {
         backgroundColor = { r = 0.1, g = 0.2, b = 0.3, a = 0.95 }, -- Dark teal background
         borderColor = { r = 0.0, g = 0.5, b = 0.4, a = 1 },        -- Green border
         thescrlfrm = {
-            bgFile = "Interface\\Buttons\\WHITE8x8",
+            bgFile = nil,
             edgeFile = "Interface\\Buttons\\WHITE8x8",
             tile = false,
             tileSize = 0,
@@ -328,7 +341,10 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
+            myAtlas = "Artifacts-Shaman-BG",
+            myAtlasVertex = resetVertex,
+            myAtlasTexCoord = { 0, 1, 0, 1 },
+            scrollFrameBGColor = { r = 1, g = 1, b = 1, a = 1 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollThumbTexture = 606551,
             scrollThumbVertex = resetVertex,
@@ -341,13 +357,13 @@ OG_Themes = {
             tileSize = 0,
             edgeSize = 3,
             insets = {
-                left = 1,
-                right = 1,
-                top = 1,
-                bottom = 1
+                left = 0,
+                right = 0,
+                top = 0,
+                bottom = 0,
             },
             cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
-            cristaFrameBorderColor = { r = 0.078, g = 0.961, b = 0.643, a = 0.895 },
+            cristaFrameBorderColor = { r = 0.078, g = 0.961, b = 0.643, a = 0.350 },
         },
         theAtari = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -361,11 +377,11 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            isEditBoxBG = { r = 0.118, g = 0.31, b = 0.275, a = 0.835 }, -- Dark Green Blue rgb01(0.118, 0.31, 0.278, 0.839)
+            isEditBoxBG = { r = 0.118, g = 0.31, b = 0.275, a = 0.13 }, -- Dark Green Blue rgb01(0.118, 0.31, 0.278, 0.839)
             isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 },
         },
         TITLE_font = "Fonts\\FRIZQT__.TTF",
-        TITLE_fontSize = 16,
+        TITLE_fontSize = 18,
         titleColor = { r = 0.29, g = 1, b = 0.888, 0.658 },
         buttonBgColor = { r = 0.1, g = 0.2, b = 0.3, a = 0.9 },
         buttonBorderColor = { r = 0.0, g = 0.5, b = 0.4, a = 1 },
@@ -925,6 +941,33 @@ local function ApplyTheme(frame, theme)
         end
 
         -- Apply ScrollFrame Styling
+        local scrollFrame = frame.ScrollFrame
+        if not scrollFrame then return end
+
+        local atlasBG = scrollFrame.atlasBG
+        if not atlasBG then return end
+        -- Check if we have an atlas name
+        if theme.thescrlfrm and theme.thescrlfrm.myAtlas then
+            atlasBG:Show()
+            atlasBG:SetAtlas(theme.thescrlfrm.myAtlas, false)
+
+            if theme.thescrlfrm.myAtlasVertex then
+                local v = theme.thescrlfrm.myAtlasVertex
+                atlasBG:SetVertexColor(v.r, v.g, v.b, v.a)
+            else
+                atlasBG:SetVertexColor(1, 1, 1, 1)
+            end
+            --table is {0,1,0,1} -- future proof my self fallback is default
+            if theme.thescrlfrm.myAtlasTexCoord then
+                atlasBG:SetTexCoord(unpack(theme.thescrlfrm.myAtlasTexCoord))
+            else
+                atlasBG:SetTexCoord(0, 1, 0, 1)
+            end
+        else
+            --no atlas? hide the texture
+            atlasBG:Hide()
+        end
+
         if frame.ScrollFrame and theme.thescrlfrm.scrollThumbTexture and theme.thescrlfrm.scrollThumbSize and theme.thescrlfrm.scrollThumbVertex then
             local scrollBar = frame.ScrollFrame.ScrollBar
             if scrollBar then
@@ -983,7 +1026,8 @@ local function ApplyTheme(frame, theme)
             frame.title:SetTextColor(
                 theme.titleColor.r,
                 theme.titleColor.g,
-                theme.titleColor.b
+                theme.titleColor.b,
+                theme.titleColor.a
             )
         end
     end
@@ -1063,9 +1107,9 @@ local function CreateThemeForPlayersGuild(frame)
         }
 
         local dynamicVertex = {
-            r = tbl.emblemColor.r or 0,
-            g = tbl.emblemColor.g or 0,
-            b = tbl.emblemColor.b or 0,
+            r = tbl.emblemColor.r or 1,
+            g = tbl.emblemColor.g or 1,
+            b = tbl.emblemColor.b or 1,
             a = tbl.emblemColor.a or 1,
         }
 
@@ -1083,7 +1127,7 @@ local function CreateThemeForPlayersGuild(frame)
         -- Populate primary theme properties
         OG_Themes[guildName].backgroundColor = dynamicbackgroundColor
         OG_Themes[guildName].borderColor = dynamicborderColor
-        OG_Themes[guildName].TITLE_font = "Fonts\\FRIZQT__.TTF"
+        OG_Themes[guildName].TITLE_font = "Fonts\\MORPHEUS.ttf"
         OG_Themes[guildName].TITLE_fontSize = 18
         OG_Themes[guildName].titleColor = dynamicVertex
         OG_Themes[guildName].buttonBgColor = dynamicbackgroundColor
@@ -1093,14 +1137,14 @@ local function CreateThemeForPlayersGuild(frame)
         OG_Themes[guildName].iconSize = { width = 72, height = 72 }
 
         OG_Themes[guildName].thescrlfrm = OG_Themes[guildName].thescrlfrm or {
-            bgFile = "Interface\\Buttons\\WHITE8x8",
+            bgFile = tbl.emblemFileID,
             edgeFile = "Interface\\Buttons\\WHITE8x8",
-            tile = false,
-            tileSize = 0,
-            edgeSize = 2,
-            insets = { left = 1, right = 1, top = 1, bottom = 1 },
+            tile = true,
+            tileSize = 64,
+            edgeSize = 4,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 },
         }
-        OG_Themes[guildName].thescrlfrm.scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 }
+        OG_Themes[guildName].thescrlfrm.scrollFrameBGColor = { r = 0.15, g = 0.15, b = 0, a = 0.825 }
         OG_Themes[guildName].thescrlfrm.scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 }
         OG_Themes[guildName].thescrlfrm.scrollThumbTexture = tbl.emblemFileID
         OG_Themes[guildName].thescrlfrm.scrollThumbVertex = dynamicVertex
@@ -1130,7 +1174,8 @@ local function CreateThemeForPlayersGuild(frame)
         OG_Themes[guildName].theAtari.isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 }
 
         -- Debug print for confirmation
-        print(CreateAtlasMarkup("UI-LFG-RoleIcon-Ready", 18, 18), "|cFF00FF00Theme Created|r: ".."|T"..tbl.emblemFileID..":18:18:0|t " .. guildName)
+        print(CreateAtlasMarkup("UI-LFG-RoleIcon-Ready", 18, 18),
+            "|cFF00FF00Theme Created|r: " .. "|T" .. tbl.emblemFileID .. ":18:18:0|t " .. guildName)
         --when addon loads intializeTheme() is called with  CreateThemeForPlayersGuild(GuildChatWindow) --
         --Drop down menu in General Options contentFrame will now have a users guild theme to select
     end
@@ -1229,8 +1274,8 @@ local function CreateGuildChatWindow(title)
     local GuildChatWindow = CreateFrame("Frame", "GuildChatWindow", UIParent, "BackdropTemplate")
     GuildChatWindow:SetSize(524, 260) -- width, height
     GuildChatWindow:SetPoint("BOTTOMLEFT", UIParent)
-    GuildChatWindow:SetFrameStrata("HIGH")
-    GuildChatWindow:SetFrameLevel(3)
+    GuildChatWindow:SetFrameStrata("BACKGROUND")
+    GuildChatWindow:SetFrameLevel(1)
     GuildChatWindow:SetMovable(true)
     GuildChatWindow:EnableMouse(true)
     GuildChatWindow:RegisterForDrag("LeftButton")
@@ -1252,20 +1297,25 @@ local function CreateGuildChatWindow(title)
     GuildChatWindow.icon = iconFrame
 
     local cristaFrame = CreateFrame("Frame", nil, GuildChatWindow, "BackdropTemplate")
-    cristaFrame:SetFrameStrata("HIGH")
+    cristaFrame:SetFrameStrata("BACKGROUND")
     cristaFrame:SetFrameLevel(3)
     cristaFrame:SetSize(GuildChatWindow:GetWidth() - 40, GuildChatWindow:GetHeight() - 115)
     cristaFrame:SetPoint("TOPLEFT", GuildChatWindow, "TOPLEFT", 16, -30)
     cristaFrame:SetPoint("BOTTOMRIGHT", GuildChatWindow, "BOTTOMRIGHT", -30, 85)
     GuildChatWindow.cristaFrame = cristaFrame
 
-    local scrollFrame = CreateFrame("ScrollFrame", nil, GuildChatWindow, "BackdropTemplate, UIPanelScrollFrameTemplate")
-    scrollFrame:SetFrameStrata("HIGH") -- Default is MEDIUM, adjust if needed
-    scrollFrame:SetFrameLevel(4)       -- Set a higher frame level within the strata
+    local scrollFrame = CreateFrame("ScrollFrame", nil, GuildChatWindow, "BackdropTemplate, UIPanelScrollFrameTemplate") --, "BackdropTemplate, UIPanelScrollFrameTemplate")
+    scrollFrame:SetFrameStrata("BACKGROUND")
+    scrollFrame:SetFrameLevel(2)
     scrollFrame:SetSize(GuildChatWindow:GetWidth() - 40, GuildChatWindow:GetHeight() - 115)
     scrollFrame:SetPoint("TOPLEFT", GuildChatWindow, "TOPLEFT", 18, -32)
     scrollFrame:SetPoint("BOTTOMRIGHT", GuildChatWindow, "BOTTOMRIGHT", -32, 87)
     scrollFrame:EnableMouseWheel(true)
+
+    local atlasBG = scrollFrame:CreateTexture(nil, "BACKGROUND", nil, 2)
+    ---@diagnostic disable-next-line: param-type-mismatch
+    atlasBG:SetAllPoints(scrollFrame)
+    scrollFrame.atlasBG = atlasBG
     GuildChatWindow.ScrollFrame = scrollFrame
 
     local scrollBar = scrollFrame.ScrollBar
@@ -1273,13 +1323,13 @@ local function CreateGuildChatWindow(title)
     scrollBar:GetThumbTexture()
 
     local editBox = CreateFrame("EditBox", nil, scrollFrame)
-    editBox:SetTextInsets(5, 5, 5, 5)
-    editBox:SetFrameStrata("HIGH")
-    editBox:SetFrameLevel(5)
-    editBox:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
     editBox:SetPoint("TOPLEFT", scrollFrame)
     editBox:SetPoint("BOTTOMRIGHT", scrollFrame)
+    editBox:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
+    editBox:SetFrameStrata("BACKGROUND")
+    editBox:SetFrameLevel(3)
     editBox:SetMultiLine(true)
+    editBox:SetTextInsets(5, 5, 5, 5)
     editBox:SetAutoFocus(false)
     editBox:EnableMouse(true)
     editBox:SetHyperlinksEnabled(true)
@@ -1329,7 +1379,7 @@ local function CreateGuildChatWindow(title)
             GameTooltip:Hide()
             if not OG_leaveSoundPlayed then
                 PlaySoundFile(5834619, "Master")
-                OG_leaveSoundPlayed = true --set global variable to true, only PlaySoundFile once per session
+                --OG_leaveSoundPlayed = true now she laughs every time :D
             end
         end)
     end)
@@ -1337,7 +1387,7 @@ local function CreateGuildChatWindow(title)
     scrollFrame:SetScrollChild(editBox)
     GuildChatWindow.editBox = editBox
 
-    local resizeButton = CreateFrame("Button", nil, GuildChatWindow)
+    local resizeButton = CreateFrame("Button", "OVERLAY", GuildChatWindow)
     resizeButton:SetSize(24, 24)
     resizeButton:SetPoint("BOTTOMRIGHT")
     resizeButton:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
@@ -1351,7 +1401,7 @@ local function CreateGuildChatWindow(title)
     end)
 
     -- Add Highlight All button
-    local copyButton = CreateFrame("Button", nil, GuildChatWindow, "BackdropTemplate")
+    local copyButton = CreateFrame("Button", "OVERLAY", GuildChatWindow, "BackdropTemplate")
     copyButton:SetSize(120, 25)
     copyButton:SetPoint("BOTTOMRIGHT", GuildChatWindow, "BOTTOM", -65, 10)
     copyButton:SetText("Select All")
@@ -1362,8 +1412,7 @@ local function CreateGuildChatWindow(title)
         PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
         editBox:HighlightText()
         editBox:SetFocus()
-        print(
-            "|cFF00FF00 CTRL+C TO COPY |r")
+        print(CreateAtlasMarkup("LevelUp-Icon-Book", 24, 24), "Press Control + C to copy")
     end)
 
     -- Add Save & Clear button
@@ -1772,6 +1821,7 @@ end
 rosterChanges:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
         CheckGuildRosterChanges()
+        PopulateEmptyGuildNotes()
     end
 end)
 --#endregion Cache Roster Track Changes
@@ -2582,8 +2632,8 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
 
     -- Add a label
     local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    label:SetPoint("LEFT", inputBox, "LEFT", -49, -3)
-    label:SetText("Search: ")
+    label:SetPoint("LEFT", inputBox, "LEFT", -80, -3)
+    label:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Search:")
     label:SetTextColor(.64, 0.33, 0.08, 1)
 
     -- Set up the callback for when the user presses Enter
@@ -3022,7 +3072,7 @@ local function CreateSearchFrame(parent)
     -- Input box label
     local inputLabel = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLeftOrange")
     inputLabel:SetPoint("TOPLEFT", 95, -40)
-    inputLabel:SetText("Search:")
+    inputLabel:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Search:")
 
     -- Input box for search
     local inputBox = CreateFrame("EditBox", "SearchInputBox", searchFrame, "InputBoxTemplate")
