@@ -11,6 +11,7 @@ OG_ChatMessageTable = {}
 OG_TooltipInfoTable = {}
 
 --#region Global table OG_Themes
+local resetVertex = { r = 1, g = 1, b = 1, a = 1 }
 OG_Themes = {
     ["Your Custom Theme"] = { -- Custom theme default when user resets theme or first time addon loads - the reset function nils the keys,values in the OldGodsSavedColors SavedVariable
         dropDownIcon = "|T1455894:18:18:0|t",
@@ -41,6 +42,9 @@ OG_Themes = {
             },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollThumbTexture = 2022762,
+            scrollThumbVertex = resetVertex,
+            scrollThumbSize = { width = 18, height = 18 },
         },
         theStefak = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -75,11 +79,10 @@ OG_Themes = {
         titleColor = { r = 0, g = 0, b = 0, a = 1 },
         TITLE_font = "Fonts\\FRIZQT__.TTF",
         TITLE_fontSize = 18,
-        scrollThumbTexture = 2022762,
-        scrollThumbSize = { width = 18, height = 18 },
         buttonBgColor = { r = 1, g = 1, b = 1, a = 1 },
-        buttonBorderColor = { r = 0.0, g = 0.0, b = 0.0, a = 1 },
+        buttonBorderColor = { r = 0, g = 0, b = 0, a = 1 },
         iconTexture = 1455894,
+        iconVertex = resetVertex,
         iconSize = { width = 48, height = 48 },
     },
     ["Horde"] = {
@@ -111,6 +114,9 @@ OG_Themes = {
             },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollThumbTexture = 516953,
+            scrollThumbVertex = resetVertex,
+            scrollThumbSize = { width = 32, height = 32 },
         },
         theStefak = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -139,18 +145,16 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            isEditBoxBG = { r = 0.44, g = 0.114, b = 0.051, a = 0.745 }, --Deep Red rgb01(0.439, 0.114, 0.051, 0.749)
+            isEditBoxBG = { r = 0.44, g = 0.114, b = 0.051, a = 0.745 },
             isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 },
         },
-        titleColor = { r = 0.8, g = 0.224, b = 0.125, 0.895 }, -- Horde red
+        titleColor = { r = 0.8, g = 0.224, b = 0.125, 0.895 },
         TITLE_font = "Fonts\\FRIZQT__.TTF",
         TITLE_fontSize = 20,
-        scrollThumbTexture = 516953,                                 --[516953]="Interface/Timer/Horde-Logo"
-        scrollThumbSize = { width = 32, height = 32 },
-        buttonBgColor = { r = 0.85, g = 0.05, b = 0.05, a = 0.750 }, --DARK DARK GREY
-        buttonBorderColor = { r = 0.0, g = 0.0, b = 0.0, a = 1 },    --BLACK
-        iconTexture = 132485,                                        --Horde Flag
-        iconVertex = { 0, 0, 0, 0 },
+        buttonBgColor = { r = 0.85, g = 0.05, b = 0.05, a = 0.750 },
+        buttonBorderColor = { r = 0.0, g = 0.0, b = 0.0, a = 1 },
+        iconTexture = 132485,
+        iconVertex = resetVertex,
         iconSize = { width = 48, height = 48 },
     },
     ["Alliance"] = {
@@ -182,6 +186,9 @@ OG_Themes = {
             },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollThumbTexture = 516949,
+            scrollThumbVertex = resetVertex,
+            scrollThumbSize = { width = 32, height = 32 },
         },
         theStefak = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -216,11 +223,10 @@ OG_Themes = {
         titleColor = { r = 0.894, g = 0.91, b = 0.055, 0.859 }, -- Alliance Gold rgb01(0.894, 0.91, 0.055, 0.859)
         TITLE_font = "Fonts\\FRIZQT__.TTF",
         TITLE_fontSize = 18,
-        scrollThumbTexture = 516949, --Alliance Nice texture forget how i got it
-        scrollThumbSize = { width = 32, height = 32 },
         buttonBgColor = { r = 0.161, g = 0.165, b = 0.18, a = 0.785 },
         buttonBorderColor = { r = 0.345, g = 0.345, b = 0.355, a = 1 },
         iconTexture = 132486,
+        iconVertex = resetVertex,
         iconSize = { width = 48, height = 48 },
     },
     ["Hacker"] = {
@@ -240,7 +246,7 @@ OG_Themes = {
         borderColor = { r = .6, g = 1, b = .2, a = 1 },
         thescrlfrm = {
             bgFile = "Interface\\AddOns\\OldGods\\Textures\\hackerScrollFrameBG.tga",
-            edgeFile = "Interface\\AddOns\\OldGods\\Textures\\hackerborder.tga",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
             tile = false,
             tileSize = 0,
             edgeSize = 0,
@@ -252,18 +258,21 @@ OG_Themes = {
             },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollThumbTexture = 1394890,
+            scrollThumbVertex = resetVertex,
+            scrollThumbSize = { width = 16, height = 16 },
         },
         theStefak = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
             edgeFile = "Interface\\AddOns\\OldGods\\Textures\\hackerborder.tga",
             tile = true,
-            tileSize = 16,
-            edgeSize = 2,
+            tileSize = 32,
+            edgeSize = 4,
             insets = {
-                left = 2,
-                right = 2,
-                top = 2,
-                bottom = 2
+                left = 1,
+                right = 1,
+                top = 1,
+                bottom = 1
             },
             cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             cristaFrameBorderColor = { r = 0.355, g = 0.891, b = 0.365, a = 0.785 },
@@ -284,13 +293,12 @@ OG_Themes = {
             isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 },
         },
         TITLE_font = "Interface\\AddOns\\OldGods\\Go-Mono.ttf",
-        TITLE_fontSize = 16,
+        TITLE_fontSize = 18,
         titleColor = { r = 0.25, g = .985, b = 0.15 },
-        scrollThumbTexture = 1394890, -- Generic green texture
-        scrollThumbSize = { width = 16, height = 16 },
         buttonBgColor = { r = .895, g = .895, b = .895, a = .55 },
         buttonBorderColor = { r = 0.0, g = 0.8, b = 0.225, a = 0.75 },
-        iconTexture = 4667414, --green skull of awesome
+        iconTexture = 4667414,
+        iconVertex = resetVertex,
         iconSize = { width = 48, height = 48 },
     },
     ["ChatGPT"] = {
@@ -322,21 +330,24 @@ OG_Themes = {
             },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollThumbTexture = 606551,
+            scrollThumbVertex = resetVertex,
+            scrollThumbSize = { width = 20, height = 20 },
         },
         theStefak = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
             edgeFile = "Interface\\Buttons\\WHITE8x8",
             tile = false,
             tileSize = 0,
-            edgeSize = 2,
+            edgeSize = 3,
             insets = {
-                left = 0,
-                right = 0,
-                top = 2,
+                left = 1,
+                right = 1,
+                top = 1,
                 bottom = 1
             },
             cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
-            cristaFrameBorderColor = { r = 0.078, g = 0.961, b = 0.643, a = 0.895 }, -- light blue green, teal? idk rgb01(0.078, 0.961, 0.643)
+            cristaFrameBorderColor = { r = 0.078, g = 0.961, b = 0.643, a = 0.895 },
         },
         theAtari = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -354,13 +365,12 @@ OG_Themes = {
             isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 },
         },
         TITLE_font = "Fonts\\FRIZQT__.TTF",
-        TITLE_fontSize = 14,
-        titleColor = { r = 0.29, g = 1, b = 0.888, 0.658 },       -- rgb01(0.29, 1, 0.808)
-        scrollThumbTexture = 606551,                              -- [606551]="Interface/Icons/Ability_Monk_TigerPalm",
-        scrollThumbSize = { width = 20, height = 20 },
-        buttonBgColor = { r = 0.1, g = 0.2, b = 0.3, a = 0.9 },   -- Dark teal
-        buttonBorderColor = { r = 0.0, g = 0.5, b = 0.4, a = 1 }, -- Green border
-        iconTexture = 5648287,                                    --[5648287]="Interface/Icons/INV_BabyArathiLynx_white",
+        TITLE_fontSize = 16,
+        titleColor = { r = 0.29, g = 1, b = 0.888, 0.658 },
+        buttonBgColor = { r = 0.1, g = 0.2, b = 0.3, a = 0.9 },
+        buttonBorderColor = { r = 0.0, g = 0.5, b = 0.4, a = 1 },
+        iconTexture = 5648287,
+        iconVertex = resetVertex,
         iconSize = { width = 48, height = 48 },
     },
     ["WoW Theme"] = {
@@ -390,8 +400,11 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            scrollFrameBGColor = { r = 1, g = 1, b = 1, a = 0.35 },
+            scrollFrameBGColor = { r = 1, g = 1, b = 1, a = 0.40 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollThumbTexture = 511913,
+            scrollThumbVertex = resetVertex,
+            scrollThumbSize = { width = 18, height = 18 },
         },
         theStefak = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -420,17 +433,16 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            isEditBoxBG = { r = 0.278, g = 0.184, b = 0.078, a = 0.77 }, -- brown rgb01(0.278, 0.184, 0.078, 0.769)
+            isEditBoxBG = { r = 0.278, g = 0.184, b = 0.078, a = 0.77 },
             isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 },
         },
         TITLE_font = "Fonts\\MORPHEUS.ttf",
-        TITLE_fontSize = 19,
-        titleColor = { r = 1, g = 0.769, b = 0.216 },                   -- orange yellow rgb01(1, 0.769, 0.216)
-        scrollThumbTexture = 511913,                                    --511913]="Interface/ChatFrame/UI-ChatIcon-WoW",
-        scrollThumbSize = { width = 18, height = 18 },
-        buttonBgColor = { r = 0.2, g = 0.1, b = 0.05, a = 0.625 },      -- rgb01(0.678, 0.678, 0.678)
-        buttonBorderColor = { r = 1, g = 0.769, b = 0.216, a = 0.850 }, -- yellow orangeish
+        TITLE_fontSize = 18,
+        titleColor = { r = 1, g = 0.769, b = 0.216 },
+        buttonBgColor = { r = 0.2, g = 0.1, b = 0.05, a = 0.625 },
+        buttonBorderColor = { r = 1, g = 0.769, b = 0.216, a = 0.850 },
         iconTexture = 1120721,
+        iconVertex = resetVertex,
         iconSize = { width = 52, height = 52 },
     },
 }
@@ -913,13 +925,15 @@ local function ApplyTheme(frame, theme)
         end
 
         -- Apply ScrollFrame Styling
-        if frame.ScrollFrame and theme.scrollThumbTexture and theme.scrollThumbSize then
+        if frame.ScrollFrame and theme.thescrlfrm.scrollThumbTexture and theme.thescrlfrm.scrollThumbSize and theme.thescrlfrm.scrollThumbVertex then
             local scrollBar = frame.ScrollFrame.ScrollBar
             if scrollBar then
                 local thumb = scrollBar:GetThumbTexture()
                 if thumb then
-                    thumb:SetTexture(theme.scrollThumbTexture)
-                    thumb:SetSize(theme.scrollThumbSize.width, theme.scrollThumbSize.height)
+                    thumb:SetTexture(theme.thescrlfrm.scrollThumbTexture)
+                    thumb:SetVertexColor(theme.thescrlfrm.scrollThumbVertex.r, theme.thescrlfrm.scrollThumbVertex.g,
+                        theme.thescrlfrm.scrollThumbVertex.b, theme.thescrlfrm.scrollThumbVertex.a)
+                    thumb:SetSize(theme.thescrlfrm.scrollThumbSize.width, theme.thescrlfrm.scrollThumbSize.height)
                 end
             end
         end
@@ -975,15 +989,10 @@ local function ApplyTheme(frame, theme)
     end
 
     -- Apply Icon Styling
-    if frame.icon and theme.iconTexture and theme.iconSize and not theme.iconVertex then
+    if frame.icon and theme.iconTexture and theme.iconSize and theme.iconVertex then
         frame.icon:SetTexture(theme.iconTexture)
+        frame.icon:SetVertexColor(theme.iconVertex.r, theme.iconVertex.g, theme.iconVertex.b, theme.iconVertex.a)
         frame.icon:SetSize(theme.iconSize.width, theme.iconSize.height)
-    else
-        if frame.icon and theme.iconTexture and theme.iconSize and theme.iconVertex then
-            frame.icon:SetTexture(theme.iconTexture)
-            frame.icon:SetSize(theme.iconSize.width, theme.iconSize.height)
-            frame.icon:SetVertexColor(theme.iconVertex.r, theme.iconVertex.g, theme.iconVertex.b, theme.iconVertex.a)
-        end
     end
 
     -- Apply Button Styling
@@ -1023,10 +1032,9 @@ local function ApplyFont(editBox, font)
 end
 
 local function CreateThemeForPlayersGuild(frame)
-    
     --Thanks to Fizzlemizz on the forums for helping with the details
     --https://us.forums.blizzard.com/en/wow/t/explain-this-wizzardry/2065725
-    
+
     if not OG_Themes or not frame or type(OG_Themes) ~= "table" then
         return
     end
@@ -1039,12 +1047,28 @@ local function CreateThemeForPlayersGuild(frame)
         local tbl = C_GuildInfo.GetGuildTabardInfo("player")
 
         if not tbl then return end
-        local dynamicborderColor = { r = tbl.borderColor.r or 1, g = tbl.borderColor.g or 0, b = tbl.borderColor.b or 0, a =
-        tbl.borderColor.a or 1 }
-        local dynamicbackgroundColor = { r = tbl.backgroundColor.r or 0, g = tbl.backgroundColor.g or 0, b = tbl
-        .backgroundColor.b or 0, a = tbl.backgroundColor.a or 0.75 }
-        local dynamicVertex = { r = tbl.borderColor.r or 0, g = tbl.borderColor.g or 0, b = tbl.borderColor.b or 0, a =
-        tbl.borderColor.a or 1 }
+
+        local dynamicborderColor = {
+            r = tbl.borderColor.r or 1,
+            g = tbl.borderColor.g or 1,
+            b = tbl.borderColor.b or 1,
+            a = tbl.borderColor.a or 1,
+        }
+
+        local dynamicbackgroundColor = {
+            r = tbl.backgroundColor.r or 0,
+            g = tbl.backgroundColor.g or 0,
+            b = tbl.backgroundColor.b or 0,
+            a = tbl.backgroundColor.a or 0.6999,
+        }
+
+        local dynamicVertex = {
+            r = tbl.emblemColor.r or 0,
+            g = tbl.emblemColor.g or 0,
+            b = tbl.emblemColor.b or 0,
+            a = tbl.emblemColor.a or 1,
+        }
+
         -- Ensure the guild has a theme entry, otherwise initialize it
         OG_Themes[guildName] = OG_Themes[guildName] or {
             dropDownIcon = "|T" .. tbl.emblemFileID .. ":24:30|t",
@@ -1060,15 +1084,13 @@ local function CreateThemeForPlayersGuild(frame)
         OG_Themes[guildName].backgroundColor = dynamicbackgroundColor
         OG_Themes[guildName].borderColor = dynamicborderColor
         OG_Themes[guildName].TITLE_font = "Fonts\\FRIZQT__.TTF"
-        OG_Themes[guildName].TITLE_fontSize = 16
-        OG_Themes[guildName].titleColor = dynamicborderColor
-        OG_Themes[guildName].scrollThumbTexture = tbl.emblemFileID
-        OG_Themes[guildName].scrollThumbSize = { width = 30, height = 35 }
+        OG_Themes[guildName].TITLE_fontSize = 18
+        OG_Themes[guildName].titleColor = dynamicVertex
         OG_Themes[guildName].buttonBgColor = dynamicbackgroundColor
         OG_Themes[guildName].buttonBorderColor = dynamicborderColor
         OG_Themes[guildName].iconTexture = tbl.emblemFileID
-        OG_Themes[guildName].iconVertex =  dynamicVertex
-        OG_Themes[guildName].iconSize = { width = 72, height = 86 }
+        OG_Themes[guildName].iconVertex = dynamicVertex
+        OG_Themes[guildName].iconSize = { width = 72, height = 72 }
 
         OG_Themes[guildName].thescrlfrm = OG_Themes[guildName].thescrlfrm or {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -1080,8 +1102,11 @@ local function CreateThemeForPlayersGuild(frame)
         }
         OG_Themes[guildName].thescrlfrm.scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 }
         OG_Themes[guildName].thescrlfrm.scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 }
+        OG_Themes[guildName].thescrlfrm.scrollThumbTexture = tbl.emblemFileID
+        OG_Themes[guildName].thescrlfrm.scrollThumbVertex = dynamicVertex
+        OG_Themes[guildName].thescrlfrm.scrollThumbSize = { width = 32, height = 32 }
 
-        -- Initialize `theStefak` before setting nested properties
+
         OG_Themes[guildName].theStefak = OG_Themes[guildName].theStefak or {
             bgFile = "Interface\\Buttons\\WHITE8x8",
             edgeFile = "Interface\\Buttons\\WHITE8x8",
@@ -1093,7 +1118,6 @@ local function CreateThemeForPlayersGuild(frame)
         OG_Themes[guildName].theStefak.cristaFrameBorderColor = dynamicborderColor
         OG_Themes[guildName].theStefak.cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 }
 
-        --Initialize `theAtari` before assigning values
         OG_Themes[guildName].theAtari = OG_Themes[guildName].theAtari or {
             bgFile = "Interface\\Buttons\\WHITE8x8",
             edgeFile = "Interface\\Buttons\\WHITE8x8",
@@ -1106,9 +1130,9 @@ local function CreateThemeForPlayersGuild(frame)
         OG_Themes[guildName].theAtari.isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 }
 
         -- Debug print for confirmation
-        print("|cFF00FF00Updated Theme|r:", guildName, " |T" .. tbl.emblemFileID .. ":18:18|t")
-        --CreateThemeForPlayersGuild(GuildChatWindow) -- Called after frames creation
-        -- ApplyTheme(frame, OG_Themes[guildName]) -- Called manually via dropdown selection
+        print(CreateAtlasMarkup("UI-LFG-RoleIcon-Ready", 18, 18), "|cFF00FF00Theme Created|r: ".."|T"..tbl.emblemFileID..":18:18:0|t " .. guildName)
+        --when addon loads intializeTheme() is called with  CreateThemeForPlayersGuild(GuildChatWindow) --
+        --Drop down menu in General Options contentFrame will now have a users guild theme to select
     end
 end
 --#endregion OG_Themes and OG_Fonts ends
@@ -4091,8 +4115,8 @@ local function InitializeTheme()
 
     -- Apply the user saved theme to the GuildChatWindow
     ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
-    
-    C_Timer.After(10, function() 
+
+    C_Timer.After(10, function()
         CreateThemeForPlayersGuild(GuildChatWindow)
     end)
 end
