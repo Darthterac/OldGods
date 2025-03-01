@@ -1,3 +1,5 @@
+--alpha
+
 --#region Global savedvariables
 OGsavedChat = OGsavedChat or {}
 OldGodsSavedColors = OldGodsSavedColors or {}

@@ -1,0 +1,26 @@
+ignore:
+  - .git
+  - .github
+  - README.md
+  - .gitignore
+  - .pkgmeta
+  - "*.py"
+  - "*.csv"
+  - "*.txt"
+
+manual-changelog: true
+
+externals:
+  LibSharedMedia-3.0:
+    url: https://repos.wowace.com/wow/libsharedmedia-3-0
+    tag: latest
+
+package-as: OldGods
+
+files:
+  - OldGods.lua
+  - OldGods.toc
+  - LICENSE
+  - Textures/**  # Includes the entire Textures folder and all subdirectories
+  - Fonts/**     # Includes the entire Fonts folder and all subdirectories
+  - Sounds/**    # Includes the entire Sounds folder and all subdirectories
