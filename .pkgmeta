@@ -1,26 +1,3 @@
-ignore:
-  - .git
-  - .github
-  - README.md
-  - .gitignore
-  - .pkgmeta
-  - "*.py"
-  - "*.csv"
-  - "*.txt"
-
-manual-changelog: true
-
-externals:
-  LibSharedMedia-3.0:
-    url: https://repos.wowace.com/wow/libsharedmedia-3-0
-    tag: latest
-
 package-as: OldGods
+ignore: [Modified_API_Functions.csv, New_API_Functions.csv, Removed_API_Functions.csv, WoW_API_Functions_Live.csv, AddOn_vs_Depriciated_API_csv.py, README.md]
 
-files:
-  - OldGods.lua
-  - OldGods.toc
-  - LICENSE
-  - Textures/**  # Includes the entire Textures folder and all subdirectories
-  - Fonts/**     # Includes the entire Fonts folder and all subdirectories
-  - Sounds/**    # Includes the entire Sounds folder and all subdirectories

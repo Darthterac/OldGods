@@ -1,10 +1,13 @@
-## Interface: 110007
-## Version: a2.1
+## Interface: 110100
+## Version: a1.0
 ## IconTexture: 514261
 ## Title: |cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r by |cFaFFD7a0Lazyeyez|r
 ## Notes: Guild Interaction and Communication 
 ## Author: Lazyeyez-Lightbringer
 ## SavedVariables: OGsavedChat, OldGodsSavedColors, OG_TrackGuildRoster, OG_EncryptedNotes, OldGods_BadMailDB, OldGods_AutoReturnEnabled
-## OptionalDeps: LibSharedMedia-3.0
+## Dependencies: LibSharedMedia-3.0
+
+
+Libs\LibSharedMedia-3.0\lib.xml
 
 OldGods.lua
