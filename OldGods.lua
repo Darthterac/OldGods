@@ -1796,7 +1796,7 @@ local function CheckGuildRosterChanges()
     C_Timer.After(10, CacheGuildRoster)
 end
 
-CacheGuildRoster()
+--CacheGuildRoster() moving to intializeTheme to call function after addon loads
 
 local function PopulateEmptyGuildNotes()
     for i = 1, GetNumGuildMembers() do
@@ -1823,7 +1823,7 @@ end
 rosterChanges:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
         CheckGuildRosterChanges()
-        PopulateEmptyGuildNotes()
+        --PopulateEmptyGuildNotes() disabled for now to avoid crashing
     end
 end)
 --#endregion Cache Roster Track Changes
@@ -2006,7 +2006,7 @@ local function OpenEncryptedNotepad(playerName)
     EncryptedPlayerNotpad:Show()
 end
 
--- Slash Command to Open Notepad
+-- Slash Command to Open Notepad (This is undocumented but functional I still have more to do be its a known function)
 SLASH_OGNOTE1 = "/ognote"
 SlashCmdList["OGNOTE"] = function(msg)
     local playerName = msg:match("^(%S+)")
@@ -2367,19 +2367,33 @@ addButton:SetScript("OnClick", function()
     OGM_inputBox:SetText("")
 end)
 
--- Populate the Scroll Frame on Mailbox Open
-gMailframe:RegisterEvent("MAIL_SHOW")
-gMailframe:RegisterEvent("MAIL_CLOSED")
-gMailframe:SetScript("OnEvent", function(self, event)
+-- Initialize the mail frame hidden (changed order of action)
+gMailframe:Hide()
+
+-- Register events for mail interactions
+gMailframe:RegisterEvent("MAIL_SHOW")                             -- this event still works even though event trace does show it
+gMailframe:RegisterEvent("PLAYER_INTERACTION_MANAGER_FRAME_HIDE") -- MAIL_CLOSED changed to PLAYER_INTERACTION_MANAGER_FRAME_HIDE were looking for 17(mailinfo) or 0(none) both fire when mail box window is closed
+
+gMailframe:SetScript("OnEvent", function(self, event, ...)
     if event == "MAIL_SHOW" then
-        gMailframe:Show()
-        UpdateItemList()
-    elseif event == "MAIL_CLOSED" then
-        gMailframe:Hide()
+        if not self:IsShown() then
+            self:Show() --put a small delay on function call to trigger when frame shows (next line)
+            C_Timer.After(0.1, function()
+                --print("debug: Frame Show")
+                UpdateItemList()
+            end)
+        end
+    elseif event == "PLAYER_INTERACTION_MANAGER_FRAME_HIDE" then
+        local type = ...
+        if type == 17 or type == 0 then     -- event type arguments are 17 or 0
+            --print("debug: HIDE 17 or 0 FIRED")
+            if self and self:IsShown() then --if our frame exists and it is shown while the events type fired
+                self:Hide()                 -- then hide it making it seemless for the user
+                --print("debug: Frame Hide")
+            end
+        end
     end
 end)
-
-gMailframe:Hide() --intialized hidden
 --#endregion Grief Mail
 
 --#region Options UI and Funtions
@@ -2387,17 +2401,19 @@ gMailframe:Hide() --intialized hidden
 --#region Content Frame Guild Functions
 
 --#region Inactive players
+--Changes, many see Diff, should be fully optimized and not require multiple key presses for updating the frame and macro
 local frame, scrollChild
 
-local function closeFrame()
-    if frame and frame:IsShown() then
-        frame:Hide()
-    end
-end
-
+local inactiveInitiates = {} --Changes moved table init outside function
 
 local function GetInactiveInitiates(threshold)
-    local inactiveInitiates = {}
+    --Changes added check for type and if table has any data
+    --if so we wipe the table so it repopulated with the next
+    --matching player player at the threshold with out having to press f5 twice
+    if type(inactiveInitiates) == "table" and #inactiveInitiates > 0 then
+        wipe(inactiveInitiates)
+        inactiveInitiates = {}
+    end
 
     local numGuildMembers = GetNumGuildMembers()
     for i = 1, numGuildMembers do
@@ -2411,13 +2427,14 @@ local function GetInactiveInitiates(threshold)
             local hyperlinkName = "|Hplayer:" .. name .. "|h|r|cFFFFFFFF[|r|cFFF0F000" .. name .. "|r|cFFFFFFFF]|r|h"
 
             -- Default macros (for ranks other than Initiate/Member)
-            macroa = "/shrug"
-            macrob = "\n/run C_Timer.After(0.5, OldGods_ShowInactiveInitiates)"
+            macroa = "/clap"
+            macrob = "\n/run C_Timer.After(0.1, function() print(\"No actions to preform\") end)"
 
             -- Apply `/gremove` only to Initiates (14+) and Members (28+)
             if (rankName == "Initiate" and days >= 14) or (rankName == "Member" and days >= 28) then
                 macroa = "/gremove"
-                macrob = "\n/run C_Timer.After(0.1, OldGods_ShowInactiveInitiates)"
+                macrob =
+                "\n/run C_Timer.After(1, function() OldGods_ShowInactiveInitiates)"
             end
 
             -- Add all ranks to the table
@@ -2464,10 +2481,19 @@ local function GetInactiveInitiates(threshold)
                 C_Timer.After(0.1, function()
                     if GetNumMacros() < MAX_ACCOUNT_MACROS then
                         CreateMacro(macroIDname, icon, macroText, nil)
-                        print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created!")
-                        DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
-                            chatFrameName ..
-                            " staged for removal |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t")
+                        -- **Ensure message is printed if `/gremove` is detected**
+                        if string.find(macroText, "/gremove") then
+                            print(
+                                "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created or Updated!")
+                            DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
+                                chatFrameName ..
+                                " staged for removal |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t")
+                            print("[OG]: Press " .. keyBind .. " for action on " .. chatFrameName)
+                            UIErrorsFrame:AddMessage(
+                                "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0,
+                                1.0,
+                                0.0, 1, 5)
+                        end
                     else
                         print(
                             "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFC8C800ATTENTION|r - Maximum number of macros reached.|r")
@@ -2477,22 +2503,26 @@ local function GetInactiveInitiates(threshold)
             else
                 -- Update existing macro
                 EditMacro(macroIndex, macroIDname, icon, macroText)
-                print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Updated!")
-                DEFAULT_CHAT_FRAME:AddMessage("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t " ..
-                    chatFrameName .. " staged for removal")
-            end
-
-            -- Bind macro to key
-            C_Timer.After(0.2, function()
-                if keyBind and keyBind ~= "" then
-                    SetBindingMacro(keyBind, macroIndex)
-                    SaveBindings(GetCurrentBindingSet())
-                    PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert5.mp3",
-                        "MASTER")
+                -- **Ensure message is printed if `/gremove` is detected**
+                if string.find(macroText, "/gremove") then
+                    --PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert5.mp3", "MASTER")
+                    print(
+                    "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created or Updated!")
+                    DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
+                        chatFrameName ..
+                        " staged for removal |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t")
                     print("[OG]: Press " .. keyBind .. " for action on " .. chatFrameName)
                     UIErrorsFrame:AddMessage(
                         "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0,
                         0.0, 1, 5)
+                end
+            end
+
+            -- Bind macro to key
+            C_Timer.After(0.2, function()
+                if keyBind and keyBind ~= "" and macroIndex > 0 then
+                    SetBindingMacro(keyBind, macroIndex)
+                    SaveBindings(GetCurrentBindingSet())
                 end
             end)
         end
@@ -2502,8 +2532,6 @@ local function GetInactiveInitiates(threshold)
 end
 
 local function CreateInactiveInitiatesFrame(parent)
-    closeFrame()
-
     -- Base frame
     local frame = CreateFrame("Frame", "InactiveInitiatesFrame", parent, "BackdropTemplate")
     frame:SetSize(420, 300)
@@ -2653,7 +2681,7 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
         --self:ClearFocus() -- Remove focus after pressing Enter
     end)
 
-    inputBox:SetScript("OnEnter", function(self)
+    inputBox:SetScript("OnEnter", function()
         GameTooltip:SetOwner(UIParent, "ANCHOR_BOTTOM")
         GameTooltip:AddLine("Search")
         GameTooltip:AddDoubleLine(
@@ -2668,12 +2696,18 @@ local function CreateThresholdInputBox(frame, onUpdateCallback)
     return inputBox
 end
 
+local function closeFrame()
+    if frame and frame:IsShown() then
+        frame:Hide()
+    end
+end
+
 -- Initial call Global so Macro can call it
 function OldGods_ShowInactiveInitiates()
     local threshold = 14 -- Default threshold
     closeFrame()
 
-    local function RefreshFrame(newThreshold)
+    function RefreshFrame(newThreshold)
         threshold = newThreshold
         local data = GetInactiveInitiates(threshold)
 
@@ -2684,7 +2718,7 @@ function OldGods_ShowInactiveInitiates()
                 #data .. " |cFF66a8bfplayers " ..
                 "\n             that are > =|r " .. threshold)
         end
-
+        --if scrollChild and frame then scrollChild = nil end
         frame, scrollChild = CreateInactiveInitiatesFrame()
         PopulateInactiveInitiates(frame, scrollChild, data)
         CreateThresholdInputBox(frame, function(newThreshold)
@@ -2697,6 +2731,7 @@ function OldGods_ShowInactiveInitiates()
 end
 
 --#endregion Inactive players
+
 --#region MemberSearch
 local guildRosterCache = {}
 local searchFrame, scrollFrame, SR_scrollChild
@@ -4062,96 +4097,6 @@ SlashCmdList["HELPDATA"] = function()
     end
 end
 --#endregion slash commands ends
-
---#region Sounds: Dependancy LibShredMedia-3.0
-local LSM = LibStub("LibSharedMedia-3.0")
-
-if LSM then
-    LSM:Register("sound", "CSC_soundpack01", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack01.ogg]])
-    LSM:Register("sound", "CSC_soundpack02", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack02.ogg]])
-    LSM:Register("sound", "CSC_soundpack03", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack03.ogg]])
-    LSM:Register("sound", "CSC_soundpack04", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack04.ogg]])
-    LSM:Register("sound", "CSC_soundpack05", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack05.ogg]])
-    LSM:Register("sound", "CSC_soundpack06", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack06.ogg]])
-    LSM:Register("sound", "CSC_soundpack07", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack07.ogg]])
-    LSM:Register("sound", "CSC_soundpack08", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack08.ogg]])
-    LSM:Register("sound", "CSC_soundpack09", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack09.ogg]])
-    LSM:Register("sound", "CSC_soundpack10", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack10.ogg]])
-    LSM:Register("sound", "CSC_soundpack11", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack11.ogg]])
-    LSM:Register("sound", "CSC_soundpack12", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack12.ogg]])
-    LSM:Register("sound", "CSC_soundpack13", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack13.ogg]])
-    LSM:Register("sound", "CSC_soundpack14", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack14.ogg]])
-    LSM:Register("sound", "CSC_soundpack15", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack15.ogg]])
-    LSM:Register("sound", "CSC_soundpack16", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack16.ogg]])
-    LSM:Register("sound", "CSC_soundpack17", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack17.ogg]])
-    LSM:Register("sound", "CSC_soundpack18", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack18.ogg]])
-    LSM:Register("sound", "CSC_soundpack19", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack19.ogg]])
-    LSM:Register("sound", "CSC_soundpack20", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack20.ogg]])
-    LSM:Register("sound", "CSC_soundpack41", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack41.ogg]])
-    LSM:Register("sound", "CSC_soundpack42", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack42.ogg]])
-    LSM:Register("sound", "CSC_soundpack43", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack43.ogg]])
-    LSM:Register("sound", "CSC_soundpack44", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack44.ogg]])
-    LSM:Register("sound", "CSC_soundpack45", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack45.ogg]])
-    LSM:Register("sound", "CSC_soundpack46", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack46.ogg]])
-    LSM:Register("sound", "CSC_soundpack47", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack47.ogg]])
-    LSM:Register("sound", "CSC_soundpack48", [[Interface\AddOns\OldGods\Sounds\CSC_soundpack48.ogg]])
-    LSM:Register("sound", "bad_machine", [[Interface\AddOns\OldGods\Sounds\bad_machine.mp3]])
-    LSM:Register("sound", "camera1", [[Interface\AddOns\OldGods\Sounds\camera1.mp3]])
-    LSM:Register("sound", "camera2", [[Interface\AddOns\OldGods\Sounds\camera2.mp3]])
-    LSM:Register("sound", "dailing_911", [[Interface\AddOns\OldGods\Sounds\dailing_911.mp3]])
-    LSM:Register("sound", "echo_beep_alert", [[Interface\AddOns\OldGods\Sounds\echo_beep_alert.mp3]])
-    LSM:Register("sound", "error_tones", [[Interface\AddOns\OldGods\Sounds\error_tones.mp3]])
-    LSM:Register("sound", "morsecode_SOS", [[Interface\AddOns\OldGods\Sounds\morsecode_SOS.mp3]])
-    LSM:Register("sound", "phone_offhook_tones", [[Interface\AddOns\OldGods\Sounds\phone_offhook_tones.mp3]])
-    LSM:Register("sound", "quick_bleep", [[Interface\AddOns\OldGods\Sounds\quick_bleep.mp3]])
-    LSM:Register("sound", "reactor", [[Interface\AddOns\OldGods\Sounds\reactor.mp3]])
-    LSM:Register("sound", "robot_talking", [[Interface\AddOns\OldGods\Sounds\robot_talking.mp3]])
-    LSM:Register("sound", "scanner", [[Interface\AddOns\OldGods\Sounds\scanner.mp3]])
-    LSM:Register("sound", "soft_chime", [[Interface\AddOns\OldGods\Sounds\soft_chime.mp3]])
-    LSM:Register("sound", "sonar_ping", [[Interface\AddOns\OldGods\Sounds\sonar_ping.mp3]])
-    LSM:Register("sound", "synth_ring", [[Interface\AddOns\OldGods\Sounds\synth_ring.mp3]])
-    LSM:Register("sound", "synth_ring2", [[Interface\AddOns\OldGods\Sounds\synth_ring2.mp3]])
-    LSM:Register("sound", "timer_finsished_bell", [[Interface\AddOns\OldGods\Sounds\timer_finsished_bell.mp3]])
-end
---#endregion LibSharedMedia
-local function DeepPrintTable(tbl, indent)
-    indent = indent or ""
-    for k, v in pairs(tbl) do
-        if type(v) == "table" then
-            print(indent .. tostring(k) .. " = {")
-            DeepPrintTable(v, indent .. "    ")
-            print(indent .. "},")
-        else
-            print(indent .. tostring(k) .. " = " .. tostring(v))
-        end
-    end
-end
-
-function GetIT()
-    if IsInGuild() then
-        local tabard = CreateFrame("Frame") -- Hidden frame to hold the tabard
-        tabard:SetSize(64, 64)
-        tabard:SetPoint("CENTER")
-
-        local emblemTexture = tabard:CreateTexture(nil, "ARTWORK")
-        SetGuildTabardTextures(nil, nil, nil, emblemTexture) -- Forces the emblem onto the texture
-        print(emblemTexture:GetTexture())
-    end
-end
-
-OG_tHax = {}
-function Gcopy(ChatHistoryWindow, str)
-    if ChatHistoryWindow then
-        local haxA = ChatHistoryWindow.editBox
-        local str_ = str .. "\n"
-        table.insert(OG_tHax, str_)
-        print(str_)
-        C_Timer.After(1, function()
-            local haxB = table.concat(OG_tHax, "\n")
-            haxA:SetText(haxB)
-        end)
-    end
-end
 
 --#region primary initialize function
 local function InitializeTheme()

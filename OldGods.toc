@@ -5,9 +5,5 @@
 ## Notes: Guild Interaction and Communication 
 ## Author: Lazyeyez-Lightbringer
 ## SavedVariables: OGsavedChat, OldGodsSavedColors, OG_TrackGuildRoster, OG_EncryptedNotes, OldGods_BadMailDB, OldGods_AutoReturnEnabled
-## Dependencies: LibSharedMedia-3.0
-
-
-Libs\LibSharedMedia-3.0\lib.xml
 
 OldGods.lua
