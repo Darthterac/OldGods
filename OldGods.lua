@@ -1,4 +1,4 @@
---alpha
+--OldGods 1.0.0-beta
 
 --#region Global savedvariables
 OGsavedChat = OGsavedChat or {}
