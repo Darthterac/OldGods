@@ -1,4 +1,4 @@
---OldGods 1.0.0-beta
+--OldGods 1.0.4-beta
 
 --#region Global savedvariables
 OGsavedChat = OGsavedChat or {}
@@ -513,7 +513,7 @@ local JokeData = { "Why cant you trust an atom? Because they make up literally e
     "What happens to an illegally parked frog? It gets toad away.",
     "Why did the parents not like their sons biology teacher? He had skeletons in his closet.",
     "A Freudian slip is when you say one thing but mean your mother.",
-    "What do you call a bear with no teeth?                   A gummy bear.",
+    "What do you call a bear with no teeth? A gummy bear.",
     "If you take $2 out of an ATM that has a $2.50 fee, do you owe the machine money?",
     "How can you tell youre getting old? When you go to an antique auction and three people bid on you.",
     "Did you hear the one about the cat who ate a ball of yarn? She had mittens.",
@@ -537,7 +537,36 @@ local JokeData = { "Why cant you trust an atom? Because they make up literally e
     "Singing in the shower is fun until you get soap in your mouth. Then its a soap opera.",
     "Why can't a nose be 12 inches long? Because then it would be a foot.",
     "You think swimming with sharks isnt expensive? Swimming with sharks cost me an arm and a leg.",
-    "It takes guts to be an organ donor." }
+    "It takes guts to be an organ donor.",
+    "How did I know my girlfriend thought I was invading her privacy? She wrote about it in her diary.",
+    "Why did the electric car feel discriminated against? Because the rules weren't current.",
+    "I'm such a good navigator, a self-driving car once asked me for directions.",
+    "Why do melons have weddings? They cantelope.",
+    "What did the bison say to his son when he left the ranch? Bi-son.",
+    "Watch what you say around the egg whites. They can't take a yolk.",
+    "Were did the pumpkins have their meeting? In the gourdroom.",
+    "What's the best way to save your dad jokes? In a dadda-base.",
+    "I got a new pen that can write under water. It can write other words too.",
+    "My boss said “dress for the job you want, not for the job you have.” So I went in as Batman.",
+    "I went to the aquarium this weekend, but I didn’t stay long. There’s something fishy about that place.",
+    "What do you call a sheep who can sing and dance? Lady Ba Ba.",
+    "What do you call a French man wearing sandals? Philipe Fallop.",
+    "Why can't dinosaurs clap their hands? Because they're extinct.",
+    "Why should you never take sides in an argument at the dinner table? Trick question. It's the perfect time to take sides because no one's paying attention. Bring Tupperware.",
+    "Who won the neck decorating contest? It was a tie.",
+    "Where do rainbows go when they've been bad? To prism, so they have time to reflect on what they've done.",
+    "Dogs can't operate MRI machines. But catscan.",
+    "What do mermaids use to wash their fins? Tide.",
+    "What did the skillet eat on its birthday? Pan-cakes.",
+    "Why couldn't the produce manager make it to work? He could drive, but he didn't avocado.",
+    "I went to a silent auction. I won a dog whistle and two mimes.",
+    "How is my wallet like an onion? Every time I open it, I cry.",
+    "What do you call a dog who meditates? Aware wolf.",
+    "What kind of fish do penguins catch at night? Star fish.",
+    "Which vegetable has the best kung fu? Broc-lee.",
+    "Can a frog jump higher than a house? Of course, a house can't jump.",
+    "Dad: What is the difference between a piano, a tuna, and a pot of glue? Me: I don't know. Dad: You can tuna piano but you can't piano a tuna. Me: What about the pot of glue? Dad: I knew you'd get stuck on that.",
+}
 
 local QuoteData = { "The customer is always right, in matters of taste - Harry Gordon Selfridge",
     "The only limit to our realization of tomorrow is our doubts of today - Franklin D. Roosevelt",
@@ -636,13 +665,15 @@ local QuoteData = { "The customer is always right, in matters of taste - Harry G
     "Life isn’t about finding yourself. It’s about creating yourself - George Bernard Shaw",
     "You can’t use up creativity. The more you use, the more you have - Maya Angelou" }
 
-local helpData = { "Welcome to the |cAA0040FFOld Gods|r AddOn!", "To use this AddOn is very simple, heres how",
-    "Type |cFFCCAA99/OG JOKE|r for a random joke", "Type |cFFCCAA99/OG QUOTE|r for a random quote",
-    "Type |cFFCCAA99/OG GUILD #|r specific Guild msgs", "Type |cFFCCAA99/OG #|r for specific Joke",
-    "Type |cFFCCAA99/OGQ #|r for specific Quote", "To get a line # and corresponding msg",
+local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
+    "The slash commands used from the input box are...",
+    "Type |cFFCCAA99/joke|r for a random joke", "Type |cFFCCAA99/quote|r for a random quote",
+    "Type |cFFCCAA99/ogg|r to list specific messages to send to the Guild", "Type |cFFCCAA99/reload|r to reload UI",
+    "Type |cFFCCAA99/afk|r set yourself away", "Type |cFFCCAA99/ognote|r to create or view encrypted notes",
+    "To veiw the available jokes and quotes",
     "click the |cFF0DAF00next page|r button", "________________________________________",
-    "by |cFF7ba9FFLazyeyez|r with help from |cFF00F906chatGPT|r",
-    "________________________________________", "|cCF99000AWork in progress|r" }
+    "by |cFF7ba9FFLazyeyez|r aka Darthterac with mentoring from |cFF00F906chatGPT|r",
+    "________________________________________", "|cCF99000AWork in progress Thanks for testing!|r" }
 
 local GuildData = {
     "Welcome to the Old Gods {skull} Lightbringer Chapter {skull} Join our Discord @ https://discord.gg/oldgods to rankup to Member! {star} Make a post in #new_member_info exactly as 'YourName@Lightbringer_Chapter' {X}DO NOT ALTER ANYTHING BUT YOUR NAME{X}",
@@ -1591,7 +1622,7 @@ local function CreateGuildChatWindow(title)
             -- Check if the input is a slash command
             if message:sub(1, 1) == "/" then
                 local command = message:lower():match("^/(%S+)")
-                if command == "reload" or "rl" then
+                if command == "reload" then
                     ChatFrame1EditBox:Show()
                     ChatFrame1EditBox:SetText("/reload")
                     ChatFrame1EditBox:SetFocus()
@@ -1606,19 +1637,44 @@ local function CreateGuildChatWindow(title)
                     ChatFrame1EditBox:SetText("/og guild ") --slash command defined in the Slash Commands region
                     ChatFrame1EditBox:SetFocus()
                     print(
-                        "Set the # then press Enter to message guild chat.\n" ..
-                        "|cFF00F0FF[|r1|cFF00F0FF]|r-|cFF00FF00New Player Welcome Message|r\n" ..
-                        "|cFF00F0FF[|r2|cFF00F0FF]|r-|cFFF0F002Notify|r Purge Begins\n" ..
-                        "|cFF00F0FF[|r3|cFF00F0FF]|r-|cFFF0F002Notify|r Purge Completed|r\n"
+                        "Enter message # then press Enter.\n" ..
+                        "|cFF00F0FF[|r1|cFF00F0FF]|r-|cFF00FF00Welcome Message & Discord Info|r\n" ..
+                        "|cFF00F0FF[|r2|cFF00F0FF]|r-|cFFF0F002Notify|r Purge Alert\n" ..
+                        "|cFF00F0FF[|r3|cFF00F0FF]|r-|cFFF0F002Notify|r Purge Complete|r\n"
                     )
+                elseif command == "oghelp" then
+                    ChatFrame1EditBox:Show()
+                    ChatFrame1EditBox:SetText("/OGHELP") --slash command defined in the Slash Commands region
+                    ChatFrame1EditBox:SetFocus()
+                    print("Press Enter to open Help Menu.")
+                elseif command == "joke" then
+                    ChatFrame1EditBox:Show()
+                    ChatFrame1EditBox:SetText("/OG JOKE") --slash command defined in the Slash Commands region
+                    ChatFrame1EditBox:SetFocus()
+                    print("Press Enter to send a Random Dad Joke!")
+                elseif command == "quote" then
+                    ChatFrame1EditBox:Show()
+                    ChatFrame1EditBox:SetText("/OG QUOTE") --slash command defined in the Slash Commands region
+                    ChatFrame1EditBox:SetFocus()
+                    print("Press Enter for to send a Random Famous Quote!")
+                elseif command == "ognote" then
+                    ChatFrame1EditBox:Show()
+                    ChatFrame1EditBox:SetText("/ognote ") --slash command defined in the Slash Commands region
+                    ChatFrame1EditBox:SetFocus()
+                    print(
+                        "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Encrypted Notes.\n" ..
+                        CreateAtlasMarkup("adventureguide-icon-whatsnew", 18, 18),
+                        "Enter a descriptive name for a new note: |cFF00F002ie. /ognote Secrets|r\n" ..
+                        CreateAtlasMarkup("adventureguide-icon-whatsnew", 18, 18),
+                        "To view or edit an existing note enter the name: |cFF00F002ie. /ognote GoldFarm|r\n")
                 end
             else
                 -- Send the final message (fancy or normal) to guild chat
                 SendChatMessage(finalMessage, "GUILD")
             end
-            self:SetText("")                              -- Clear the input box after processing
+            self:SetText("")                       -- Clear the input box after processing
         else
-            print("Error: Cannot send an empty message.") -- Error for empty input
+            print("Cannot send an empty message.") -- Error for empty input
         end
     end)
 
@@ -1883,7 +1939,8 @@ end
 -- Save Encrypted Note
 local function SaveEncryptedNote()
     if not userKey then
-        print("|cFFFF0000[OldGods]|r Set an encryption key first!")
+        print(CreateAtlasMarkup("Ping_Chat_Warning", 18, 18),
+            "Create a password to continue\n This is not saved and if lost or forgotten\n you will not be able to access or edit this note.\n Write it down, you can use the same password for many notes.")
         PromptUserForKey(function()
             SaveEncryptedNote() -- Retry saving after key is set
         end)
@@ -1897,7 +1954,8 @@ local function SaveEncryptedNote()
     local note = EncryptedPlayerNotpad.editBox:GetText()
     if note and note ~= "" then
         OG_EncryptedNotes[currentPlayer] = XORCipher(note, userKey)
-        print("|cFF00FF00[OldGods]|r Note saved for " .. currentPlayer)
+        print(CreateAtlasMarkup("UI-CharacterCreate-PadLock", 19, 28),
+            "Note " .. currentPlayer .. " has been encrypted and saved")
     else
         print("|cFFFF0000[OldGods]|r Cannot save an empty note!")
     end
@@ -1918,7 +1976,8 @@ local function LoadDecryptedNote()
 
     -- If userKey is missing, prompt for it first
     if not userKey then
-        print("|cFFFF0000[OldGods]|r Set an encryption key first!")
+        print(CreateAtlasMarkup("Ping_Chat_Warning", 18, 18),
+            "Create a password to continue\n This is not saved and if lost or forgotten\n you will not be able to access or edit this note.\n Write it down, you can use the same password for many notes.")
         PromptUserForKey(function()
             -- Once key is entered, retry loading the note
             EncryptedPlayerNotpad.editBox:SetText(LoadDecryptedNote())
@@ -1975,6 +2034,7 @@ local function CreateEncryptedPlayerNotepad()
     closeButton:SetScript("OnClick", function()
         frame:Hide()
         userKey = nil -- Clear key on close for security
+        EncryptedPlayerNotpad.editBox:SetText("")
         print("|cFFFF0000[OldGods]|r Encryption key removed from memory.")
     end)
 
@@ -1989,11 +2049,12 @@ local function OpenEncryptedNotepad(playerName)
     end
 
     currentPlayer = playerName
-    EncryptedPlayerNotpad.title:SetText("Notes for: " .. playerName)
+    EncryptedPlayerNotpad.title:SetText("Note: " .. playerName)
 
     -- Ensure key is set before attempting to decrypt
     if not userKey then
-        print("|cFFFF0000[OldGods]|r Set an encryption key first!")
+        print(CreateAtlasMarkup("Ping_Chat_Warning", 18, 18),
+            "Enter the password for this note.\nPasswords are not saved, you will not be able to access or edit this note without it.\n Write the password down, you can use the same password for different notes, the password is used as the encryption key.")
         PromptUserForKey(function()
             -- Retry loading note after key is set
             EncryptedPlayerNotpad.editBox:SetText(LoadDecryptedNote())
@@ -2019,6 +2080,72 @@ end
 --#endregion
 
 --#region ModifyMenu
+local function ModMenu_RankGuild_Up(contextData)
+    if not contextData or not contextData.name then
+        print("Old Gods: No player found to promote.")
+        return
+    end
+
+    local targetPlayer = contextData.name .. "-" .. contextData.server
+
+    if CanGuildPromote() then
+        -- Ensure we always get the full player name
+        local macroName = "OG_Promote"
+        local macroIcon = 134238
+        local macroText = "/gpromote " .. targetPlayer
+        local macroIndex = GetMacroIndexByName(macroName)
+        local keyBind = "F6"
+
+        -- Check if macro exists, else create/update it
+        if macroIndex == 0 then
+            C_Timer.After(0.1, function()
+                if GetNumMacros() < MAX_ACCOUNT_MACROS then
+                    CreateMacro(macroName, macroIcon, macroText, nil)
+                    -- **Ensure message is printed if `/gpromote` is detected**
+                    if string.find(macroText, "/gpromote") then
+                        print(
+                            "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created!")
+                        DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
+                            targetPlayer ..
+                            " staged for promotion |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16|t")
+                        print("[OG]: Press " .. keyBind .. " for action on " .. targetPlayer)
+                        UIErrorsFrame:AddMessage(
+                            "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0,
+                            0.0, 1, 5)
+                    end
+                else
+                    print(
+                        "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFC8C800ATTENTION|r - Maximum number of macros reached.|r")
+                    return
+                end
+            end)
+        else
+            -- Update existing macro
+            EditMacro(macroIndex, macroName, macroIcon, macroText)
+            -- **Ensure message is printed if `/gpromote` is detected**
+            if string.find(macroText, "/gpromote") then
+                print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Updated!")
+                DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
+                    targetPlayer ..
+                    " staged for promotion |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16|t")
+                print("[OG]: Press " .. keyBind .. " for action on " .. targetPlayer)
+                UIErrorsFrame:AddMessage(
+                    "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0, 0.0, 1,
+                    5)
+            end
+        end
+
+        -- Bind macro to key
+        C_Timer.After(0.2, function()
+            if keyBind and keyBind ~= "" and macroIndex > 0 then
+                SetBindingMacro(keyBind, macroIndex)
+                SaveBindings(GetCurrentBindingSet())
+            end
+        end)
+    end
+end
+
+
 local function ModMenu_SendGuild_Invite(contextData)
     if not contextData or not contextData.name then
         print("Old Gods: No player found to invite.")
@@ -2116,6 +2243,10 @@ local OG_ModifyMenu_Buttons = {
         lfunction = ModMenu_SendGuild_Invite,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
     },
+    ["Promote Guild Member"] = {
+        lfunction = ModMenu_RankGuild_Up,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:18:18|t "
+    },
     ["Copy Character Name"] = {
         lfunction = ModMenu_CopyNameTrick,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
@@ -2124,7 +2255,7 @@ local OG_ModifyMenu_Buttons = {
 
 Menu.ModifyMenu("MENU_UNIT_PLAYER", function(ownerRegion, rootDescription, contextData)
     rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options")
+    rootDescription:CreateTitle("Old Gods Options: Player")
     for bLabel, bData in pairs(OG_ModifyMenu_Buttons) do
         rootDescription:CreateButton(bData.icon .. bLabel, function()
             bData.lfunction(contextData) -- Pass contextData properly
@@ -2134,7 +2265,7 @@ end)
 
 Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, contextData)
     rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options")
+    rootDescription:CreateTitle("Old Gods Options: Friend")
     for bLabel, bData in pairs(OG_ModifyMenu_Buttons) do
         rootDescription:CreateButton(bData.icon .. bLabel, function()
             bData.lfunction(contextData) -- Pass contextData properly
@@ -2412,7 +2543,6 @@ local function GetInactiveInitiates(threshold)
     --matching player player at the threshold with out having to press f5 twice
     if type(inactiveInitiates) == "table" and #inactiveInitiates > 0 then
         wipe(inactiveInitiates)
-        inactiveInitiates = {}
     end
 
     local numGuildMembers = GetNumGuildMembers()
@@ -2433,8 +2563,7 @@ local function GetInactiveInitiates(threshold)
             -- Apply `/gremove` only to Initiates (14+) and Members (28+)
             if (rankName == "Initiate" and days >= 14) or (rankName == "Member" and days >= 28) then
                 macroa = "/gremove"
-                macrob =
-                "\n/run C_Timer.After(1, function() OldGods_ShowInactiveInitiates)"
+                macrob = "\n/run C_Timer.After(0.1, OldGods_ShowInactiveInitiates)"
             end
 
             -- Add all ranks to the table
@@ -2507,7 +2636,7 @@ local function GetInactiveInitiates(threshold)
                 if string.find(macroText, "/gremove") then
                     --PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert5.mp3", "MASTER")
                     print(
-                    "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created or Updated!")
+                        "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created or Updated!")
                     DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
                         chatFrameName ..
                         " staged for removal |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t")
@@ -2705,11 +2834,12 @@ end
 -- Initial call Global so Macro can call it
 function OldGods_ShowInactiveInitiates()
     local threshold = 14 -- Default threshold
+    local data
     closeFrame()
 
     function RefreshFrame(newThreshold)
         threshold = newThreshold
-        local data = GetInactiveInitiates(threshold)
+        data = GetInactiveInitiates(threshold)
 
         if #data == 0 then
             print("No Guild members match " .. threshold .. " days offline.")
@@ -2718,7 +2848,7 @@ function OldGods_ShowInactiveInitiates()
                 #data .. " |cFF66a8bfplayers " ..
                 "\n             that are > =|r " .. threshold)
         end
-        --if scrollChild and frame then scrollChild = nil end
+
         frame, scrollChild = CreateInactiveInitiatesFrame()
         PopulateInactiveInitiates(frame, scrollChild, data)
         CreateThresholdInputBox(frame, function(newThreshold)
