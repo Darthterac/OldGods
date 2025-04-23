@@ -1,10 +1,14 @@
---OldGods 1.0.4-beta
+--OldGods 1.0.61
+
+
+--line 1899 commented out, fucntion crashing app, hi shefali <3
 
 --#region Global savedvariables
 OGsavedChat = OGsavedChat or {}
 OldGodsSavedColors = OldGodsSavedColors or {}
 OG_TrackGuildRoster = OG_TrackGuildRoster or {}
 OldGods_BadMailDB = OldGods_BadMailDB or {}
+OldGodsGuildActivity = OldGodsGuildActivity or {}
 OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
 --#endregion Global savedvariables
 
@@ -676,7 +680,7 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
     "________________________________________", "|cCF99000AWork in progress Thanks for testing!|r" }
 
 local GuildData = {
-    "Welcome to the Old Gods {skull} Lightbringer Chapter {skull} Join our Discord @ https://discord.gg/oldgods to rankup to Member! {star} Make a post in #new_member_info exactly as 'YourName@Lightbringer_Chapter' {X}DO NOT ALTER ANYTHING BUT YOUR NAME{X}",
+    "Welcome to Old Gods {skull} Hyjal Chapter {skull} Discord: discord.gg/oldgods to rankup! {star} Post in #new_member_info as 'ToonName/ToonServer/Hyjal' {star} Questions? Contact an Officer/GM!",
     "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live The Old Gods! {triangle}",
     "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever." }
 
@@ -726,6 +730,7 @@ local CLASS_ROLES = {
 --#endregion tables end
 
 --#region Utility and Other functions
+
 local function SumTableData(table_name)
     local size = 0
     if type(table_name) == "table" then
@@ -792,6 +797,14 @@ local function updateTargetEditBoxText(editBox, table_name)
     end
 end
 
+local function calDateStamp()
+    local c = C_DateAndTime.GetCurrentCalendarTime()
+    local w = CALENDAR_WEEKDAY_NAMES[c.weekday]
+    local m = CALENDAR_FULLDATE_MONTH_NAMES[c.month]
+    local x = string.format("%02d:%02d, %s, %d %s %d", c.hour, c.minute, w, c.monthDay, m, c.year)
+    return x
+end
+
 local function UpdateChatHistoryTitle(table_name)
     if type(table_name) ~= "table" or next(table_name) == nil then
         return "Chat History (0.00 KB)"
@@ -804,12 +817,14 @@ end
 
 local function saveDateMessage(table_name)
     if type(table_name) ~= "table" or next(table_name) == nil then
-        return "Possibly not a table"
+        return "Nothing to save, tell a joke engage the guild :)"
     end
 
+    local thistime = calDateStamp()
     local table_size = SumTableData(table_name)
     local size_in_kb = math.max(table_size / 1024, 0) -- Avoid negative values
-    return string.format("MEMORY FREED: (%.2f KB)", size_in_kb)
+
+    return string.format("MEMORY FREED: (%.2f KB)", size_in_kb) .. " \n" .. thistime
 end
 
 -- GetClassColor(class) returns the hexColor value assined to the class key in CLASS_COLORS table
@@ -1412,7 +1427,7 @@ local function CreateGuildChatWindow(title)
             GameTooltip:Hide()
             if not OG_leaveSoundPlayed then
                 PlaySoundFile(5834619, "Master")
-                --OG_leaveSoundPlayed = true now she laughs every time :D
+                OG_leaveSoundPlayed = true -- ok once per session i spoiled you guys
             end
         end)
     end)
@@ -1459,7 +1474,9 @@ local function CreateGuildChatWindow(title)
     SaveClearButton:SetSize(120, 25)
     SaveClearButton:SetScript("OnClick", function()
         if type(OG_ChatMessageTable) == "table" then
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert3.mp3")
+            local SaveMessage = saveDateMessage(OGsavedChat)
+            table.insert(OG_ChatMessageTable, SaveMessage)
+
             for _, message in ipairs(OG_ChatMessageTable) do
                 if not tContains(OGsavedChat, message) then
                     table.insert(OGsavedChat, message)
@@ -1468,13 +1485,16 @@ local function CreateGuildChatWindow(title)
 
             SavedChatHistoryWindow:Show()
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)
-            local SaveMessage = saveDateMessage(OG_ChatMessageTable)
 
-            updateTargetEditBoxText(SavedChatHistoryWindow.editBox, OGsavedChat)
-            SavedChatHistoryWindow.title:SetText(updatedTitle)
+            C_Timer.After(0.1, function()
+                updateTargetEditBoxText(SavedChatHistoryWindow.editBox, OGsavedChat)
+                SavedChatHistoryWindow.title:SetText(updatedTitle)
+            end)
 
             wipe(OG_ChatMessageTable)
             OG_ChatMessageTable = {}
+
+            local SaveMessage = saveDateMessage(OG_ChatMessageTable)
             table.insert(OG_ChatMessageTable, SaveMessage)
 
             C_Timer.After(0.1, function()
@@ -1654,9 +1674,9 @@ local function CreateGuildChatWindow(title)
                     print("Press Enter to send a Random Dad Joke!")
                 elseif command == "quote" then
                     ChatFrame1EditBox:Show()
-                    ChatFrame1EditBox:SetText("/OG QUOTE") --slash command defined in the Slash Commands region
+                    ChatFrame1EditBox:SetText("/OG QUOTE")                  --slash command defined in the Slash Commands region
                     ChatFrame1EditBox:SetFocus()
-                    print("Press Enter for to send a Random Famous Quote!")
+                    print("Press Enter for to send a Random Famous Quote!") -- lol for to, im leaving it
                 elseif command == "ognote" then
                     ChatFrame1EditBox:Show()
                     ChatFrame1EditBox:SetText("/ognote ") --slash command defined in the Slash Commands region
@@ -1879,7 +1899,7 @@ end
 rosterChanges:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
         CheckGuildRosterChanges()
-        --PopulateEmptyGuildNotes() disabled for now to avoid crashing
+        --PopulateEmptyGuildNotes() -- Populate empty notes
     end
 end)
 --#endregion Cache Roster Track Changes
@@ -2924,7 +2944,6 @@ end
 
 local function stripChars(str)
     local tableAccents = {}
-
     -- Standard Latin Accents
     tableAccents["À"] = "A"
     tableAccents["Á"] = "A"
@@ -2957,7 +2976,6 @@ local function stripChars(str)
     tableAccents["Ý"] = "Y"
     tableAccents["Þ"] = "P"
     tableAccents["ß"] = "ss"
-
     -- Lowercase Variants
     tableAccents["à"] = "a"
     tableAccents["á"] = "a"
@@ -2990,7 +3008,6 @@ local function stripChars(str)
     tableAccents["ý"] = "y"
     tableAccents["þ"] = "p"
     tableAccents["ÿ"] = "y"
-
     -- **Additional Eastern European Characters**
     tableAccents["Ā"] = "A"
     tableAccents["Ă"] = "A"
@@ -3054,7 +3071,6 @@ local function stripChars(str)
     tableAccents["Ź"] = "Z"
     tableAccents["Ż"] = "Z"
     tableAccents["Ž"] = "Z"
-
     -- Lowercase versions of Eastern European characters
     tableAccents["ā"] = "a"
     tableAccents["ă"] = "a"
@@ -3289,6 +3305,149 @@ local function OldGods_MemberSearch()
     CreateSearchFrame()
     searchFrame:Show()
 end
+
+--#region Meta data graph
+local graphScrollFrame, graphContent
+
+-- 5-minute tracker
+C_Timer.NewTicker(300, function()
+    local timestamp = calDateStamp()
+    local online = GetNumGuildMembers()
+    local chatLines = #OG_ChatMessageTable or 0
+
+    table.insert(OldGodsGuildActivity, {
+        timestamp = timestamp,
+        chatCount = chatLines,
+        onlineMembers = online,
+    })
+
+    if #OldGodsGuildActivity > 288 then
+        table.remove(OldGodsGuildActivity, 1)
+    end
+end)
+
+local function CreateGraphFrame(parent)
+    if graphScrollFrame then return end
+
+    -- Outer scroll container
+    graphScrollFrame = CreateFrame("ScrollFrame", "OldGods_GuildGraphScroll", parent, "BackdropTemplate")
+    graphScrollFrame:SetSize(500, 340)
+    graphScrollFrame:SetPoint("CENTER", parent, "CENTER", 0, 0)
+    graphScrollFrame:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = { left = 8, right = 8, top = 8, bottom = 8 }
+    })
+
+    -- Make it draggable
+    graphScrollFrame:EnableMouse(true)
+    graphScrollFrame:SetMovable(true)
+    graphScrollFrame:RegisterForDrag("LeftButton")
+    graphScrollFrame:SetScript("OnDragStart", graphScrollFrame.StartMoving)
+    graphScrollFrame:SetScript("OnDragStop", graphScrollFrame.StopMovingOrSizing)
+
+    -- Mousewheel 2D scroll
+    graphScrollFrame:EnableMouseWheel(true)
+    graphScrollFrame:SetScript("OnMouseWheel", function(self, delta)
+        if IsShiftKeyDown() then
+            self:SetHorizontalScroll(self:GetHorizontalScroll() - delta * 20)
+        else
+            self:SetVerticalScroll(self:GetVerticalScroll() - delta * 20)
+        end
+    end)
+
+    -- Scrollable content
+    graphContent = CreateFrame("Frame", nil, graphScrollFrame)
+    graphContent:SetSize(1440, 720) -- Big enough to scroll both axes
+    graphScrollFrame:SetScrollChild(graphContent)
+
+    -- Background for clarity
+    local bg = graphContent:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    bg:SetColorTexture(0.1, 0.1, 0.1, 0.8)
+
+    -- Grid lines (horizontal)
+    for i = 1, 4 do
+        local grid = graphContent:CreateTexture(nil, "ARTWORK")
+        grid:SetColorTexture(0.3, 0.3, 0.3, 0.4)
+        grid:SetSize(graphContent:GetWidth(), 1)
+        grid:SetPoint("BOTTOMLEFT", 0, i * (graphContent:GetHeight() / 5))
+    end
+
+    -- Grid lines (vertical)
+    for i = 1, 10 do
+        local vgrid = graphContent:CreateTexture(nil, "ARTWORK")
+        vgrid:SetColorTexture(0.3, 0.3, 0.3, 0.3)
+        vgrid:SetSize(1, graphContent:GetHeight())
+        vgrid:SetPoint("BOTTOMLEFT", i * (graphContent:GetWidth() / 10), 0)
+    end
+end
+
+local function OldGods_DrawGuildActivityGraph()
+    if not OldGodsGuildActivity or not graphContent then return end
+
+    -- Clean up previous lines
+    for _, region in ipairs({ graphContent:GetRegions() }) do
+        if region:GetObjectType() == "Line" then
+            region:Hide()
+        end
+    end
+
+    local spacing = 5
+    local maxY = 1
+    for _, data in ipairs(OldGodsGuildActivity) do
+        local total = data.chatCount + data.onlineMembers
+        if total > maxY then maxY = total end
+    end
+
+    local height = graphContent:GetHeight()
+    local scaleFactor = height / maxY
+
+    for i = 2, #OldGodsGuildActivity do
+        local prev = OldGodsGuildActivity[i - 1]
+        local curr = OldGodsGuildActivity[i]
+
+        local x1 = (i - 2) * spacing
+        local x2 = (i - 1) * spacing
+        local y1 = prev.chatCount * scaleFactor
+        local y2 = curr.chatCount * scaleFactor
+
+        local line = graphContent:CreateLine(nil, "OVERLAY")
+        line:SetThickness(2)
+        line:SetColorTexture(1, 1, 0, 1) -- yellow
+        line:SetStartPoint("BOTTOMLEFT", x1, y1)
+        line:SetEndPoint("BOTTOMLEFT", x2, y2)
+    end
+    -- Add time labels every 12 points (1 hour)
+    for i = 1, #OldGodsGuildActivity, 12 do
+        local entry = OldGodsGuildActivity[i]
+        local x = (i - 1) * spacing
+
+        -- Vertical tick line
+        local tick = graphContent:CreateTexture(nil, "ARTWORK")
+        tick:SetColorTexture(0.8, 0.8, 0.8, 0.5)
+        tick:SetSize(1, 6)
+        tick:SetPoint("BOTTOMLEFT", x, 0)
+
+        -- Timestamp label
+        local label = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        label:SetPoint("BOTTOMLEFT", x + 2, 6)
+        label:SetText(entry.timestamp:match("^%d+:%d+")) -- HH:MM only
+    end
+end
+
+function OldGods_MetaDataGraph(parent)
+    CreateGraphFrame(parent)
+    OldGods_DrawGuildActivityGraph()
+    graphScrollFrame:Show()
+end
+
+--#endregion Meta data graph
+
+
 --#endregion Sub_region_OldGods_MemberSearch
 --#region Fast Options Content Menu
 
@@ -3538,7 +3697,7 @@ local function PopulateContentFrame_GuildSettings(optionsFrame)
     local guildOptions = {
         { label = "Inactive Initiates", key = OldGods_ShowInactiveInitiates },
         { label = "Member Search",      key = OldGods_MemberSearch },
-        { label = "x2",                 key = dummyFunction },
+        { label = "Meta Data",          key = OldGods_MetaDataGraph },
         { label = "x3",                 key = dummyFunction },
         { label = "x4",                 key = dummyFunction },
         { label = "x5",                 key = dummyFunction },
@@ -3904,15 +4063,15 @@ local function OnChatMessage(self, event, message, sender)
         existingData.formattedTooltip = tooltipSpice(sender, existingData.level, class, existingData.zone,
             existingData.rank, publicN, officerN)
     else
-        -- Add new data
+        -- Add new data to table and pass it to spice function
         OG_TooltipInfoTable[normalizedSender] = {
             sender = sender,
             level = level,
             class = class,
             zone = zone,
             rank = rank,
-            publicNote = publicN or "no data",
-            officerNote = officerN or "no data",
+            publicNote = publicN,
+            officerNote = officerN,
             formattedTooltip = tooltipSpice(sender, level, class, zone, rank, publicN, officerN)
         }
     end
@@ -3928,6 +4087,7 @@ local function OnChatMessage(self, event, message, sender)
         end)
     end
     --Play a click for each CHAT_MSG_GUILD event
+
     PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\Chatmessage.mp3", "Master")
 end
 local OnChatMessageEventFrame = CreateFrame("Frame")
