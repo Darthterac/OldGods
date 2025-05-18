@@ -1,7 +1,420 @@
---OldGods 1.0.61
-
-
+--OldGods 1.1.0
 --line 1899 commented out, fucntion crashing app, hi shefali <3
+
+--[[
+  ByteFilter Patterns generated from LDNOOBW
+  Source: https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words
+  License: CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/
+  This list was converted into byte-only format for use in the OldGods addon.
+  Raw words are excluded from the final addon source to maintain ethical handling.
+--]]
+local ByteFilter = {}
+
+ByteFilter.BadWordBytePatterns = {
+    { 50,  103, 49,  99 },
+    { 50,  32,  103, 105, 114, 108, 115, 32,  49,  32,  99,  117, 112 },
+    { 97,  99,  114, 111, 116, 111, 109, 111, 112, 104, 105, 108, 105, 97 },
+    { 97,  108, 97,  98,  97,  109, 97,  32,  104, 111, 116, 32,  112, 111, 99,  107, 101, 116 },
+    { 97,  108, 97,  115, 107, 97,  110, 32,  112, 105, 112, 101, 108, 105, 110, 101 },
+    { 97,  110, 97,  108 },
+    { 97,  110, 105, 108, 105, 110, 103, 117, 115 },
+    { 97,  110, 117, 115 },
+    { 97,  112, 101, 115, 104, 105, 116 },
+    { 97,  114, 115, 101, 104, 111, 108, 101 },
+    { 97,  115, 115 },
+    { 97,  115, 115, 104, 111, 108, 101 },
+    { 97,  115, 115, 109, 117, 110, 99,  104 },
+    { 97,  117, 116, 111, 32,  101, 114, 111, 116, 105, 99 },
+    { 97,  117, 116, 111, 101, 114, 111, 116, 105, 99 },
+    { 98,  97,  98,  101, 108, 97,  110, 100 },
+    { 98,  97,  98,  121, 32,  98,  97,  116, 116, 101, 114 },
+    { 98,  97,  98,  121, 32,  106, 117, 105, 99,  101 },
+    { 98,  97,  108, 108, 32,  103, 97,  103 },
+    { 98,  97,  108, 108, 32,  103, 114, 97,  118, 121 },
+    { 98,  97,  108, 108, 32,  107, 105, 99,  107, 105, 110, 103 },
+    { 98,  97,  108, 108, 32,  108, 105, 99,  107, 105, 110, 103 },
+    { 98,  97,  108, 108, 32,  115, 97,  99,  107 },
+    { 98,  97,  108, 108, 32,  115, 117, 99,  107, 105, 110, 103 },
+    { 98,  97,  110, 103, 98,  114, 111, 115 },
+    { 98,  97,  110, 103, 98,  117, 115 },
+    { 98,  97,  114, 101, 98,  97,  99,  107 },
+    { 98,  97,  114, 101, 108, 121, 32,  108, 101, 103, 97,  108 },
+    { 98,  97,  114, 101, 110, 97,  107, 101, 100 },
+    { 98,  97,  115, 116, 97,  114, 100 },
+    { 98,  97,  115, 116, 97,  114, 100, 111 },
+    { 98,  97,  115, 116, 105, 110, 97,  100, 111 },
+    { 98,  98,  119 },
+    { 98,  100, 115, 109 },
+    { 98,  101, 97,  110, 101, 114 },
+    { 98,  101, 97,  110, 101, 114, 115 },
+    { 98,  101, 97,  118, 101, 114, 32,  99,  108, 101, 97,  118, 101, 114 },
+    { 98,  101, 97,  118, 101, 114, 32,  108, 105, 112, 115 },
+    { 98,  101, 97,  115, 116, 105, 97,  108, 105, 116, 121 },
+    { 98,  101, 115, 116, 105, 97,  108, 105, 116, 121 },
+    { 98,  105, 103, 32,  98,  108, 97,  99,  107 },
+    { 98,  105, 103, 32,  98,  114, 101, 97,  115, 116, 115 },
+    { 98,  105, 103, 32,  107, 110, 111, 99,  107, 101, 114, 115 },
+    { 98,  105, 103, 32,  116, 105, 116, 115 },
+    { 98,  105, 109, 98,  111, 115 },
+    { 98,  105, 114, 100, 108, 111, 99,  107 },
+    { 98,  105, 116, 99,  104 },
+    { 98,  105, 116, 99,  104, 101, 115 },
+    { 98,  108, 97,  99,  107, 32,  99,  111, 99,  107 },
+    { 98,  108, 111, 110, 100, 101, 32,  97,  99,  116, 105, 111, 110 },
+    { 98,  108, 111, 110, 100, 101, 32,  111, 110, 32,  98,  108, 111, 110, 100, 101, 32,  97,  99, 116, 105, 111, 110 },
+    { 98,  108, 111, 119, 106, 111, 98 },
+    { 98,  108, 111, 119, 32,  106, 111, 98 },
+    { 98,  108, 111, 119, 32,  121, 111, 117, 114, 32,  108, 111, 97,  100 },
+    { 98,  108, 117, 101, 32,  119, 97,  102, 102, 108, 101 },
+    { 98,  108, 117, 109, 112, 107, 105, 110 },
+    { 98,  111, 108, 108, 111, 99,  107, 115 },
+    { 98,  111, 110, 100, 97,  103, 101 },
+    { 98,  111, 110, 101, 114 },
+    { 98,  111, 111, 98 },
+    { 98,  111, 111, 98,  115 },
+    { 98,  111, 111, 116, 121, 32,  99,  97,  108, 108 },
+    { 98,  114, 111, 119, 110, 32,  115, 104, 111, 119, 101, 114, 115 },
+    { 98,  114, 117, 110, 101, 116, 116, 101, 32,  97,  99,  116, 105, 111, 110 },
+    { 98,  117, 107, 107, 97,  107, 101 },
+    { 98,  117, 108, 108, 100, 121, 107, 101 },
+    { 98,  117, 108, 108, 101, 116, 32,  118, 105, 98,  101 },
+    { 98,  117, 108, 108, 115, 104, 105, 116 },
+    { 98,  117, 110, 103, 32,  104, 111, 108, 101 },
+    { 98,  117, 110, 103, 104, 111, 108, 101 },
+    { 98,  117, 115, 116, 121 },
+    { 98,  117, 116, 116 },
+    { 98,  117, 116, 116, 99,  104, 101, 101, 107, 115 },
+    { 98,  117, 116, 116, 104, 111, 108, 101 },
+    { 99,  97,  109, 101, 108, 32,  116, 111, 101 },
+    { 99,  97,  109, 103, 105, 114, 108 },
+    { 99,  97,  109, 115, 108, 117, 116 },
+    { 99,  97,  109, 119, 104, 111, 114, 101 },
+    { 99,  97,  114, 112, 101, 116, 32,  109, 117, 110, 99,  104, 101, 114 },
+    { 99,  97,  114, 112, 101, 116, 109, 117, 110, 99,  104, 101, 114 },
+    { 99,  104, 111, 99,  111, 108, 97,  116, 101, 32,  114, 111, 115, 101, 98,  117, 100, 115 },
+    { 99,  105, 97,  108, 105, 115 },
+    { 99,  105, 114, 99,  108, 101, 106, 101, 114, 107 },
+    { 99,  108, 101, 118, 101, 108, 97,  110, 100, 32,  115, 116, 101, 97,  109, 101, 114 },
+    { 99,  108, 105, 116 },
+    { 99,  108, 105, 116, 111, 114, 105, 115 },
+    { 99,  108, 111, 118, 101, 114, 32,  99,  108, 97,  109, 112, 115 },
+    { 99,  108, 117, 115, 116, 101, 114, 102, 117, 99,  107 },
+    { 99,  111, 99,  107 },
+    { 99,  111, 99,  107, 115 },
+    { 99,  111, 112, 114, 111, 108, 97,  103, 110, 105, 97 },
+    { 99,  111, 112, 114, 111, 112, 104, 105, 108, 105, 97 },
+    { 99,  111, 114, 110, 104, 111, 108, 101 },
+    { 99,  111, 111, 110 },
+    { 99,  111, 111, 110, 115 },
+    { 99,  114, 101, 97,  109, 112, 105, 101 },
+    { 99,  117, 109 },
+    { 99,  117, 109, 109, 105, 110, 103 },
+    { 99,  117, 109, 115, 104, 111, 116 },
+    { 99,  117, 109, 115, 104, 111, 116, 115 },
+    { 99,  117, 110, 110, 105, 108, 105, 110, 103, 117, 115 },
+    { 99,  117, 110, 116 },
+    { 100, 97,  114, 107, 105, 101 },
+    { 100, 97,  116, 101, 32,  114, 97,  112, 101 },
+    { 100, 97,  116, 101, 114, 97,  112, 101 },
+    { 100, 101, 101, 112, 32,  116, 104, 114, 111, 97,  116 },
+    { 100, 101, 101, 112, 116, 104, 114, 111, 97,  116 },
+    { 100, 101, 110, 100, 114, 111, 112, 104, 105, 108, 105, 97 },
+    { 100, 105, 99,  107 },
+    { 100, 105, 108, 100, 111 },
+    { 100, 105, 110, 103, 108, 101, 98,  101, 114, 114, 121 },
+    { 100, 105, 110, 103, 108, 101, 98,  101, 114, 114, 105, 101, 115 },
+    { 100, 105, 114, 116, 121, 32,  112, 105, 108, 108, 111, 119, 115 },
+    { 100, 105, 114, 116, 121, 32,  115, 97,  110, 99,  104, 101, 122 },
+    { 100, 111, 103, 103, 105, 101, 32,  115, 116, 121, 108, 101 },
+    { 100, 111, 103, 103, 105, 101, 115, 116, 121, 108, 101 },
+    { 100, 111, 103, 103, 121, 32,  115, 116, 121, 108, 101 },
+    { 100, 111, 103, 103, 121, 115, 116, 121, 108, 101 },
+    { 100, 111, 103, 32,  115, 116, 121, 108, 101 },
+    { 100, 111, 108, 99,  101, 116, 116 },
+    { 100, 111, 109, 105, 110, 97,  116, 105, 111, 110 },
+    { 100, 111, 109, 105, 110, 97,  116, 114, 105, 120 },
+    { 100, 111, 109, 109, 101, 115 },
+    { 100, 111, 110, 107, 101, 121, 32,  112, 117, 110, 99,  104 },
+    { 100, 111, 117, 98,  108, 101, 32,  100, 111, 110, 103 },
+    { 100, 111, 117, 98,  108, 101, 32,  112, 101, 110, 101, 116, 114, 97,  116, 105, 111, 110 },
+    { 100, 112, 32,  97,  99,  116, 105, 111, 110 },
+    { 100, 114, 121, 32,  104, 117, 109, 112 },
+    { 100, 118, 100, 97 },
+    { 101, 97,  116, 32,  109, 121, 32,  97,  115, 115 },
+    { 101, 99,  99,  104, 105 },
+    { 101, 106, 97,  99,  117, 108, 97,  116, 105, 111, 110 },
+    { 101, 114, 111, 116, 105, 99 },
+    { 101, 114, 111, 116, 105, 115, 109 },
+    { 101, 115, 99,  111, 114, 116 },
+    { 101, 117, 110, 117, 99,  104 },
+    { 102, 97,  103 },
+    { 102, 97,  103, 103, 111, 116 },
+    { 102, 101, 99,  97,  108 },
+    { 102, 101, 108, 99,  104 },
+    { 102, 101, 108, 108, 97,  116, 105, 111 },
+    { 102, 101, 108, 116, 99,  104 },
+    { 102, 101, 109, 97,  108, 101, 32,  115, 113, 117, 105, 114, 116, 105, 110, 103 },
+    { 102, 101, 109, 100, 111, 109 },
+    { 102, 105, 103, 103, 105, 110, 103 },
+    { 102, 105, 110, 103, 101, 114, 98,  97,  110, 103 },
+    { 102, 105, 110, 103, 101, 114, 105, 110, 103 },
+    { 102, 105, 115, 116, 105, 110, 103 },
+    { 102, 111, 111, 116, 32,  102, 101, 116, 105, 115, 104 },
+    { 102, 111, 111, 116, 106, 111, 98 },
+    { 102, 114, 111, 116, 116, 105, 110, 103 },
+    { 102, 117, 99,  107 },
+    { 102, 117, 99,  107, 32,  98,  117, 116, 116, 111, 110, 115 },
+    { 102, 117, 99,  107, 105, 110 },
+    { 102, 117, 99,  107, 105, 110, 103 },
+    { 102, 117, 99,  107, 116, 97,  114, 100, 115 },
+    { 102, 117, 100, 103, 101, 32,  112, 97,  99,  107, 101, 114 },
+    { 102, 117, 100, 103, 101, 112, 97,  99,  107, 101, 114 },
+    { 102, 117, 116, 97,  110, 97,  114, 105 },
+    { 103, 97,  110, 103, 98,  97,  110, 103 },
+    { 103, 97,  110, 103, 32,  98,  97,  110, 103 },
+    { 103, 97,  121, 32,  115, 101, 120 },
+    { 103, 101, 110, 105, 116, 97,  108, 115 },
+    { 103, 105, 97,  110, 116, 32,  99,  111, 99,  107 },
+    { 103, 105, 114, 108, 32,  111, 110 },
+    { 103, 105, 114, 108, 32,  111, 110, 32,  116, 111, 112 },
+    { 103, 105, 114, 108, 115, 32,  103, 111, 110, 101, 32,  119, 105, 108, 100 },
+    { 103, 111, 97,  116, 99,  120 },
+    { 103, 111, 97,  116, 115, 101 },
+    { 103, 111, 100, 32,  100, 97,  109, 110 },
+    { 103, 111, 107, 107, 117, 110 },
+    { 103, 111, 108, 100, 101, 110, 32,  115, 104, 111, 119, 101, 114 },
+    { 103, 111, 111, 100, 112, 111, 111, 112 },
+    { 103, 111, 111, 32,  103, 105, 114, 108 },
+    { 103, 111, 114, 101, 103, 97,  115, 109 },
+    { 103, 114, 111, 112, 101 },
+    { 103, 114, 111, 117, 112, 32,  115, 101, 120 },
+    { 103, 45,  115, 112, 111, 116 },
+    { 103, 117, 114, 111 },
+    { 104, 97,  110, 100, 32,  106, 111, 98 },
+    { 104, 97,  110, 100, 106, 111, 98 },
+    { 104, 97,  114, 100, 32,  99,  111, 114, 101 },
+    { 104, 97,  114, 100, 99,  111, 114, 101 },
+    { 104, 101, 110, 116, 97,  105 },
+    { 104, 111, 109, 111, 101, 114, 111, 116, 105, 99 },
+    { 104, 111, 110, 107, 101, 121 },
+    { 104, 111, 111, 107, 101, 114 },
+    { 104, 111, 114, 110, 121 },
+    { 104, 111, 116, 32,  99,  97,  114, 108 },
+    { 104, 111, 116, 32,  99,  104, 105, 99,  107 },
+    { 104, 111, 119, 32,  116, 111, 32,  107, 105, 108, 108 },
+    { 104, 111, 119, 32,  116, 111, 32,  109, 117, 114, 100, 101, 114 },
+    { 104, 117, 103, 101, 32,  102, 97,  116 },
+    { 104, 117, 109, 112, 105, 110, 103 },
+    { 105, 110, 99,  101, 115, 116 },
+    { 105, 110, 116, 101, 114, 99,  111, 117, 114, 115, 101 },
+    { 106, 97,  99,  107, 32,  111, 102, 102 },
+    { 106, 97,  105, 108, 32,  98,  97,  105, 116 },
+    { 106, 97,  105, 108, 98,  97,  105, 116 },
+    { 106, 101, 108, 108, 121, 32,  100, 111, 110, 117, 116 },
+    { 106, 101, 114, 107, 32,  111, 102, 102 },
+    { 106, 105, 103, 97,  98,  111, 111 },
+    { 106, 105, 103, 103, 97,  98,  111, 111 },
+    { 106, 105, 103, 103, 101, 114, 98,  111, 111 },
+    { 106, 105, 122, 122 },
+    { 106, 117, 103, 103, 115 },
+    { 107, 105, 107, 101 },
+    { 107, 105, 110, 98,  97,  107, 117 },
+    { 107, 105, 110, 107, 115, 116, 101, 114 },
+    { 107, 105, 110, 107, 121 },
+    { 107, 110, 111, 98,  98,  105, 110, 103 },
+    { 108, 101, 97,  116, 104, 101, 114, 32,  114, 101, 115, 116, 114, 97,  105, 110, 116 },
+    { 108, 101, 97,  116, 104, 101, 114, 32,  115, 116, 114, 97,  105, 103, 104, 116, 32,  106, 97, 99,  107, 101, 116 },
+    { 108, 101, 109, 111, 110, 32,  112, 97,  114, 116, 121 },
+    { 108, 105, 118, 101, 115, 101, 120 },
+    { 108, 111, 108, 105, 116, 97 },
+    { 108, 111, 118, 101, 109, 97,  107, 105, 110, 103 },
+    { 109, 97,  107, 101, 32,  109, 101, 32,  99,  111, 109, 101 },
+    { 109, 97,  108, 101, 32,  115, 113, 117, 105, 114, 116, 105, 110, 103 },
+    { 109, 97,  115, 116, 117, 114, 98,  97,  116, 101 },
+    { 109, 97,  115, 116, 117, 114, 98,  97,  116, 105, 110, 103 },
+    { 109, 97,  115, 116, 117, 114, 98,  97,  116, 105, 111, 110 },
+    { 109, 101, 110, 97,  103, 101, 32,  97,  32,  116, 114, 111, 105, 115 },
+    { 109, 105, 108, 102 },
+    { 109, 105, 115, 115, 105, 111, 110, 97,  114, 121, 32,  112, 111, 115, 105, 116, 105, 111, 110 },
+    { 109, 111, 110, 103 },
+    { 109, 111, 116, 104, 101, 114, 102, 117, 99,  107, 101, 114 },
+    { 109, 111, 117, 110, 100, 32,  111, 102, 32,  118, 101, 110, 117, 115 },
+    { 109, 114, 32,  104, 97,  110, 100, 115 },
+    { 109, 117, 102, 102, 32,  100, 105, 118, 101, 114 },
+    { 109, 117, 102, 102, 100, 105, 118, 105, 110, 103 },
+    { 110, 97,  109, 98,  108, 97 },
+    { 110, 97,  119, 97,  115, 104, 105 },
+    { 110, 101, 103, 114, 111 },
+    { 110, 101, 111, 110, 97,  122, 105 },
+    { 110, 105, 103, 103, 97 },
+    { 110, 105, 103, 103, 101, 114 },
+    { 110, 105, 103, 32,  110, 111, 103 },
+    { 110, 105, 109, 112, 104, 111, 109, 97,  110, 105, 97 },
+    { 110, 105, 112, 112, 108, 101 },
+    { 110, 105, 112, 112, 108, 101, 115 },
+    { 110, 115, 102, 119 },
+    { 110, 115, 102, 119, 32,  105, 109, 97,  103, 101, 115 },
+    { 110, 117, 100, 101 },
+    { 110, 117, 100, 105, 116, 121 },
+    { 110, 117, 116, 116, 101, 110 },
+    { 110, 121, 109, 112, 104, 111 },
+    { 110, 121, 109, 112, 104, 111, 109, 97,  110, 105, 97 },
+    { 111, 99,  116, 111, 112, 117, 115, 115, 121 },
+    { 111, 109, 111, 114, 97,  115, 104, 105 },
+    { 111, 110, 101, 32,  99,  117, 112, 32,  116, 119, 111, 32,  103, 105, 114, 108, 115 },
+    { 111, 110, 101, 32,  103, 117, 121, 32,  111, 110, 101, 32,  106, 97,  114 },
+    { 111, 114, 103, 97,  115, 109 },
+    { 111, 114, 103, 121 },
+    { 112, 97,  101, 100, 111, 112, 104, 105, 108, 101 },
+    { 112, 97,  107, 105 },
+    { 112, 97,  110, 116, 105, 101, 115 },
+    { 112, 97,  110, 116, 121 },
+    { 112, 101, 100, 111, 98,  101, 97,  114 },
+    { 112, 101, 100, 111, 112, 104, 105, 108, 101 },
+    { 112, 101, 103, 103, 105, 110, 103 },
+    { 112, 101, 110, 105, 115 },
+    { 112, 104, 111, 110, 101, 32,  115, 101, 120 },
+    { 112, 105, 101, 99,  101, 32,  111, 102, 32,  115, 104, 105, 116 },
+    { 112, 105, 107, 101, 121 },
+    { 112, 105, 115, 115, 105, 110, 103 },
+    { 112, 105, 115, 115, 32,  112, 105, 103 },
+    { 112, 105, 115, 115, 112, 105, 103 },
+    { 112, 108, 97,  121, 98,  111, 121 },
+    { 112, 108, 101, 97,  115, 117, 114, 101, 32,  99,  104, 101, 115, 116 },
+    { 112, 111, 108, 101, 32,  115, 109, 111, 107, 101, 114 },
+    { 112, 111, 110, 121, 112, 108, 97,  121 },
+    { 112, 111, 111, 102 },
+    { 112, 111, 111, 110 },
+    { 112, 111, 111, 110, 116, 97,  110, 103 },
+    { 112, 117, 110, 97,  110, 121 },
+    { 112, 111, 111, 112, 32,  99,  104, 117, 116, 101 },
+    { 112, 111, 111, 112, 99,  104, 117, 116, 101 },
+    { 112, 111, 114, 110 },
+    { 112, 111, 114, 110, 111 },
+    { 112, 111, 114, 110, 111, 103, 114, 97,  112, 104, 121 },
+    { 112, 114, 105, 110, 99,  101, 32,  97,  108, 98,  101, 114, 116, 32,  112, 105, 101, 114, 99, 105, 110, 103 },
+    { 112, 116, 104, 99 },
+    { 112, 117, 98,  101, 115 },
+    { 112, 117, 115, 115, 121 },
+    { 113, 117, 101, 97,  102 },
+    { 113, 117, 101, 101, 102 },
+    { 113, 117, 105, 109 },
+    { 114, 97,  103, 104, 101, 97,  100 },
+    { 114, 97,  103, 105, 110, 103, 32,  98,  111, 110, 101, 114 },
+    { 114, 97,  112, 101 },
+    { 114, 97,  112, 105, 110, 103 },
+    { 114, 97,  112, 105, 115, 116 },
+    { 114, 101, 99,  116, 117, 109 },
+    { 114, 101, 118, 101, 114, 115, 101, 32,  99,  111, 119, 103, 105, 114, 108 },
+    { 114, 105, 109, 106, 111, 98 },
+    { 114, 105, 109, 109, 105, 110, 103 },
+    { 114, 111, 115, 121, 32,  112, 97,  108, 109 },
+    { 114, 111, 115, 121, 32,  112, 97,  108, 109, 32,  97,  110, 100, 32,  104, 101, 114, 32,  53, 32,  115, 105, 115, 116, 101, 114, 115 },
+    { 114, 117, 115, 116, 121, 32,  116, 114, 111, 109, 98,  111, 110, 101 },
+    { 115, 97,  100, 105, 115, 109 },
+    { 115, 97,  110, 116, 111, 114, 117, 109 },
+    { 115, 99,  97,  116 },
+    { 115, 99,  104, 108, 111, 110, 103 },
+    { 115, 99,  105, 115, 115, 111, 114, 105, 110, 103 },
+    { 115, 101, 109, 101, 110 },
+    { 115, 101, 120 },
+    { 115, 101, 120, 99,  97,  109 },
+    { 115, 101, 120, 111 },
+    { 115, 101, 120, 121 },
+    { 115, 101, 120, 117, 97,  108 },
+    { 115, 101, 120, 117, 97,  108, 108, 121 },
+    { 115, 101, 120, 117, 97,  108, 105, 116, 121 },
+    { 115, 104, 97,  118, 101, 100, 32,  98,  101, 97,  118, 101, 114 },
+    { 115, 104, 97,  118, 101, 100, 32,  112, 117, 115, 115, 121 },
+    { 115, 104, 101, 109, 97,  108, 101 },
+    { 115, 104, 105, 98,  97,  114, 105 },
+    { 115, 104, 105, 116 },
+    { 115, 104, 105, 116, 98,  108, 105, 109, 112 },
+    { 115, 104, 105, 116, 116, 121 },
+    { 115, 104, 111, 116, 97 },
+    { 115, 104, 114, 105, 109, 112, 105, 110, 103 },
+    { 115, 107, 101, 101, 116 },
+    { 115, 108, 97,  110, 116, 101, 121, 101 },
+    { 115, 108, 117, 116 },
+    { 115, 38,  109 },
+    { 115, 109, 117, 116 },
+    { 115, 110, 97,  116, 99,  104 },
+    { 115, 110, 111, 119, 98,  97,  108, 108, 105, 110, 103 },
+    { 115, 111, 100, 111, 109, 105, 122, 101 },
+    { 115, 111, 100, 111, 109, 121 },
+    { 115, 112, 97,  115, 116, 105, 99 },
+    { 115, 112, 105, 99 },
+    { 115, 112, 108, 111, 111, 103, 101 },
+    { 115, 112, 108, 111, 111, 103, 101, 32,  109, 111, 111, 115, 101 },
+    { 115, 112, 111, 111, 103, 101 },
+    { 115, 112, 114, 101, 97,  100, 32,  108, 101, 103, 115 },
+    { 115, 112, 117, 110, 107 },
+    { 115, 116, 114, 97,  112, 32,  111, 110 },
+    { 115, 116, 114, 97,  112, 111, 110 },
+    { 115, 116, 114, 97,  112, 112, 97,  100, 111 },
+    { 115, 116, 114, 105, 112, 32,  99,  108, 117, 98 },
+    { 115, 116, 121, 108, 101, 32,  100, 111, 103, 103, 121 },
+    { 115, 117, 99,  107 },
+    { 115, 117, 99,  107, 115 },
+    { 115, 117, 105, 99,  105, 100, 101, 32,  103, 105, 114, 108, 115 },
+    { 115, 117, 108, 116, 114, 121, 32,  119, 111, 109, 101, 110 },
+    { 115, 119, 97,  115, 116, 105, 107, 97 },
+    { 115, 119, 105, 110, 103, 101, 114 },
+    { 116, 97,  105, 110, 116, 101, 100, 32,  108, 111, 118, 101 },
+    { 116, 97,  115, 116, 101, 32,  109, 121 },
+    { 116, 101, 97,  32,  98,  97,  103, 103, 105, 110, 103 },
+    { 116, 104, 114, 101, 101, 115, 111, 109, 101 },
+    { 116, 104, 114, 111, 97,  116, 105, 110, 103 },
+    { 116, 104, 117, 109, 98,  122, 105, 108, 108, 97 },
+    { 116, 105, 101, 100, 32,  117, 112 },
+    { 116, 105, 103, 104, 116, 32,  119, 104, 105, 116, 101 },
+    { 116, 105, 116 },
+    { 116, 105, 116, 115 },
+    { 116, 105, 116, 116, 105, 101, 115 },
+    { 116, 105, 116, 116, 121 },
+    { 116, 111, 110, 103, 117, 101, 32,  105, 110, 32,  97 },
+    { 116, 111, 112, 108, 101, 115, 115 },
+    { 116, 111, 115, 115, 101, 114 },
+    { 116, 111, 119, 101, 108, 104, 101, 97,  100 },
+    { 116, 114, 97,  110, 110, 121 },
+    { 116, 114, 105, 98,  97,  100, 105, 115, 109 },
+    { 116, 117, 98,  32,  103, 105, 114, 108 },
+    { 116, 117, 98,  103, 105, 114, 108 },
+    { 116, 117, 115, 104, 121 },
+    { 116, 119, 97,  116 },
+    { 116, 119, 105, 110, 107 },
+    { 116, 119, 105, 110, 107, 105, 101 },
+    { 116, 119, 111, 32,  103, 105, 114, 108, 115, 32,  111, 110, 101, 32,  99,  117, 112 },
+    { 117, 110, 100, 114, 101, 115, 115, 105, 110, 103 },
+    { 117, 112, 115, 107, 105, 114, 116 },
+    { 117, 114, 101, 116, 104, 114, 97,  32,  112, 108, 97,  121 },
+    { 117, 114, 111, 112, 104, 105, 108, 105, 97 },
+    { 118, 97,  103, 105, 110, 97 },
+    { 118, 101, 110, 117, 115, 32,  109, 111, 117, 110, 100 },
+    { 118, 105, 97,  103, 114, 97 },
+    { 118, 105, 98,  114, 97,  116, 111, 114 },
+    { 118, 105, 111, 108, 101, 116, 32,  119, 97,  110, 100 },
+    { 118, 111, 114, 97,  114, 101, 112, 104, 105, 108, 105, 97 },
+    { 118, 111, 121, 101, 117, 114 },
+    { 118, 111, 121, 101, 117, 114, 119, 101, 98 },
+    { 118, 111, 121, 117, 101, 114 },
+    { 118, 117, 108, 118, 97 },
+    { 119, 97,  110, 107 },
+    { 119, 101, 116, 98,  97,  99,  107 },
+    { 119, 101, 116, 32,  100, 114, 101, 97,  109 },
+    { 119, 104, 105, 116, 101, 32,  112, 111, 119, 101, 114 },
+    { 119, 104, 111, 114, 101 },
+    { 119, 111, 114, 108, 100, 115, 101, 120 },
+    { 119, 114, 97,  112, 112, 105, 110, 103, 32,  109, 101, 110 },
+    { 119, 114, 105, 110, 107, 108, 101, 100, 32,  115, 116, 97,  114, 102, 105, 115, 104 },
+    { 120, 120 },
+    { 120, 120, 120 },
+    { 121, 97,  111, 105 },
+    { 121, 101, 108, 108, 111, 119, 32,  115, 104, 111, 119, 101, 114, 115 },
+    { 121, 105, 102, 102, 121 },
+    { 122, 111, 111, 112, 104, 105, 108, 105, 97 },
+} -- The filter table from ByteFilter.lua *LDNOOBW*
+
 
 --#region Global savedvariables
 OGsavedChat = OGsavedChat or {}
@@ -122,7 +535,7 @@ OG_Themes = {
                 top = 0,
                 bottom = 0,
             },
-            myAtlas = "HordeScenario-TrackerHeader",
+            myAtlas = "accountupgradebanner-wod",
             myAtlasVertex = resetVertex,
             myAtlasTexCoord = { 0, 1, 0, 1 },
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
@@ -680,9 +1093,10 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
     "________________________________________", "|cCF99000AWork in progress Thanks for testing!|r" }
 
 local GuildData = {
-    "Welcome to Old Gods {skull} Hyjal Chapter {skull} Discord: discord.gg/oldgods to rankup! {star} Post in #new_member_info as 'ToonName/ToonServer/Hyjal' {star} Questions? Contact an Officer/GM!",
+    "Welcome to Kiss My Darnassus {skull} KMDA {skull} discord.gg/yncVTe4kDm to rank to member! {star} Post in #new-members as 'ToonName/ToonServer' to say hi {star} Questions? Contact an Officer/GM!",
     "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live The Old Gods! {triangle}",
-    "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever." }
+    "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever.",
+    "{moon} Kiss My Darnassus * Delves and Key's Event * For info & participation just ask for invite or help from a Officer/GM {moon} KMDA {star}" }
 
 -- Table that is used to match class to its familiar color in game
 local CLASS_COLORS = {
@@ -730,6 +1144,69 @@ local CLASS_ROLES = {
 --#endregion tables end
 
 --#region Utility and Other functions
+
+OG_tHax = {} -- this table and function just send what ever is printed to the default chat frame to ChatHistoryWindow 
+function Gcopy(ChatHistoryWindow, str)
+    if ChatHistoryWindow then
+        local haxA = ChatHistoryWindow.editBox
+        local str_ = str .. "\n"
+        table.insert(OG_tHax, str_)
+        print(str_)
+        C_Timer.After(1, function()
+            local haxB = table.concat(OG_tHax, "\n")
+            haxA:SetText(haxB)
+        end)
+    end
+end -- enjoy its part of the next push some cool history of the addon while developing. Use it in a macro 
+
+local function IsMessageFiltered(msg)
+    local function toBytes(str)
+        local b = {}
+        for i = 1, #str do b[#b + 1] = string.byte(str, i) end
+        return b
+    end
+
+    local function byteEquals(a, b)
+        if #a ~= #b then return false end
+        for i = 1, #a do
+            if a[i] ~= b[i] then return false end
+        end
+        return true
+    end
+
+    for word in msg:lower():gmatch("%S+") do
+        local wordBytes = toBytes(word)
+        for _, pattern in ipairs(ByteFilter.BadWordBytePatterns) do
+            if byteEquals(wordBytes, pattern) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+-- Call this to warn a ignorant people
+function ByteFilter.WarnIfNecessary(input)
+    if ByteFilter.ContainsBadBytes(input) then
+        print("|cffff0000[OldGods]|r {x} |cFFF0F000Please reconsider your message. We rise by lifting others.|r")
+    end
+end
+
+local function DumpTable(tbl, indent) -- debug i used this with gCopy() to see inside the tables
+    indent = indent or 0
+    local prefix = string.rep("  ", indent)
+
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            print(prefix .. tostring(k) .. " = {")
+            DumpTable(v, indent + 1)
+            print(prefix .. "}")
+        else
+            print(prefix .. tostring(k) .. " = " .. tostring(v))
+        end
+    end
+end
 
 local function SumTableData(table_name)
     local size = 0
@@ -1632,6 +2109,11 @@ local function CreateGuildChatWindow(title)
     inputBox:SetScript("OnEnterPressed", function(self)
         local message = self:GetText() -- Get the user's input
 
+        if IsMessageFiltered(message) then
+            print("|cffff0000[OldGods]|r {skull} |cFFF0F000Reconsider your message. We rise by lifting others.|r")
+            return -- Block the message from sending
+        end
+
         -- Check if Shift is being held
         local isShiftDown = IsShiftKeyDown()
 
@@ -2243,6 +2725,69 @@ local function CopiedNameTrickframe(CopiedName)
     trickFrame:Show() -- Ensure it appears
 end
 
+local function ArmoryLinkLoL(CopiedNameLink)
+    local FrameBackdrop = {
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        tile = false,
+        tileSize = 0,
+        edgeSize = 2,
+        insets = {
+            left = 2,
+            right = 2,
+            top = 2,
+            bottom = 2
+        }
+    }
+
+    local linkFrame = CreateFrame("EditBox", "linkFrame", UIParent, "BackdropTemplate")
+    linkFrame:SetPoint("CENTER", UIParent)
+    linkFrame:SetSize(520, 36) -- Resized for a single-line input fits most links in with https:// showing ( safety first )
+    linkFrame:SetFrameStrata("TOOLTIP")
+    linkFrame:SetFontObject("GameFontNormal")
+    linkFrame:SetBackdrop(FrameBackdrop)
+    linkFrame:SetBackdropColor(0.204, 0.227, 0.329, 1)
+    linkFrame:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
+
+    -- Enable mouse interaction
+    linkFrame:EnableMouse(true)
+
+    -- EditBox properties
+    linkFrame:SetMultiLine(false)
+    linkFrame:SetAutoFocus(false)
+    linkFrame:SetTextInsets(3, 3, 3, 3) -- Prevents text clipping
+    linkFrame:SetText(CopiedNameLink)
+
+    -- Highlight text & play a sound on show
+    linkFrame:SetScript("OnMouseDown", function(self)
+        self:SetText(CopiedNameLink)
+        self:SetFocus()
+        UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
+        print(CreateAtlasMarkup("Battlenet-ClientIcon-WoW", 28, 28), " Press CTRL+C to Copy Link!") -- this is cute its the WOW logo, theyll give me shit
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+        C_Timer.After(0.1, function()
+            self:HighlightText(0, -1)
+        end)
+    end)
+
+    local linkButton = CreateFrame("Button", nil, linkFrame, "BackdropTemplate")
+    linkButton:SetPoint("RIGHT", linkFrame, -5, 0)
+    linkButton:SetSize(32, 32)
+
+    linkButton.tex = linkButton:CreateTexture()
+    linkButton.tex:SetPoint("RIGHT", linkFrame, -5, 0)
+    linkButton.tex:SetAtlas("adventureguide-redx") -- adventureguide-redx high res X button thank you texture atlas viewer and agian to fizzle it started with a jocular back and forth an turned into something cool
+    linkButton.tex:SetSize(31, 31)
+    linkButton:SetFrameStrata("TOOLTIP")
+
+    linkButton:SetScript("OnClick", function()
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        linkFrame:Hide()
+    end)
+
+    linkFrame:Show() -- Ensure it appears
+end
+
 local function ModMenu_CopyNameTrick(contextData)
     if not contextData or not contextData.name then
         print("Old Gods: No player found to copy.")
@@ -2258,14 +2803,44 @@ local function ModMenu_CopyNameTrick(contextData)
     CopiedNameTrickframe(CopiedName)
 end
 
-local OG_ModifyMenu_Buttons = {
-    ["Send Guild Invite"] = {
-        lfunction = ModMenu_SendGuild_Invite,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
-    },
+local function ModMenu_GetArmoryLink(contextData)
+    if not contextData then
+        print("Old Gods: No player found to copy.")
+        return
+    end
+
+    print("Old Gods: Received contextData:") --leaving this in for later ill cicle back
+    DumpTable(contextData) --Player menu is to weird tables in tables and functions in tables Im not worried about it
+    --ill show you gCoopy in action its kinda slick
+    local CopiedNameLink
+    if contextData.server and contextData.server ~= "" then
+        CopiedNameLink = "https://worldofwarcraft.blizzard.com/en-us/character/us/" ..
+            contextData.server .. "/" .. contextData.name .. "/"
+    end
+
+    ArmoryLinkLoL(CopiedNameLink)
+end
+
+local OG_ModifyMenuFriend_Buttons = {
     ["Promote Guild Member"] = {
         lfunction = ModMenu_RankGuild_Up,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:18:18|t "
+    },
+    ["Copy Character Name"] = {
+        lfunction = ModMenu_CopyNameTrick,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
+    },
+    ["Get Armory Link"] = {
+        lfunction = ModMenu_GetArmoryLink,
+        icon =
+        "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t " --[235503]="Interface/FriendsFrame/UI-FriendsFrame-Link",
+    },
+}
+
+local OG_ModifyMenuPlayer_Buttons = {
+    ["Send Guild Invite"] = {
+        lfunction = ModMenu_SendGuild_Invite,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
     },
     ["Copy Character Name"] = {
         lfunction = ModMenu_CopyNameTrick,
@@ -2276,7 +2851,7 @@ local OG_ModifyMenu_Buttons = {
 Menu.ModifyMenu("MENU_UNIT_PLAYER", function(ownerRegion, rootDescription, contextData)
     rootDescription:CreateDivider()
     rootDescription:CreateTitle("Old Gods Options: Player")
-    for bLabel, bData in pairs(OG_ModifyMenu_Buttons) do
+    for bLabel, bData in pairs(OG_ModifyMenuPlayer_Buttons) do
         rootDescription:CreateButton(bData.icon .. bLabel, function()
             bData.lfunction(contextData) -- Pass contextData properly
         end)
@@ -2286,7 +2861,7 @@ end)
 Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, contextData)
     rootDescription:CreateDivider()
     rootDescription:CreateTitle("Old Gods Options: Friend")
-    for bLabel, bData in pairs(OG_ModifyMenu_Buttons) do
+    for bLabel, bData in pairs(OG_ModifyMenuFriend_Buttons) do
         rootDescription:CreateButton(bData.icon .. bLabel, function()
             bData.lfunction(contextData) -- Pass contextData properly
         end)
@@ -2313,7 +2888,7 @@ gMailframe.scroll:SetScrollChild(content)
 
 local selectedItemID = nil
 local selectedMailIndex = nil
-local selectedItemIcon = nil
+local selectedItemIcon = nil --wtf is this not being used? I dont know, but it was in the original code so I left it info
 
 local selectedDisplay = gMailframe:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 selectedDisplay:SetPoint("BOTTOM", gMailframe, "BOTTOM", 0, 75)
@@ -2391,7 +2966,7 @@ local function UpdateItemList()
         if itemName then
             count = count + 1
 
-            -- Either reuse an existing button or create a new one, I dont care, I want buttons
+            -- Either reuse an existing button or create a new one, I dont care, I want buttons lol
             local btn = content.buttons[count] or CreateFrame("Button", nil, content, "UIPanelButtonTemplate")
             content.buttons[count] = btn
 
@@ -3309,8 +3884,8 @@ end
 --#region Meta data graph
 local graphScrollFrame, graphContent
 
--- 5-minute tracker
-C_Timer.NewTicker(300, function()
+-- 2.5-minute tracker
+C_Timer.NewTicker(75, function()
     local timestamp = calDateStamp()
     local online = GetNumGuildMembers()
     local chatLines = #OG_ChatMessageTable or 0
@@ -3336,9 +3911,9 @@ local function CreateGraphFrame(parent)
     graphScrollFrame:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true,
-        tileSize = 32,
-        edgeSize = 32,
+        tile = false,
+        tileSize = 0,
+        edgeSize = 0,
         insets = { left = 8, right = 8, top = 8, bottom = 8 }
     })
 
@@ -3348,20 +3923,23 @@ local function CreateGraphFrame(parent)
     graphScrollFrame:RegisterForDrag("LeftButton")
     graphScrollFrame:SetScript("OnDragStart", graphScrollFrame.StartMoving)
     graphScrollFrame:SetScript("OnDragStop", graphScrollFrame.StopMovingOrSizing)
+    graphScrollFrame:SetVerticalScroll(graphScrollFrame:GetVerticalScrollRange())
+    graphScrollFrame:SetVerticalScroll(graphScrollFrame:GetVerticalScrollRange())
 
     -- Mousewheel 2D scroll
     graphScrollFrame:EnableMouseWheel(true)
     graphScrollFrame:SetScript("OnMouseWheel", function(self, delta)
-        if IsShiftKeyDown() then
-            self:SetHorizontalScroll(self:GetHorizontalScroll() - delta * 20)
-        else
-            self:SetVerticalScroll(self:GetVerticalScroll() - delta * 20)
-        end
+        --if IsShiftKeyDown() then
+        self:SetHorizontalScroll(self:GetHorizontalScroll() - delta * 20)
+        -- else
+        -- self:SetVerticalScroll(self:GetVerticalScroll() - delta * 20)
+        --  self:SetVerticalScroll(self:GetVerticalScrollRange())
+        --end
     end)
 
     -- Scrollable content
     graphContent = CreateFrame("Frame", nil, graphScrollFrame)
-    graphContent:SetSize(1440, 720) -- Big enough to scroll both axes
+    graphContent:SetSize(1440, 340) -- Big enough to scroll both axes
     graphScrollFrame:SetScrollChild(graphContent)
 
     -- Background for clarity
@@ -3369,12 +3947,13 @@ local function CreateGraphFrame(parent)
     bg:SetAllPoints()
     bg:SetColorTexture(0.1, 0.1, 0.1, 0.8)
 
-    -- Grid lines (horizontal)
+    --[[Grid lines (horizontal)
     for i = 1, 4 do
         local grid = graphContent:CreateTexture(nil, "ARTWORK")
         grid:SetColorTexture(0.3, 0.3, 0.3, 0.4)
         grid:SetSize(graphContent:GetWidth(), 1)
-        grid:SetPoint("BOTTOMLEFT", 0, i * (graphContent:GetHeight() / 5))
+        grid:SetPoint("BOTTOMLEFT", 0, i * (graphContent:GetHeight() / 4))
+
     end
 
     -- Grid lines (vertical)
@@ -3382,7 +3961,25 @@ local function CreateGraphFrame(parent)
         local vgrid = graphContent:CreateTexture(nil, "ARTWORK")
         vgrid:SetColorTexture(0.3, 0.3, 0.3, 0.3)
         vgrid:SetSize(1, graphContent:GetHeight())
-        vgrid:SetPoint("BOTTOMLEFT", i * (graphContent:GetWidth() / 10), 0)
+        vgrid:SetPoint("TOPLEFT", i * (graphContent:GetWidth() / 10), 0)
+    end]]
+
+    local gridSize = 48
+    local width = graphContent:GetWidth()
+    local height = graphContent:GetHeight()
+
+    for y = gridSize, height - gridSize, gridSize do
+        local hLine = graphContent:CreateTexture(nil, "ARTWORK")
+        hLine:SetColorTexture(0.2, 0.2, 0.2, 0.4)
+        hLine:SetSize(width, 1)
+        hLine:SetPoint("BOTTOMLEFT", 0, y)
+    end
+
+    for x = gridSize, width - gridSize, gridSize do
+        local vLine = graphContent:CreateTexture(nil, "ARTWORK")
+        vLine:SetColorTexture(0.2, 0.2, 0.2, 0.3)
+        vLine:SetSize(1, height)
+        vLine:SetPoint("BOTTOMLEFT", x, 0)
     end
 end
 
@@ -3429,13 +4026,17 @@ local function OldGods_DrawGuildActivityGraph()
         -- Vertical tick line
         local tick = graphContent:CreateTexture(nil, "ARTWORK")
         tick:SetColorTexture(0.8, 0.8, 0.8, 0.5)
-        tick:SetSize(1, 6)
+        tick:SetSize(1, 12)
         tick:SetPoint("BOTTOMLEFT", x, 0)
 
         -- Timestamp label
         local label = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         label:SetPoint("BOTTOMLEFT", x + 2, 6)
         label:SetText(entry.timestamp:match("^%d+:%d+")) -- HH:MM only
+
+        local daylable = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        daylable:SetPoint("BOTTOMLEFT", x + 2, 18)
+        daylable:SetText(entry.timestamp:match(",%s*(%a+),")) -- Day of the week
     end
 end
 
@@ -3445,7 +4046,7 @@ function OldGods_MetaDataGraph(parent)
     graphScrollFrame:Show()
 end
 
---#endregion Meta data graph
+--#endregion Meta data graph =)
 
 
 --#endregion Sub_region_OldGods_MemberSearch
@@ -3837,9 +4438,7 @@ local function CreateOptionsFrame()
         "Navigate each Setting and Option by clicking\non the nav buttons in the left-hand section.\n\n" ..
         "The |cFF00FF00General|r settings include\nFont and Theme selections and other misc. settings.\n\n" ..
         "The |cFF00FF00Colors|r settings are only available\nwhen the |cFFFFFF00'Your Custom Theme'|r is chosen.\n\n" ..
-        "The |cFF00FF00Sounds|r settings let you choose sounds\nor disable sounds used by this AddOn.\n" ..
-        "LOTS of sounds included with this addon use the\n|cFFFFFF00LibSharedMedia-3.0|r library,\n" ..
-        "which are shared with other AddOns.\n\n" ..
+        "The |cFF00FF00Sounds|r WIP settings let you choose sounds\nor disable sounds used by this AddOn (coming soon).\n\n" ..
         "The |cFF00FF00Guild|r tab is full of useful functions\n" ..
         "to aid with common tasks not found in WoW's Guild Chat!\n")
     fontLabel:SetTextColor(1, 1, 1, 1)
@@ -4433,4 +5032,4 @@ frame:SetScript("OnEvent", function(self, event, name)
         end
     end
 end)
---#endregion ADDON_LOADED ends END OF FILE
+--#endregion ADDON_LOADED ends END OF FILE thanks for watching
