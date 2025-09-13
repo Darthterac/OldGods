@@ -1,9 +1,11 @@
-## Interface: 110105, 110107
-## Version: 1.1.0
+## Interface: 110200
+## Version: 2.0.1
 ## IconTexture: 514261
-## Title: |cFF0000FF<|r|cFFFFFFFFOld Gods|r|cFF0000FF>|r by |cFaFFD7a0Lazyeyez|r
+## Title: |cFF0000FF<|rOG_Guild_Chat|cFF0000FF>|r by |cFaFFD7a0Lazyeyez|r & |cD0F6EEa0Nyx|r(chatGPT)
 ## Notes: Guild Interaction and Communication 
-## Author: Lazyeyez-Lightbringer
-## SavedVariables: OGsavedChat, OldGodsSavedColors, OG_TrackGuildRoster, OG_EncryptedNotes, OldGods_BadMailDB, OldGods_AutoReturnEnabled, OldGodsGuildActivity
+## Author: Lazyeyez and Nyx(chatGPT) -- Collaberating with an AI mentor is the future
+## SavedVariables: OGsavedChat, OldGodsSavedColors, OldGodsDB, OG_TrackGuildRoster, OG_EncryptedNotes, OldGods_BadMailDB, OldGods_AutoReturnEnabled, OldGodsGuildActivity
 
 OldGods.lua
+core/Emoji.lua
+core/EmojiUI.lua

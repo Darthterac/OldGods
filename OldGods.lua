@@ -1,5 +1,15 @@
---OldGods 1.1.0
+--OldGods 1.1.1
 --line 1899 commented out, fucntion crashing app, hi shefali <3
+
+--#region Global savedvariables
+OldGodsDB = OldGodsDB or {}
+OGsavedChat = OGsavedChat or {}
+OldGodsSavedColors = OldGodsSavedColors or {}
+OG_TrackGuildRoster = OG_TrackGuildRoster or {}
+OldGods_BadMailDB = OldGods_BadMailDB or {}
+OldGodsGuildActivity = OldGodsGuildActivity or {}
+OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
+--#endregion Global savedvariables
 
 --[[
   ByteFilter Patterns generated from LDNOOBW
@@ -414,16 +424,6 @@ ByteFilter.BadWordBytePatterns = {
     { 121, 105, 102, 102, 121 },
     { 122, 111, 111, 112, 104, 105, 108, 105, 97 },
 } -- The filter table from ByteFilter.lua *LDNOOBW*
-
-
---#region Global savedvariables
-OGsavedChat = OGsavedChat or {}
-OldGodsSavedColors = OldGodsSavedColors or {}
-OG_TrackGuildRoster = OG_TrackGuildRoster or {}
-OldGods_BadMailDB = OldGods_BadMailDB or {}
-OldGodsGuildActivity = OldGodsGuildActivity or {}
-OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
---#endregion Global savedvariables
 
 --#region Global Tables
 OG_ChatMessageTable = {}
@@ -1144,8 +1144,9 @@ local CLASS_ROLES = {
 --#endregion tables end
 
 --#region Utility and Other functions
+local soundEnabled = true
 
-OG_tHax = {} -- this table and function just send what ever is printed to the default chat frame to ChatHistoryWindow 
+OG_tHax = {} -- this table and function just send what ever is printed to the default chat frame to ChatHistoryWindow
 function Gcopy(ChatHistoryWindow, str)
     if ChatHistoryWindow then
         local haxA = ChatHistoryWindow.editBox
@@ -1157,7 +1158,7 @@ function Gcopy(ChatHistoryWindow, str)
             haxA:SetText(haxB)
         end)
     end
-end -- enjoy its part of the next push some cool history of the addon while developing. Use it in a macro 
+end -- enjoy its part of the next push some cool history of the addon while developing. Use it in a macro
 
 local function IsMessageFiltered(msg)
     local function toBytes(str)
@@ -1934,7 +1935,9 @@ local function CreateGuildChatWindow(title)
     copyButton:SetHighlightFontObject("GameFontHighlight")
     copyButton:SetPushedTexture(5926319)
     copyButton:SetScript("OnClick", function()
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+        if OldGodsDB.soundEnabled then
+            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+        end
         editBox:HighlightText()
         editBox:SetFocus()
         print(CreateAtlasMarkup("LevelUp-Icon-Book", 24, 24), "Press Control + C to copy")
@@ -2010,10 +2013,14 @@ local function CreateGuildChatWindow(title)
         toggleGuildChatWindow = not toggleGuildChatWindow -- Flip the toggle state
         toggleButton:SetText(toggleGuildChatWindow and "Hide Chat" or "Show Chat")
         if toggleGuildChatWindow then
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert7.mp3")
+            if OldGodsDB.soundEnabled then
+                PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert7.mp3")
+            end
             GuildChatWindow:Show()
         else
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+            if OldGodsDB.soundEnabled then
+                PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+            end
             GuildChatWindow:Hide()
         end
     end)
@@ -2048,7 +2055,9 @@ local function CreateGuildChatWindow(title)
         if toggleGuildChatWindow then
             GuildChatWindow:Show() -- this is the same as the toggleButton:OnClick function but it will never be called
         else
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+            if OldGodsDB.soundEnabled then
+                PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+            end
             GuildChatWindow:Hide()
         end
     end)
@@ -2172,7 +2181,7 @@ local function CreateGuildChatWindow(title)
                 end
             else
                 -- Send the final message (fancy or normal) to guild chat
-                SendChatMessage(finalMessage, "GUILD")
+                C_ChatInfo.SendChatMessage(finalMessage, "GUILD")
             end
             self:SetText("")                       -- Clear the input box after processing
         else
@@ -2381,7 +2390,7 @@ end
 rosterChanges:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
         CheckGuildRosterChanges()
-        --PopulateEmptyGuildNotes() -- Populate empty notes
+        --PopulateEmptyGuildNotes() -- Populate empty notes (this was the cause of crashing in peoples addons that were not officers in the guild ) cant leave it in, I use it every other week just once to fill in data
     end
 end)
 --#endregion Cache Roster Track Changes
@@ -2701,7 +2710,9 @@ local function CopiedNameTrickframe(CopiedName)
         self:SetText(CopiedName)
         self:SetFocus()
         UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+        if OldGodsDB.soundEnabled then
+            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+        end
         C_Timer.After(0.1, function()
             self:HighlightText(0, -1)
         end)
@@ -2718,7 +2729,9 @@ local function CopiedNameTrickframe(CopiedName)
     trickButton:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
 
     trickButton:SetScript("OnClick", function()
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        if OldGodsDB.soundEnabled then
+            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        end
         trickFrame:Hide()
     end)
 
@@ -2764,7 +2777,9 @@ local function ArmoryLinkLoL(CopiedNameLink)
         self:SetFocus()
         UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
         print(CreateAtlasMarkup("Battlenet-ClientIcon-WoW", 28, 28), " Press CTRL+C to Copy Link!") -- this is cute its the WOW logo, theyll give me shit
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+        if OldGodsDB.soundEnabled then
+            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+        end
         C_Timer.After(0.1, function()
             self:HighlightText(0, -1)
         end)
@@ -2781,7 +2796,9 @@ local function ArmoryLinkLoL(CopiedNameLink)
     linkButton:SetFrameStrata("TOOLTIP")
 
     linkButton:SetScript("OnClick", function()
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        if OldGodsDB.soundEnabled then
+            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        end
         linkFrame:Hide()
     end)
 
@@ -2810,7 +2827,7 @@ local function ModMenu_GetArmoryLink(contextData)
     end
 
     print("Old Gods: Received contextData:") --leaving this in for later ill cicle back
-    DumpTable(contextData) --Player menu is to weird tables in tables and functions in tables Im not worried about it
+    DumpTable(contextData)                   --Player menu is to weird tables in tables and functions in tables Im not worried about it
     --ill show you gCoopy in action its kinda slick
     local CopiedNameLink
     if contextData.server and contextData.server ~= "" then
@@ -3884,10 +3901,24 @@ end
 --#region Meta data graph
 local graphScrollFrame, graphContent
 
--- 2.5-minute tracker
+local function GetOnlineGuildMembers()
+    local TotalGuildMembers = GetNumGuildMembers()
+    local onlineCount = 0
+
+    for i = 1, TotalGuildMembers do
+        local _, _, _, _, _, _, _, _, online = GetGuildRosterInfo(i)
+        if online then
+            onlineCount = onlineCount + 1 -- Im online? count me =D
+        end
+    end
+
+    return onlineCount
+end
+
+-- Tracking/plotting/timing
 C_Timer.NewTicker(75, function()
     local timestamp = calDateStamp()
-    local online = GetNumGuildMembers()
+    local online = GetOnlineGuildMembers()
     local chatLines = #OG_ChatMessageTable or 0
 
     table.insert(OldGodsGuildActivity, {
@@ -3896,7 +3927,7 @@ C_Timer.NewTicker(75, function()
         onlineMembers = online,
     })
 
-    if #OldGodsGuildActivity > 288 then
+    if #OldGodsGuildActivity > 128 then
         table.remove(OldGodsGuildActivity, 1)
     end
 end)
@@ -3906,15 +3937,15 @@ local function CreateGraphFrame(parent)
 
     -- Outer scroll container
     graphScrollFrame = CreateFrame("ScrollFrame", "OldGods_GuildGraphScroll", parent, "BackdropTemplate")
-    graphScrollFrame:SetSize(500, 340)
+    graphScrollFrame:SetSize(720, 405)
     graphScrollFrame:SetPoint("CENTER", parent, "CENTER", 0, 0)
     graphScrollFrame:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = false,
-        tileSize = 0,
-        edgeSize = 0,
-        insets = { left = 8, right = 8, top = 8, bottom = 8 }
+        tile = true,
+        tileSize = 32,
+        edgeSize = 8,
+        insets = { left = -10, right = -10, top = -10, bottom = -10 }
     })
 
     -- Make it draggable
@@ -3923,10 +3954,27 @@ local function CreateGraphFrame(parent)
     graphScrollFrame:RegisterForDrag("LeftButton")
     graphScrollFrame:SetScript("OnDragStart", graphScrollFrame.StartMoving)
     graphScrollFrame:SetScript("OnDragStop", graphScrollFrame.StopMovingOrSizing)
-    graphScrollFrame:SetVerticalScroll(graphScrollFrame:GetVerticalScrollRange())
+    graphScrollFrame:SetScript("OnEnter", function()
+            GameTooltip:SetOwner(graphScrollFrame, "ANCHOR_CURSOR")
+            GameTooltip:AddLine("Use MouseWheel to Scroll Graph!", 1, 1, 1)
+            GameTooltip:AddLine("Scroll Down: Recent Data", 0, 0.85, 0.675)
+            GameTooltip:AddLine("Scroll Up: Past Data", 0.35, 0.60, 0.425)
+            GameTooltip:AddLine("Drag graph from here to position", 0.525, 0.45, 0.385)
+            GameTooltip:Show()
+    end)
+    graphScrollFrame:SetScript("OnLeave", function()
+            GameTooltip:Hide()
+        end)
     graphScrollFrame:SetVerticalScroll(graphScrollFrame:GetVerticalScrollRange())
 
-    -- Mousewheel 2D scroll
+    -- Close button
+    --local closeButton = CreateFrame("Button", nil, graphScrollFrame, "UIPanelCloseButton")
+    --closeButton:SetPoint("TOPRIGHT", -5, -5)
+    --closeButton:SetScript("OnClick", function()
+    --graphScrollFrame:Hide()
+    --end)
+
+    -- Mousewheel 2D scroll [commented out vertical scroll and the need to hold shift for horrizon]
     graphScrollFrame:EnableMouseWheel(true)
     graphScrollFrame:SetScript("OnMouseWheel", function(self, delta)
         --if IsShiftKeyDown() then
@@ -3939,13 +3987,13 @@ local function CreateGraphFrame(parent)
 
     -- Scrollable content
     graphContent = CreateFrame("Frame", nil, graphScrollFrame)
-    graphContent:SetSize(1440, 340) -- Big enough to scroll both axes
+    graphContent:SetSize(800, 340) -- horrizontal scroll keeping vertical locked
     graphScrollFrame:SetScrollChild(graphContent)
 
     -- Background for clarity
     local bg = graphContent:CreateTexture(nil, "BACKGROUND")
-    bg:SetAllPoints()
-    bg:SetColorTexture(0.1, 0.1, 0.1, 0.8)
+    bg:SetAllPoints(graphScrollFrame, true)
+    bg:SetColorTexture(0.05, 0.05, 0.105, 0.8)
 
     --[[Grid lines (horizontal)
     for i = 1, 4 do
@@ -3964,23 +4012,57 @@ local function CreateGraphFrame(parent)
         vgrid:SetPoint("TOPLEFT", i * (graphContent:GetWidth() / 10), 0)
     end]]
 
-    local gridSize = 48
-    local width = graphContent:GetWidth()
-    local height = graphContent:GetHeight()
+    local gridSize = 32
+    local width = graphContent:GetWidth() - 10
+    local height = graphContent:GetHeight() - 10
 
     for y = gridSize, height - gridSize, gridSize do
         local hLine = graphContent:CreateTexture(nil, "ARTWORK")
-        hLine:SetColorTexture(0.2, 0.2, 0.2, 0.4)
+        hLine:SetColorTexture(0.2, 0.2, 0.2, 0.325)
         hLine:SetSize(width, 1)
         hLine:SetPoint("BOTTOMLEFT", 0, y)
     end
 
     for x = gridSize, width - gridSize, gridSize do
         local vLine = graphContent:CreateTexture(nil, "ARTWORK")
-        vLine:SetColorTexture(0.2, 0.2, 0.2, 0.3)
+        vLine:SetColorTexture(0.2, 0.2, 0.2, 0.325)
         vLine:SetSize(1, height)
         vLine:SetPoint("BOTTOMLEFT", x, 0)
     end
+
+    -- Legend box
+    local legend = CreateFrame("Frame", nil, graphContent, "BackdropTemplate")
+    legend:SetSize(120, 40)
+    legend:SetPoint("TOPLEFT", 10, -10)
+    legend:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 0,
+        edgeSize = 8,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    legend:SetBackdropColor(0.025, 0.055, 0.115, 0.9)
+
+    -- Chat label (yellow)
+    local chatColor = legend:CreateTexture(nil, "ARTWORK")
+    chatColor:SetColorTexture(1, 1, 0, 1)
+    chatColor:SetSize(12, 12)
+    chatColor:SetPoint("TOPLEFT", 6, -6)
+
+    local chatLabel = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    chatLabel:SetPoint("LEFT", chatColor, "RIGHT", 4, 0)
+    chatLabel:SetText("Chat Activity")
+
+    -- Online label (green)
+    local onlineColor = legend:CreateTexture(nil, "ARTWORK")
+    onlineColor:SetColorTexture(0, 1, 0, 1)
+    onlineColor:SetSize(12, 12)
+    onlineColor:SetPoint("TOPLEFT", chatColor, "BOTTOMLEFT", 0, -6)
+
+    local onlineLabel = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    onlineLabel:SetPoint("LEFT", onlineColor, "RIGHT", 4, 0)
+    onlineLabel:SetText("Online Players")
 end
 
 local function OldGods_DrawGuildActivityGraph()
@@ -3996,8 +4078,9 @@ local function OldGods_DrawGuildActivityGraph()
     local spacing = 5
     local maxY = 1
     for _, data in ipairs(OldGodsGuildActivity) do
-        local total = data.chatCount + data.onlineMembers
-        if total > maxY then maxY = total end
+        -- Scale by whichever is bigger: chat or online
+        if data.chatCount > maxY then maxY = data.chatCount end
+        if data.onlineMembers > maxY then maxY = data.onlineMembers end
     end
 
     local height = graphContent:GetHeight()
@@ -4009,33 +4092,62 @@ local function OldGods_DrawGuildActivityGraph()
 
         local x1 = (i - 2) * spacing
         local x2 = (i - 1) * spacing
-        local y1 = prev.chatCount * scaleFactor
-        local y2 = curr.chatCount * scaleFactor
 
-        local line = graphContent:CreateLine(nil, "OVERLAY")
-        line:SetThickness(2)
-        line:SetColorTexture(1, 1, 0, 1) -- yellow
-        line:SetStartPoint("BOTTOMLEFT", x1, y1)
-        line:SetEndPoint("BOTTOMLEFT", x2, y2)
+        -- Chat line (yellow)
+        local y1c = prev.chatCount * scaleFactor
+        local y2c = curr.chatCount * scaleFactor
+        local lineC = graphContent:CreateLine(nil, "OVERLAY")
+        lineC:SetThickness(1)
+        lineC:SetColorTexture(1, 1, 0, 1) -- yellow
+        lineC:SetStartPoint("BOTTOMLEFT", x1, y1c)
+        lineC:SetEndPoint("BOTTOMLEFT", x2, y2c)
+
+        -- Online line (green)
+        local y1o = prev.onlineMembers * scaleFactor
+        local y2o = curr.onlineMembers * scaleFactor
+        local lineO = graphContent:CreateLine(nil, "OVERLAY")
+        lineO:SetThickness(1)
+        lineO:SetColorTexture(0, 1, 0, 1) -- green
+        lineO:SetStartPoint("BOTTOMLEFT", x1, y1o)
+        lineO:SetEndPoint("BOTTOMLEFT", x2, y2o)
+
+        -- Invisible hitbox
+        local hitbox = CreateFrame("Frame", nil, graphContent)
+        hitbox:SetSize(spacing, height) -- covers this slice of the graph
+        hitbox:SetPoint("BOTTOMLEFT", x1, 0)
+        hitbox:SetMouseClickEnabled(true)
+        hitbox:EnableMouse(true)
+        hitbox:SetScript("OnEnter", function()
+            GameTooltip:SetOwner(hitbox, "ANCHOR_CURSOR")
+            GameTooltip:AddLine(curr.timestamp, 1, 1, 1)
+            GameTooltip:AddDoubleLine("Online: " .. curr.onlineMembers, "Chat: " .. curr.chatCount, 0, 1, 0 , 1, 1, 0)
+            --GameTooltip:AddLine("Chat: " .. curr.chatCount, 1, 1, 0)
+            GameTooltip:Show()
+        end)
+        hitbox:SetScript("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+
     end
-    -- Add time labels every 12 points (1 hour)
-    for i = 1, #OldGodsGuildActivity, 12 do
+
+    -- Add time labels every 16 points
+    for i = 1, #OldGodsGuildActivity, 10 do
         local entry = OldGodsGuildActivity[i]
         local x = (i - 1) * spacing
 
         -- Vertical tick line
         local tick = graphContent:CreateTexture(nil, "ARTWORK")
-        tick:SetColorTexture(0.8, 0.8, 0.8, 0.5)
-        tick:SetSize(1, 12)
+        tick:SetColorTexture(0.5, .85, 0.95, 0.625)
+        tick:SetSize(1, 16)
         tick:SetPoint("BOTTOMLEFT", x, 0)
 
-        -- Timestamp label
+        -- Timestamp label ( Day of the week over HH:MM )
         local label = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        label:SetPoint("BOTTOMLEFT", x + 2, 6)
+        label:SetPoint("BOTTOMLEFT", x+2, 6)
         label:SetText(entry.timestamp:match("^%d+:%d+")) -- HH:MM only
 
         local daylable = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        daylable:SetPoint("BOTTOMLEFT", x + 2, 18)
+        daylable:SetPoint("BOTTOMLEFT", x+2, 18)
         daylable:SetText(entry.timestamp:match(",%s*(%a+),")) -- Day of the week
     end
 end
@@ -4060,9 +4172,13 @@ local function toggle_ZoneSpam()
     local statetring = zoneDataSpam and "Zone Data On" or "Zone Data Off"
     print(statetring)
     if zoneDataSpam then
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert7.mp3")
+        if OldGodsDB.soundEnabled then
+            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert7.mp3")
+        end
     else
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        if OldGodsDB.soundEnabled then
+            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
+        end
     end
 end
 
@@ -4285,6 +4401,24 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
 end
 --#endregion populate General settings
 
+--#region populate Sound Settings
+local function PopulateContentFrame_SoundSettings(optionsFrame)
+    local contentFrame = optionsFrame.contentFrame
+
+    local soundCheckbox = CreateFrame("CheckButton", "OG_SoundCheckbox", contentFrame, "ChatConfigCheckButtonTemplate")
+    soundCheckbox:SetPoint("TOPLEFT", contentFrame, "TOPLEFT", 12, -12)
+    soundCheckbox.Text:SetText("Enable Sounds")
+    soundCheckbox:SetChecked(OldGodsDB.soundEnabled)
+
+    soundCheckbox:SetScript("OnClick", function(self)
+        local checked = self:GetChecked()
+        OldGodsDB.soundEnabled = checked
+        PlaySound(checked and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+    end)
+end
+--#endregion populate Sound Settings
+
+
 --#region populate Guild settings
 local function dummyFunction()
     print("YOU CLICKED A BUTTON")
@@ -4334,6 +4468,12 @@ local function ShowGeneralSettings(optionsFrame)
     ClearContentFrame(optionsFrame)
     optionsFrame:Show()
     PopulateContentFrame_GeneralSettings(optionsFrame)
+end
+
+local function ShowSoundSettings(optionsFrame)
+    ClearContentFrame(optionsFrame)
+    optionsFrame:Show()
+    PopulateContentFrame_SoundSettings(optionsFrame)
 end
 
 local function ShowGuildSettings(optionsFrame)
@@ -4484,7 +4624,7 @@ function SetupNavigation(optionsFrame)
         {
             label = "Sounds",
             callback = function()
-                --ShowSoundSettings(optionsFrame)
+                ShowSoundSettings(optionsFrame)
                 print("Sound Settings")
                 local navtitle = "Sound Settings"
                 optionsFrame.title:SetFormattedText("%s", navtitle)
@@ -4538,7 +4678,9 @@ for _, button in ipairs(GuildChatWindow.buttons) do
                 return
             else
                 optionsFrame:Show()
-                PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert7.mp3")
+                if OldGodsDB.soundEnabled then
+                    PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert7.mp3")
+                end
             end
         end)
     end
@@ -4687,8 +4829,11 @@ local function OnChatMessage(self, event, message, sender)
     end
     --Play a click for each CHAT_MSG_GUILD event
 
-    PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\Chatmessage.mp3", "Master")
+    if OldGodsDB.soundEnabled then
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\Chatmessage.mp3", "Master")
+    end
 end
+
 local OnChatMessageEventFrame = CreateFrame("Frame")
 OnChatMessageEventFrame:RegisterEvent("CHAT_MSG_GUILD")
 OnChatMessageEventFrame:SetScript("OnEvent", OnChatMessage)
@@ -4712,7 +4857,7 @@ local function sendAutoMsg(sender)
 
     AfkMsg_lastSentTime = currentTime -- Reset the cooldown
     local AfkMsg = string.format("Hi %s - I'm AFK or busy right now but I'll be back soon! {diamond}", normalizedSender)
-    SendChatMessage(AfkMsg, "GUILD")
+    C_ChatInfo.SendChatMessage(AfkMsg, "GUILD")
 end
 
 --onTriggerWord called on each CHAT_MSG_GUILD event
@@ -4849,7 +4994,7 @@ helpdataFrame = createDataWindow(helpData, "Old Gods - Help", OG_ShowJokedataFra
 local function sendSpecificLineToGuild(lineNumber)
     local line = JokeData[lineNumber]
     if line then
-        SendChatMessage(line, "GUILD")
+        C_ChatInfo.SendChatMessage(line, "GUILD")
     else
         print("Invalid line number.")
     end
@@ -4859,7 +5004,7 @@ end
 local function sendSpecificQuoteLineToGuild(qlineNumber)
     local qline = QuoteData[qlineNumber]
     if qline then
-        SendChatMessage(qline, "GUILD")
+        C_ChatInfo.SendChatMessage(qline, "GUILD")
     else
         print("Invalid line number.")
     end
@@ -4869,7 +5014,7 @@ end
 local function sendSpecificOGLineToGuild(glineNumber)
     local gline = GuildData[glineNumber]
     if gline then
-        SendChatMessage(gline, "GUILD")
+        C_ChatInfo.SendChatMessage(gline, "GUILD")
         print(string.format("Line %d from GuildData table was sent.", glineNumber))
     else
         print("Invalid line number.")
@@ -4887,7 +5032,7 @@ local function sendRandomJokeToGuild()
     local lineNumber = math.random(1, maxIndex)
     local line = JokeData[lineNumber]
     if line then
-        SendChatMessage(line, "GUILD")
+        C_ChatInfo.SendChatMessage(line, "GUILD")
         print(string.format("Line %d from JokeData table was sent.", lineNumber))
     else
         print("Error: No line found.")
@@ -4905,7 +5050,7 @@ local function sendRandQuote()
     local qlineNumber = math.random(1, maxIndex)
     local qline = QuoteData[qlineNumber]
     if qline then
-        SendChatMessage(qline, "GUILD")
+        C_ChatInfo.SendChatMessage(qline, "GUILD")
         print(string.format("Line %d from QuoteData table", qlineNumber))
     else
         print("Error: No line found.")
@@ -5001,6 +5146,8 @@ local function InitializeTheme()
 
     -- Apply the user saved theme to the GuildChatWindow
     ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
+    --init emoji handler
+    OldGods_Emoji:Enable()
 
     C_Timer.After(10, function()
         CreateThemeForPlayersGuild(GuildChatWindow)
@@ -5013,6 +5160,14 @@ local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(self, event, name)
     if name == "OldGods" then
+        -- load user settings
+        if OldGodsDB then
+            if OldGodsDB.soundEnabled == nil then
+                OldGodsDB.soundEnabled = true
+            end
+            soundEnabled = OldGodsDB.soundEnabled
+        end
+
         --set Global easter egg sound vars state
         OG_leaveSoundPlayed = false
         OG_clickedSoundPlayed = false
@@ -5021,9 +5176,11 @@ frame:SetScript("OnEvent", function(self, event, name)
         print(
             "|cFF0000FF<|rOld Gods|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\addOnOk.tga:18:18|t |cFFf0FF00Addon Loaded|r\n" ..
             "|cFF0000FF<|rOld Gods|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\fetchData.tga:18:18|t initializing")
+
         --apply the theme
         InitializeTheme()
-        -- and finally load the users save chats
+
+        -- load the users save chats
         if OGsavedChat then
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)
             updateTargetEditBoxText(SavedChatHistoryWindow.editBox, OGsavedChat)
