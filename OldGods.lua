@@ -1,11 +1,14 @@
---OldGods 1.1.1
---line 1899 commented out, fucntion crashing app, hi shefali <3
+--OldGods 2.1.0 'whos your daddy¿'
+-- I f%%%ing love @uwu_underground
+-- yeah the addon is one pure lua/wow api file no libs \_(;.;)_/ many whelps handle it!
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
 OGsavedChat = OGsavedChat or {}
 OldGodsSavedColors = OldGodsSavedColors or {}
 OG_TrackGuildRoster = OG_TrackGuildRoster or {}
+OG_EncryptedNotes = OG_EncryptedNotes or {}
+OG_AfkMsg = OG_AfkMsg or {}
 OldGods_BadMailDB = OldGods_BadMailDB or {}
 OldGodsGuildActivity = OldGodsGuildActivity or {}
 OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
@@ -1093,7 +1096,7 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
     "________________________________________", "|cCF99000AWork in progress Thanks for testing!|r" }
 
 local GuildData = {
-    "Welcome to Kiss My Darnassus {skull} KMDA {skull} discord.gg/yncVTe4kDm to rank to member! {star} Post in #new-members as 'ToonName/ToonServer' to say hi {star} Questions? Contact an Officer/GM!",
+    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://discord.gg/3Gpja7PVBp to rank to member and join in voice comms for Mythic groups! {star} WELCOME!! Questions? Contact an Officer/GM! Check the calendar events weekly!",
     "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live The Old Gods! {triangle}",
     "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever.",
     "{moon} Kiss My Darnassus * Delves and Key's Event * For info & participation just ask for invite or help from a Officer/GM {moon} KMDA {star}" }
@@ -2114,20 +2117,37 @@ local function CreateGuildChatWindow(title)
         end
     end)
 
+    StaticPopupDialogs["OLDGODS_FILTER_BYPASS"] = {
+        text = "|TInterface\\AddOns\\OldGods\\Textures\\chat_alert.tga:64:64:0|t Reconsider your message.\n" ..
+            "Your message was blocked due to offensive language. consider WoW TOS and guild rules!\n\nDo you want to bypass the filter and send it anyway?",
+        button1 = "Send Anyway", -- left button
+        button2 = "Do Not Send", -- right button
+        OnAccept = function(self, data)
+            -- data carries the original message
+            if data and data ~= "" then
+                C_ChatInfo.SendChatMessage(data, "GUILD")
+            end
+        end,
+        OnCancel = function(_, _) end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = 3, -- avoid conflicts with other addons
+    }
+
     -- Handle the Enter key pressed
     inputBox:SetScript("OnEnterPressed", function(self)
         local message = self:GetText() -- Get the user's input
-
-        if IsMessageFiltered(message) then
-            print("|cffff0000[OldGods]|r {skull} |cFFF0F000Reconsider your message. We rise by lifting others.|r")
-            return -- Block the message from sending
-        end
-
-        -- Check if Shift is being held
         local isShiftDown = IsShiftKeyDown()
 
+        if IsMessageFiltered(message) then
+            StaticPopup_Show("OLDGODS_FILTER_BYPASS", nil, nil, isShiftDown and fancyTransform(message) or message)
+            return
+        end
+
         -- Transform the text if Shift is held
-        local finalMessage = isShiftDown and fancyTransform(message) or message
+        local finalMessage = isShiftDown and fancyTransform(message) or
+            message --fancyTransform() turns the message into 1337 speak ;) little easter egg
 
         if finalMessage and finalMessage ~= "" then
             -- Check if the input is a slash command
@@ -2180,12 +2200,12 @@ local function CreateGuildChatWindow(title)
                         "To view or edit an existing note enter the name: |cFF00F002ie. /ognote GoldFarm|r\n")
                 end
             else
-                -- Send the final message (fancy or normal) to guild chat
+                -- Send the final message (fancytransformed, bypassed or normal) to guild chat
                 C_ChatInfo.SendChatMessage(finalMessage, "GUILD")
             end
-            self:SetText("")                       -- Clear the input box after processing
+            self:SetText("")                                                                                        -- Clear the input box after processing
         else
-            print("Cannot send an empty message.") -- Error for empty input
+            print("|TInterface\\AddOns\\OldGods\\Textures\\chat_alert.tga:16:16:0|t Cannot send an empty message.") -- Error for empty input
         end
     end)
 
@@ -2776,13 +2796,23 @@ local function ArmoryLinkLoL(CopiedNameLink)
         self:SetText(CopiedNameLink)
         self:SetFocus()
         UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
-        print(CreateAtlasMarkup("Battlenet-ClientIcon-WoW", 28, 28), " Press CTRL+C to Copy Link!") -- this is cute its the WOW logo, theyll give me shit
+        print(CreateAtlasMarkup("Battlenet-ClientIcon-WoW", 18, 18), " Press Control+C to Copy Link!") -- this is cute its the WOW logo, theyll give me shit
         if OldGodsDB.soundEnabled then
             PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
         end
         C_Timer.After(0.1, function()
             self:HighlightText(0, -1)
         end)
+    end)
+
+    linkFrame:SetScript("OnKeyDown", function(self, key)
+        if IsControlKeyDown() and key == "C" then
+            if OldGodsDB.soundEnabled then
+                PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
+            end
+            local linkColor = "|cFFaF10bF" .. CopiedNameLink .. "|r\n"
+            print(CreateAtlasMarkup("Battlenet-ClientIcon-WoW", 18, 18), "Copied armory link: \n" .. linkColor)
+        end
     end)
 
     local linkButton = CreateFrame("Button", nil, linkFrame, "BackdropTemplate")
@@ -2820,14 +2850,132 @@ local function ModMenu_CopyNameTrick(contextData)
     CopiedNameTrickframe(CopiedName)
 end
 
+local function UrlFriendlyRealmName(realm) -- Function to format the return of realm from UnitName("target")
+    if not realm then return nil end       -- and GetRealmName() into Blizzards url syntax.
+    -- No need for a comparison table we just format in this order
+
+    realm = realm:gsub("([A-Za-z])[Oo][Ff](%u)", "%1-of-%2") -- 1. Puts the -of- in the string                 | "AlterofStorms" to "Atler-of-Storms" |
+    realm = realm:gsub("(%l)(%u)", "%1-%2")                  -- 2. Puts the - between lower and uppercase
+    realm = realm:gsub("(%l)([0-9])", "%1-%2")               -- 2.1 hahaha Area52 you sneaky bugger
+    realm = realm:gsub("\'", "")                             -- 3. Strip the hyphen returning url syntax       | "Kel'Thuzud" to "KelThuzud"          |
+    realm = realm:gsub("%s+", "-")                           -- 4. GetRealmName() edgecase " " becomes -       | "Moon Guard" to "Moon-Gaurd"         |
+
+    return
+        realm -- 5. return the formated string like a boss, get a beer, do more tests dont push on a friday :}
+end
+
+
+local function ModMenu_GetArmoryLinkTarget(contextData)
+    if not contextData then return end -- legacy were not using contextData in this function, if we decide to expand this function well keep it
+
+    local name, realm = UnitName("target")
+
+    if realm then
+        realm = UrlFriendlyRealmName(realm) -- not on our realm but needs to be formated
+    end
+
+    if not realm or realm == nil then
+        realm = GetRealmName()              -- on our realm but may have a space or ' or ie. AlterofStorms so we make it Alter-of-Storms
+        realm = UrlFriendlyRealmName(realm) -- so we format it also
+    end
+
+    -- realm in both edge cases has been formated by UrlFriendlyRealmName() and returns URL friendly string to use
+    CopiedNameLink = "https://worldofwarcraft.blizzard.com/en-us/character/us/" .. realm .. "/" .. name .. "/"
+    ArmoryLinkLoL(CopiedNameLink) -- Now we pass the string to the main function and were done!
+end
+
 local function ModMenu_GetArmoryLink(contextData)
+    if not contextData then
+        return
+    end
+
+    local CopiedNameLink
+    if contextData.server and contextData.server ~= "" then
+        local realm = contextData.server
+        realm = UrlFriendlyRealmName(realm)
+        CopiedNameLink = "https://worldofwarcraft.blizzard.com/en-us/character/us/" ..
+            realm .. "/" .. contextData.name .. "/"
+    end
+
+    ArmoryLinkLoL(CopiedNameLink) -- so far so good need to test on people from other realms still
+end
+
+local OG_ModifyMenuFriend_Buttons = {
+    ["Promote Guild Member"] = {
+        lfunction = ModMenu_RankGuild_Up,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:18:18|t "
+    },
+    ["Copy Character Name"] = {
+        lfunction = ModMenu_CopyNameTrick,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
+    },
+    ["Get Armory Link"] = {
+        lfunction = ModMenu_GetArmoryLink,
+        icon =
+        "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t " --[235503]="Interface/FriendsFrame/UI-FriendsFrame-Link",
+    },
+}
+
+local OG_ModifyMenuPlayer_Buttons = {
+    ["Send Guild Invite"] = {
+        lfunction = ModMenu_SendGuild_Invite,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
+    },
+    ["Get Armory Link"] = {
+        lfunction = ModMenu_GetArmoryLinkTarget,
+        icon = "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t "
+    },
+    ["Copy Character Name"] = {
+        lfunction = ModMenu_CopyNameTrick,
+        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
+    },
+}
+
+local OG_ModifyMenuEnemyPlayer_Buttons = {
+    ["Get Armory Link"] = {
+        lfunction = ModMenu_GetArmoryLinkTarget,
+        icon = "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t "
+    },
+}
+
+Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, contextData)
+    rootDescription:CreateDivider()
+    rootDescription:CreateTitle("Old Gods Options: Friend")
+    for bLabel, bData in pairs(OG_ModifyMenuFriend_Buttons) do
+        rootDescription:CreateButton(bData.icon .. bLabel, function()
+            bData.lfunction(contextData) -- Pass contextData properly
+        end)
+    end
+end)
+
+Menu.ModifyMenu("MENU_UNIT_PLAYER", function(ownerRegion, rootDescription, contextData)
+    rootDescription:CreateDivider()
+    rootDescription:CreateTitle("Old Gods Options: Player")
+    for bLabel, bData in pairs(OG_ModifyMenuPlayer_Buttons) do
+        rootDescription:CreateButton(bData.icon .. bLabel, function()
+            bData.lfunction(contextData) -- Pass contextData properly
+        end)
+    end
+end)
+
+Menu.ModifyMenu("MENU_UNIT_ENEMY_PLAYER", function(ownerRegion, rootDescription, contextData)
+    rootDescription:CreateDivider()
+    rootDescription:CreateTitle("Old Gods Options: Player")
+    for bLabel, bData in pairs(OG_ModifyMenuEnemyPlayer_Buttons) do
+        rootDescription:CreateButton(bData.icon .. bLabel, function()
+            bData.lfunction(contextData) -- Pass contextData properly
+        end)
+    end
+end)
+
+--[[local function ModMenu_GetArmoryLink(contextData)
     if not contextData then
         print("Old Gods: No player found to copy.")
         return
     end
 
-    print("Old Gods: Received contextData:") --leaving this in for later ill cicle back
-    DumpTable(contextData)                   --Player menu is to weird tables in tables and functions in tables Im not worried about it
+    --print("Old Gods: Received contextData:") --leaving this in for later ill cicle back
+    --DumpTable(contextData)                   --Player menu is to weird tables in tables and functions in tables Im not worried about it
     --ill show you gCoopy in action its kinda slick
     local CopiedNameLink
     if contextData.server and contextData.server ~= "" then
@@ -2859,9 +3007,10 @@ local OG_ModifyMenuPlayer_Buttons = {
         lfunction = ModMenu_SendGuild_Invite,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
     },
-    ["Copy Character Name"] = {
-        lfunction = ModMenu_CopyNameTrick,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
+    ["Get Armory Link"] = {
+        lfunction = ModMenu_GetArmoryLink,
+        icon =
+        "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t " --[235503]="Interface/FriendsFrame/UI-FriendsFrame-Link",
     },
 }
 
@@ -2869,6 +3018,24 @@ Menu.ModifyMenu("MENU_UNIT_PLAYER", function(ownerRegion, rootDescription, conte
     rootDescription:CreateDivider()
     rootDescription:CreateTitle("Old Gods Options: Player")
     for bLabel, bData in pairs(OG_ModifyMenuPlayer_Buttons) do
+        rootDescription:CreateButton(bData.icon .. bLabel, function()
+            bData.lfunction(contextData) -- Pass contextData properly
+        end)
+    end
+end)
+
+local OG_ModifyMenuEnemyPlayer_Buttons = {
+    ["Get Armory Link"] = {
+        lfunction = ModMenu_GetArmoryLink,
+        icon =
+        "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t "
+    },
+}
+
+Menu.ModifyMenu("MENU_UNIT_ENEMY_PLAYER", function(ownerRegion, rootDescription, contextData)
+    rootDescription:CreateDivider()
+    rootDescription:CreateTitle("Old Gods Options: Player")
+    for bLabel, bData in pairs(OG_ModifyMenuEnemyPlayer_Buttons) do
         rootDescription:CreateButton(bData.icon .. bLabel, function()
             bData.lfunction(contextData) -- Pass contextData properly
         end)
@@ -2883,7 +3050,7 @@ Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, conte
             bData.lfunction(contextData) -- Pass contextData properly
         end)
     end
-end)
+end)]]
 --#endregion ModifyMenu
 
 --#region Grief Mail
@@ -2893,7 +3060,7 @@ gMailframe:SetPoint("CENTER")
 gMailframe.title = gMailframe:CreateFontString(nil, "OVERLAY")
 gMailframe.title:SetFontObject("GameFontHighlight")
 gMailframe.title:SetPoint("TOP", gMailframe, "TOP", 0, -5)
-gMailframe.title:SetText("Old Gods Grief Mail Manager")
+gMailframe.title:SetText("Gmail - Grief Mail Manager")
 
 gMailframe.scroll = CreateFrame("ScrollFrame", "OldGodsMailScroll", gMailframe, "UIPanelScrollFrameTemplate")
 gMailframe.scroll:SetSize(360, 285)
@@ -3059,14 +3226,25 @@ end
 local OGM_inputBox = CreateFrame("EditBox", nil, gMailframe, "InputBoxTemplate")
 OGM_inputBox:SetSize(110, 35)
 OGM_inputBox:SetPoint("BOTTOMLEFT", gMailframe, "BOTTOMLEFT", 25, 10)
-OGM_inputBox:SetAutoFocus(false)
-OGM_inputBox:SetText("Enter Item ID")
+OGM_inputBox:SetAutoFocus(true)
 OGM_inputBox:EnableMouse(true)
 OGM_inputBox:SetHyperlinksEnabled(true)
 OGM_inputBox:SetMaxLetters(3999)
 OGM_inputBox:SetScript("OnMouseDown", function(self)
-    self:SetFocus() -- Ensure inputBox is focused
-    --self:HighlightText()    -- Highlight the text? no why the hell would you do that?
+    self:SetFocus()
+end)
+
+OGM_inputBox:SetScript("OnEnter", function(self)
+    self:SetFocus()
+    GameTooltip:SetOwner(UIParent, "ANCHOR_BOTTOM")
+    GameTooltip:AddLine("ADD Item to Black List")
+    GameTooltip:AddDoubleLine(
+        "|cFF00FF00[|r|cFFF0FF00Shift|r+|cFFF0FF00Click Item|r|cFF00FF00]|r", "|cFF00FF00[|r|cFFF0FF00Advanced|r|cFF00FF00]|r Enter Valid |cFFF0FF00[|r|cFF00FF00Item ID#|r|cFFF0FF00]|r\n", 1, 1, 1, 1, 1, 1)
+    GameTooltip:Show()
+end)
+
+OGM_inputBox:SetScript("OnLeave", function()
+    GameTooltip:Hide()
 end)
 
 --The magic hooksecurefunc we need to learn more about this, and we are now, so there!
@@ -3897,6 +4075,125 @@ local function OldGods_MemberSearch()
     CreateSearchFrame()
     searchFrame:Show()
 end
+--#endregion OldGods_MemberSearch
+
+--#region create AfkMsgFrame
+local function CreateAfkMsgFrame(parent)
+    AfkMsgFrame = CreateFrame("Frame", "SearchFrame", UIParent, "BackdropTemplate")
+    AfkMsgFrame:SetSize(500, 340)
+    AfkMsgFrame:SetPoint("LEFT", parent)
+    AfkMsgFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+    AfkMsgFrame:SetFrameLevel(1)
+    AfkMsgFrame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = { left = 8, right = 8, top = 8, bottom = 8 },
+    })
+
+    AfkMsgFrame:SetBackdropColor(0, 0, 0, 1)
+    AfkMsgFrame:EnableMouse(true)
+    AfkMsgFrame:SetMovable(true)
+    AfkMsgFrame:RegisterForDrag("LeftButton")
+    AfkMsgFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+    AfkMsgFrame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+
+    -- Title bar
+    local title = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    title:SetPoint("TOP", 0, -10)
+    title:SetText("Auto AFK/In Combat Message")
+
+    -- Text lable for inputBoxT (triggerword)
+    local inputLabelT = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    inputLabelT:SetPoint("TOPLEFT", 95, -40)
+    inputLabelT:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Set trigger word:")
+    inputLabelT:SetTextColor(0.64, 0.33, 0.08, 1)
+
+    -- Create the input box for TriggerWord
+    local inputBoxT = CreateFrame("EditBox", "TriggerInputBox", AfkMsgFrame, "InputBoxTemplate")
+    inputBoxT:SetSize(200, 30)
+    inputBoxT:SetPoint("LEFT", inputLabelT, "RIGHT", 5, 0)
+    inputBoxT:SetFrameStrata("TOOLTIP")
+    inputBoxT:SetAutoFocus(false)
+
+    -- Text lable for inputBoxR (ReplyPhrase)
+    local inputLabelR = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    inputLabelR:SetPoint("TOPLEFT", 95, -100)
+    inputLabelR:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Auto Reply Text:")
+    inputLabelR:SetTextColor(0.64, 0.33, 0.08, 1)
+
+    -- Create the input box for users Reply
+    local inputBoxR = CreateFrame("EditBox", "TriggerInputBox", AfkMsgFrame, "InputBoxTemplate")
+    inputBoxR:SetSize(200, 200)
+    inputBoxR:SetPoint("LEFT", inputLabelR, "RIGHT", 5, 0)
+    inputBoxR:SetFrameStrata("TOOLTIP")
+    inputBoxR:SetAutoFocus(false)
+
+    -- inputBoxT (trigger) Scripting
+    inputBoxT:SetScript("OnEnterPressed", function(self)
+        local text = self:GetText():lower()
+        if text and text ~= "" then
+            OG_AfkMsg.trigger = text
+            print("OldGods: AFK trigger word saved -> " .. text)
+        end
+        self:ClearFocus()
+    end)
+
+    -- Tooltip when cursor enters inputBoxT
+    inputBoxT:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(AfkMsgFrame, "ANCHOR_BOTTOMRIGHT")
+        GameTooltip:AddLine("Auto Msg to Guild Trigger Word")
+        GameTooltip:AddDoubleLine(
+            "|cFF00FF00ESet a Triggger Word", "|cFFF0FF00ie. Common Nick Name|r\n", 1, 1, 1, 1, 1, 1)
+        GameTooltip:Show()
+    end)
+
+    -- Hide tooltip when cursor leaves inputBoxT
+    inputBoxT:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+
+    -- inputBoxR (user reply) Scripting
+    inputBoxR:SetScript("OnEnterPressed", function(self)
+        local text = self:GetText():lower()
+        if text and text ~= "" then
+            OG_AfkMsg.reply = text
+            print("OldGods: Auto Reply set as ->\n" .. text)
+        end
+        self:ClearFocus()
+    end)
+
+    -- Tooltip when cursor enters inputBoxT
+    inputBoxR:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(AfkMsgFrame, "ANCHOR_BOTTOMRIGHT")
+        GameTooltip:AddLine("Press Enter to Save! max 255 char")
+        GameTooltip:AddLine("Enter reply to send when\n" ..
+            "trigger is word is said in Guild Chat\n" ..
+            "While you are AFK or in combat!")
+        GameTooltip:Show()
+    end)
+
+    -- Hide tooltip when cursor leaves inputBoxT
+    inputBoxR:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+
+    -- Close button
+    local closeButton = CreateFrame("Button", nil, AfkMsgFrame, "UIPanelCloseButton")
+    closeButton:SetPoint("TOPRIGHT", -5, -5)
+    closeButton:SetScript("OnClick", function()
+        AfkMsgFrame:Hide()
+    end)
+end
+
+-- Main function to initiate AfkMsgFrame
+local function OldGods_AutoAfkMsg()
+    CreateAfkMsgFrame()
+    AfkMsgFrame:Show()
+end
+--#endregion create AfkMsgFrame
 
 --#region Meta data graph
 local graphScrollFrame, graphContent
@@ -3955,16 +4252,16 @@ local function CreateGraphFrame(parent)
     graphScrollFrame:SetScript("OnDragStart", graphScrollFrame.StartMoving)
     graphScrollFrame:SetScript("OnDragStop", graphScrollFrame.StopMovingOrSizing)
     graphScrollFrame:SetScript("OnEnter", function()
-            GameTooltip:SetOwner(graphScrollFrame, "ANCHOR_CURSOR")
-            GameTooltip:AddLine("Use MouseWheel to Scroll Graph!", 1, 1, 1)
-            GameTooltip:AddLine("Scroll Down: Recent Data", 0, 0.85, 0.675)
-            GameTooltip:AddLine("Scroll Up: Past Data", 0.35, 0.60, 0.425)
-            GameTooltip:AddLine("Drag graph from here to position", 0.525, 0.45, 0.385)
-            GameTooltip:Show()
+        GameTooltip:SetOwner(graphScrollFrame, "ANCHOR_CURSOR")
+        GameTooltip:AddLine("Use MouseWheel to Scroll Graph!", 1, 1, 1)
+        GameTooltip:AddLine("Scroll Down: Recent Data", 0, 0.85, 0.675)
+        GameTooltip:AddLine("Scroll Up: Past Data", 0.35, 0.60, 0.425)
+        GameTooltip:AddLine("Drag graph from here to position", 0.525, 0.45, 0.385)
+        GameTooltip:Show()
     end)
     graphScrollFrame:SetScript("OnLeave", function()
-            GameTooltip:Hide()
-        end)
+        GameTooltip:Hide()
+    end)
     graphScrollFrame:SetVerticalScroll(graphScrollFrame:GetVerticalScrollRange())
 
     -- Close button
@@ -4120,17 +4417,16 @@ local function OldGods_DrawGuildActivityGraph()
         hitbox:SetScript("OnEnter", function()
             GameTooltip:SetOwner(hitbox, "ANCHOR_CURSOR")
             GameTooltip:AddLine(curr.timestamp, 1, 1, 1)
-            GameTooltip:AddDoubleLine("Online: " .. curr.onlineMembers, "Chat: " .. curr.chatCount, 0, 1, 0 , 1, 1, 0)
+            GameTooltip:AddDoubleLine("Online: " .. curr.onlineMembers, "Chat: " .. curr.chatCount, 0, 1, 0, 1, 1, 0)
             --GameTooltip:AddLine("Chat: " .. curr.chatCount, 1, 1, 0)
             GameTooltip:Show()
         end)
         hitbox:SetScript("OnLeave", function()
             GameTooltip:Hide()
         end)
-
     end
 
-    -- Add time labels every 16 points
+    -- Add time labels
     for i = 1, #OldGodsGuildActivity, 10 do
         local entry = OldGodsGuildActivity[i]
         local x = (i - 1) * spacing
@@ -4143,11 +4439,11 @@ local function OldGods_DrawGuildActivityGraph()
 
         -- Timestamp label ( Day of the week over HH:MM )
         local label = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        label:SetPoint("BOTTOMLEFT", x+2, 6)
+        label:SetPoint("BOTTOMLEFT", x + 2, 6)
         label:SetText(entry.timestamp:match("^%d+:%d+")) -- HH:MM only
 
         local daylable = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        daylable:SetPoint("BOTTOMLEFT", x+2, 18)
+        daylable:SetPoint("BOTTOMLEFT", x + 2, 18)
         daylable:SetText(entry.timestamp:match(",%s*(%a+),")) -- Day of the week
     end
 end
@@ -4160,8 +4456,6 @@ end
 
 --#endregion Meta data graph =)
 
-
---#endregion Sub_region_OldGods_MemberSearch
 --#region Fast Options Content Menu
 
 local function toggle_ZoneSpam()
@@ -4433,7 +4727,7 @@ local function PopulateContentFrame_GuildSettings(optionsFrame)
         { label = "Inactive Initiates", key = OldGods_ShowInactiveInitiates },
         { label = "Member Search",      key = OldGods_MemberSearch },
         { label = "Meta Data",          key = OldGods_MetaDataGraph },
-        { label = "x3",                 key = dummyFunction },
+        { label = "Automated Busy MSG", key = OldGods_AutoAfkMsg },
         { label = "x4",                 key = dummyFunction },
         { label = "x5",                 key = dummyFunction },
         { label = "x6",                 key = dummyFunction },
@@ -4666,7 +4960,7 @@ function SetupNavigation(optionsFrame)
     end
 end
 
--- Instantiate and hide initially
+--#region inti options frame
 local optionsFrame = CreateOptionsFrame()
 optionsFrame:Hide()
 
@@ -4685,6 +4979,8 @@ for _, button in ipairs(GuildChatWindow.buttons) do
         end)
     end
 end
+--endregion Init options Frame
+
 --#endregion Create Options Frame
 
 --#endregion Options UI and Functions
@@ -4856,19 +5152,21 @@ local function sendAutoMsg(sender)
     end
 
     AfkMsg_lastSentTime = currentTime -- Reset the cooldown
-    local AfkMsg = string.format("Hi %s - I'm AFK or busy right now but I'll be back soon! {diamond}", normalizedSender)
-    C_ChatInfo.SendChatMessage(AfkMsg, "GUILD")
+    -- use saved reply, fallback if missing
+    local reply = (OG_AfkMsg and OG_AfkMsg.reply) or "I'm AFK right now."
+    C_ChatInfo.SendChatMessage(reply, "GUILD")
 end
 
 --onTriggerWord called on each CHAT_MSG_GUILD event
 local function onTriggerWord(self, event, message, sender)
-    -- Check if the player (me) is AFK or in combat
+    --[[ Check if the player (me) is AFK or in combat
     if not UnitIsAFK("player") and not InCombatLockdown() then
         return --function stops if not afk or in combat
     end
+    ]]
 
-    -- if afk or in combat is true and the message contains a match of the words here pass the sender to sendAutoMsg function
-    if string.match(message:lower(), "lazy") or string.match(message:lower(), "lazyeyez") then
+    -- check against saved trigger word(s)
+    if OG_AfkMsg and OG_AfkMsg.trigger and message:lower():find(OG_AfkMsg.trigger:lower()) then
         sendAutoMsg(sender)
     end
 end
