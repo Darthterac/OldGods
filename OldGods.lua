@@ -1,16 +1,17 @@
---OldGods 2.1.0 'whos your daddy¿'
--- I f%%%ing love @uwu_underground
--- yeah the addon is one pure lua/wow api file no libs \_(;.;)_/ many whelps handle it!
+--OGGC v2.2.0 'I hope all this work is not wiped out in midnight'
+local KMDAver = "2.2.0" -- Kiss My Darnassus getting some love
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
 OGsavedChat = OGsavedChat or {}
 OldGodsSavedColors = OldGodsSavedColors or {}
+OldGods_LastThemeName = OldGods_LastThemeName or "Your Custom Theme"
+OldGods_LastFontName = OldGods_LastFontName or "Roboto"
+OldGodsGuildActivity = OldGodsGuildActivity or {}
 OG_TrackGuildRoster = OG_TrackGuildRoster or {}
 OG_EncryptedNotes = OG_EncryptedNotes or {}
 OG_AfkMsg = OG_AfkMsg or {}
 OldGods_BadMailDB = OldGods_BadMailDB or {}
-OldGodsGuildActivity = OldGodsGuildActivity or {}
 OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
 --#endregion Global savedvariables
 
@@ -21,8 +22,9 @@ OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
   This list was converted into byte-only format for use in the OldGods addon.
   Raw words are excluded from the final addon source to maintain ethical handling.
 --]]
-local ByteFilter = {}
 
+--#region *LDNOOBW*
+local ByteFilter = {}
 ByteFilter.BadWordBytePatterns = {
     { 50,  103, 49,  99 },
     { 50,  32,  103, 105, 114, 108, 115, 32,  49,  32,  99,  117, 112 },
@@ -426,7 +428,8 @@ ByteFilter.BadWordBytePatterns = {
     { 121, 101, 108, 108, 111, 119, 32,  115, 104, 111, 119, 101, 114, 115 },
     { 121, 105, 102, 102, 121 },
     { 122, 111, 111, 112, 104, 105, 108, 105, 97 },
-} -- The filter table from ByteFilter.lua *LDNOOBW*
+}
+--#endregion *LDNOOBW*
 
 --#region Global Tables
 OG_ChatMessageTable = {}
@@ -1163,6 +1166,7 @@ function Gcopy(ChatHistoryWindow, str)
     end
 end -- enjoy its part of the next push some cool history of the addon while developing. Use it in a macro
 
+-- obscene language filter
 local function IsMessageFiltered(msg)
     local function toBytes(str)
         local b = {}
@@ -1197,7 +1201,8 @@ function ByteFilter.WarnIfNecessary(input)
     end
 end
 
-local function DumpTable(tbl, indent) -- debug i used this with gCopy() to see inside the tables
+-- not used but handy for looking at tables to get the contents
+local function DumpTable(tbl, indent)
     indent = indent or 0
     local prefix = string.rep("  ", indent)
 
@@ -1222,6 +1227,7 @@ local function SumTableData(table_name)
     return size
 end
 
+-- Check a table for a given value return true if value is found and false if not
 local function tContains(table, value)
     for _, v in ipairs(table) do
         if v == value then
@@ -1231,14 +1237,16 @@ local function tContains(table, value)
     return false
 end
 
+-- Get the theme name
 local function GetCurrentThemeName()
     for k, v in pairs(OG_Themes) do
         if v == CurrentTheme then
             return k
         end
     end
-    return "Your Custom Theme" -- Fallback if no match is found
+    return "Your Custom Theme"
 end
+
 
 local function ResolveNestedKey(tbl, key, value)
     local current = tbl
@@ -1298,14 +1306,14 @@ end
 
 local function saveDateMessage(table_name)
     if type(table_name) ~= "table" or next(table_name) == nil then
-        return "Nothing to save, tell a joke engage the guild :)"
+        return "Chat-Begins: " .. "|cFFf0f000" .. calDateStamp() .. "|r\n"
     end
 
     local thistime = calDateStamp()
     local table_size = SumTableData(table_name)
     local size_in_kb = math.max(table_size / 1024, 0) -- Avoid negative values
 
-    return string.format("MEMORY FREED: (%.2f KB)", size_in_kb) .. " \n" .. thistime
+    return string.format("MEMORY FREED: (%.2f KB)", size_in_kb) .. "\n" .. thistime
 end
 
 -- GetClassColor(class) returns the hexColor value assined to the class key in CLASS_COLORS table
@@ -1318,6 +1326,7 @@ local function GetRankColor(rank)
     return RANK_COLORS[rank] or "FFFFFF" -- Default to white if rank not listed
 end
 
+-- leet speak we have some fun
 local function fancyTransform(text)
     -- Mapping normal letters to one "fancy" counterpart
     local charMap = {
@@ -1397,8 +1406,16 @@ local function ApplyEditBoxTheme(editBox, theme)
     end
 end
 
-local function ApplyTheme(frame, theme)
+local function ApplyTheme(frame, theme, themeName)
     CurrentTheme = theme
+
+    -- store last theme name (if passed)
+    if themeName then
+        OldGods_LastThemeName = themeName
+    else
+        OldGods_LastThemeName = GetCurrentThemeName()
+    end
+
     if frame.editBox then
         ApplyEditBoxTheme(frame.editBox, theme)
     end
@@ -1593,9 +1610,11 @@ local function ApplyTheme(frame, theme)
             )
         end
     end
+    OldGods_LastThemeName = GetCurrentThemeName()
 end
 
-local function ApplyFont(editBox, font)
+local function ApplyFont(editBox, font, fontName)
+    OldGods_LastFontName = fontName
     if font and font.fPath and font.fSize and font.fFlag then
         editBox:SetFont(font.fPath, font.fSize, font.fFlag)
         editBox:SetTextInsets(5, 5, 5, 5)
@@ -1799,11 +1818,12 @@ local SavedChatHistoryWindow = CreateSavedChatHistoryWindow("Chat History")
 
 --#region Guild Chat Window
 local function CreateGuildChatWindow(title)
-    -- Create the parent frame for the Guild Chat GUI
+    -- Create the parent frame for the Guild Chat
+    local fStrt = "HIGH"
     local GuildChatWindow = CreateFrame("Frame", "GuildChatWindow", UIParent, "BackdropTemplate")
     GuildChatWindow:SetSize(524, 260) -- width, height
     GuildChatWindow:SetPoint("BOTTOMLEFT", UIParent)
-    GuildChatWindow:SetFrameStrata("BACKGROUND")
+    GuildChatWindow:SetFrameStrata(fStrt)
     GuildChatWindow:SetFrameLevel(1)
     GuildChatWindow:SetMovable(true)
     GuildChatWindow:EnableMouse(true)
@@ -1825,8 +1845,9 @@ local function CreateGuildChatWindow(title)
     iconFrame:SetPoint("BOTTOMLEFT", GuildChatWindow, "BOTTOMLEFT", 7, 9)
     GuildChatWindow.icon = iconFrame
 
+    --this is needed because text was clipping I found adding this as a border around scrollFrane fixed it
     local cristaFrame = CreateFrame("Frame", nil, GuildChatWindow, "BackdropTemplate")
-    cristaFrame:SetFrameStrata("BACKGROUND")
+    cristaFrame:SetFrameStrata(fStrt)
     cristaFrame:SetFrameLevel(3)
     cristaFrame:SetSize(GuildChatWindow:GetWidth() - 40, GuildChatWindow:GetHeight() - 115)
     cristaFrame:SetPoint("TOPLEFT", GuildChatWindow, "TOPLEFT", 16, -30)
@@ -1834,7 +1855,7 @@ local function CreateGuildChatWindow(title)
     GuildChatWindow.cristaFrame = cristaFrame
 
     local scrollFrame = CreateFrame("ScrollFrame", nil, GuildChatWindow, "BackdropTemplate, UIPanelScrollFrameTemplate") --, "BackdropTemplate, UIPanelScrollFrameTemplate")
-    scrollFrame:SetFrameStrata("BACKGROUND")
+    scrollFrame:SetFrameStrata(fStrt)
     scrollFrame:SetFrameLevel(2)
     scrollFrame:SetSize(GuildChatWindow:GetWidth() - 40, GuildChatWindow:GetHeight() - 115)
     scrollFrame:SetPoint("TOPLEFT", GuildChatWindow, "TOPLEFT", 18, -32)
@@ -1855,7 +1876,7 @@ local function CreateGuildChatWindow(title)
     editBox:SetPoint("TOPLEFT", scrollFrame)
     editBox:SetPoint("BOTTOMRIGHT", scrollFrame)
     editBox:SetSize(scrollFrame:GetWidth(), scrollFrame:GetHeight())
-    editBox:SetFrameStrata("BACKGROUND")
+    editBox:SetFrameStrata(fStrt)
     editBox:SetFrameLevel(3)
     editBox:SetMultiLine(true)
     editBox:SetTextInsets(5, 5, 5, 5)
@@ -2140,19 +2161,20 @@ local function CreateGuildChatWindow(title)
         local message = self:GetText() -- Get the user's input
         local isShiftDown = IsShiftKeyDown()
 
+        --run the text thru the LDNOOBW byte filter and show popup dialog if theres a match
         if IsMessageFiltered(message) then
             StaticPopup_Show("OLDGODS_FILTER_BYPASS", nil, nil, isShiftDown and fancyTransform(message) or message)
             return
         end
 
         -- Transform the text if Shift is held
-        local finalMessage = isShiftDown and fancyTransform(message) or
-            message --fancyTransform() turns the message into 1337 speak ;) little easter egg
+        local finalMessage = isShiftDown and fancyTransform(message) or message
 
         if finalMessage and finalMessage ~= "" then
             -- Check if the input is a slash command
             if message:sub(1, 1) == "/" then
                 local command = message:lower():match("^/(%S+)")
+
                 if command == "reload" then
                     ChatFrame1EditBox:Show()
                     ChatFrame1EditBox:SetText("/reload")
@@ -2188,7 +2210,7 @@ local function CreateGuildChatWindow(title)
                     ChatFrame1EditBox:SetText("/OG QUOTE")                  --slash command defined in the Slash Commands region
                     ChatFrame1EditBox:SetFocus()
                     print("Press Enter for to send a Random Famous Quote!") -- lol for to, im leaving it
-                elseif command == "ognote" then
+                elseif command == "note" then
                     ChatFrame1EditBox:Show()
                     ChatFrame1EditBox:SetText("/ognote ") --slash command defined in the Slash Commands region
                     ChatFrame1EditBox:SetFocus()
@@ -2233,7 +2255,7 @@ local function CreateGuildChatWindow(title)
         scrollFrame:SetVerticalScroll(scrollFrame:GetVerticalScrollRange()) -- Scroll to the bottom after resizing
     end)
 
-    ApplyFont(GuildChatWindow.editBox, OG_Fonts["Roboto"])
+    --ApplyFont(GuildChatWindow.editBox, OG_Fonts["Roboto"])
     return GuildChatWindow
 end
 
@@ -2287,11 +2309,10 @@ local isUpdatingRoster = false
 local zoneDataSpam = true
 
 local function CacheGuildRoster()
-    -- Prevent recursive updates (Flag Check)
     if isUpdatingRoster then
-        print("|cFFFF0000Condition 2|r")
         return
     end
+
     isUpdatingRoster = true
 
     wipe(OG_TrackGuildRoster)
@@ -2383,20 +2404,17 @@ local function CheckGuildRosterChanges()
     C_Timer.After(10, CacheGuildRoster)
 end
 
---CacheGuildRoster() moving to intializeTheme to call function after addon loads
-
+-- ***WARNING*** CALLING THIS FUNCTION CAUSES GAME CRASHES - USE WITH CAUTION BE SURE RANK IS OFFICER OR ABOVE
+-- IM LEAVING IT HERE BECAUSE IT CAN BE USEFUL TO FILL IN THE NOTES FOR MISSING GUILD MEMBERS BUT ITS DANGEROUS
 local function PopulateEmptyGuildNotes()
     for i = 1, GetNumGuildMembers() do
         local name, _, _, _, _, _, playerNote, officerNote = GetGuildRosterInfo(i)
-
         if name then
             local shortName = Ambiguate(name, "guild")
-
             -- Update player note if empty
             if playerNote == "" or not playerNote then
                 GuildRosterSetPublicNote(i, shortName .. " - main")
             end
-
             -- Update officer note if empty
             if officerNote == "" or not officerNote then
                 local currentDate = "Joined: " .. tostring(date("%m/%d/%y"))
@@ -2410,15 +2428,16 @@ end
 rosterChanges:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
         CheckGuildRosterChanges()
-        --PopulateEmptyGuildNotes() -- Populate empty notes (this was the cause of crashing in peoples addons that were not officers in the guild ) cant leave it in, I use it every other week just once to fill in data
+        --[[ --*WARNING* Dont forget to comment this out after use known to crash game
+        PopulateEmptyGuildNotes()
+        ]]
     end
 end)
 --#endregion Cache Roster Track Changes
 
 --#region Encryption By ChatGPT https://openai.com/index/introducing-chatgpt-pro/
-OG_EncryptedNotes = OG_EncryptedNotes or {} -- SavedVariables table
-local userKey = nil                         -- Temporary encryption key (deleted on close)
-local currentPlayer = nil                   -- Tracks which player’s note is open
+local userKey = nil       -- Temporary encryption key (deleted on close)
+local currentPlayer = nil -- Tracks which player’s note is open
 
 -- XOR Encryption Function
 local function XORCipher(input, key)
@@ -3239,7 +3258,9 @@ OGM_inputBox:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(UIParent, "ANCHOR_BOTTOM")
     GameTooltip:AddLine("ADD Item to Black List")
     GameTooltip:AddDoubleLine(
-        "|cFF00FF00[|r|cFFF0FF00Shift|r+|cFFF0FF00Click Item|r|cFF00FF00]|r", "|cFF00FF00[|r|cFFF0FF00Advanced|r|cFF00FF00]|r Enter Valid |cFFF0FF00[|r|cFF00FF00Item ID#|r|cFFF0FF00]|r\n", 1, 1, 1, 1, 1, 1)
+        "|cFF00FF00[|r|cFFF0FF00Shift|r+|cFFF0FF00Click Item|r|cFF00FF00]|r",
+        "|cFF00FF00[|r|cFFF0FF00Advanced|r|cFF00FF00]|r Enter Valid |cFFF0FF00[|r|cFF00FF00Item ID#|r|cFFF0FF00]|r\n", 1,
+        1, 1, 1, 1, 1)
     GameTooltip:Show()
 end)
 
@@ -4136,17 +4157,20 @@ local function CreateAfkMsgFrame(parent)
         local text = self:GetText():lower()
         if text and text ~= "" then
             OG_AfkMsg.trigger = text
-            print("OldGods: AFK trigger word saved -> " .. text)
+            print("[OG]: Trigger Word Saved -> " .. text)
+            local trigtext = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            trigtext:SetPoint("TOP", 0, -200)
+            trigtext:SetText("Trigger Word: " .. "|cFF00FF00" .. OG_AfkMsg.trigger .. "|r\n")
         end
         self:ClearFocus()
     end)
 
     -- Tooltip when cursor enters inputBoxT
     inputBoxT:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(AfkMsgFrame, "ANCHOR_BOTTOMRIGHT")
-        GameTooltip:AddLine("Auto Msg to Guild Trigger Word")
+        GameTooltip:SetOwner(AfkMsgFrame, "ANCHOR_TOP")
+        GameTooltip:AddLine("Auto Message: Trigger Word")
         GameTooltip:AddDoubleLine(
-            "|cFF00FF00ESet a Triggger Word", "|cFFF0FF00ie. Common Nick Name|r\n", 1, 1, 1, 1, 1, 1)
+            "|cFF00FF00Set a Triggger Word", "|cFFF0FF00Press Enter to save|r\n", 1, 1, 1, 1, 1, 1)
         GameTooltip:Show()
     end)
 
@@ -4160,18 +4184,20 @@ local function CreateAfkMsgFrame(parent)
         local text = self:GetText():lower()
         if text and text ~= "" then
             OG_AfkMsg.reply = text
-            print("OldGods: Auto Reply set as ->\n" .. text)
+            print("[OG]: Auto Reply Set -> " .. text)
+            local rplytext = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            rplytext:SetPoint("TOP", 0, -225)
+            rplytext:SetText("Auto Reply: " .. "|cFF00FF00" .. OG_AfkMsg.reply .. "|r\n")
         end
         self:ClearFocus()
     end)
 
     -- Tooltip when cursor enters inputBoxT
     inputBoxR:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(AfkMsgFrame, "ANCHOR_BOTTOMRIGHT")
-        GameTooltip:AddLine("Press Enter to Save! max 255 char")
-        GameTooltip:AddLine("Enter reply to send when\n" ..
-            "trigger is word is said in Guild Chat\n" ..
-            "While you are AFK or in combat!")
+        GameTooltip:SetOwner(AfkMsgFrame, "ANCHOR_CURSOR_RIGHT")
+        GameTooltip:AddLine("Auto Message: Reply")
+        GameTooltip:AddDoubleLine(
+            "|cFF00FF00Set Auto Reply when triggered|r", "|cFFF0FF00Press Enter to save|r\n", 1, 1, 1, 1, 1, 1)
         GameTooltip:Show()
     end)
 
@@ -4666,7 +4692,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     fontDropdown:SetupMenu(function(self, rootDescription)
         for fontName, fontData in pairs(OG_Fonts) do
             rootDescription:CreateButton("|TInterface\\Icons\\INV_Letter_01:24:24:0|t " .. fontName, function(data)
-                ApplyFont(GuildChatWindow.editBox, fontData)
+                ApplyFont(GuildChatWindow.editBox, fontData, fontName)
                 print("Selected Font:", fontName)
             end)
         end
@@ -4687,7 +4713,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     themeDropdown:SetupMenu(function(self, rootDescription)
         for themeName, themeData in pairs(OG_Themes) do
             rootDescription:CreateButton(themeData.dropDownIcon .. themeName, function(data)
-                ApplyTheme(GuildChatWindow, themeData)
+                ApplyTheme(GuildChatWindow, themeData, themeName)
                 print("Selected Theme:", themeName)
             end)
         end
@@ -5432,19 +5458,27 @@ end
 
 --#region primary initialize function
 local function InitializeTheme()
-    --Load saved colors into CurrentTheme
+    
     for key, value in pairs(OldGodsSavedColors) do
-        -- Theme keys match the saved keys?
         local resolvedValue = ResolveNestedKey(OG_Themes["Your Custom Theme"], key)
-        -- if so apply the saved value to the theme
         if resolvedValue then
             ResolveNestedKey(OG_Themes["Your Custom Theme"], key, value)
         end
     end
 
-    -- Apply the user saved theme to the GuildChatWindow
-    ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"])
-    --init emoji handler
+    if OldGods_LastThemeName and OG_Themes[OldGods_LastThemeName] then
+        print("Applying Theme: " .. OldGods_LastThemeName)
+        ApplyTheme(GuildChatWindow, OG_Themes[OldGods_LastThemeName], OldGods_LastThemeName)
+    else
+        print("Theme not found: " .. OldGods_LastThemeName)
+        ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"], "Your Custom Theme")
+    end
+    
+    if OldGods_LastFontName and OG_Fonts[OldGods_LastFontName] then 
+        print("Applying Font: " .. OldGods_LastFontName)
+        ApplyFont(GuildChatWindow.editBox, OG_Fonts[OldGods_LastFontName], OldGods_LastFontName)
+    end
+
     OldGods_Emoji:Enable()
 
     C_Timer.After(10, function()
@@ -5472,13 +5506,15 @@ frame:SetScript("OnEvent", function(self, event, name)
 
         -- Print addon loaded message in chat frame
         print(
-            "|cFF0000FF<|rOld Gods|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\addOnOk.tga:18:18|t |cFFf0FF00Addon Loaded|r\n" ..
-            "|cFF0000FF<|rOld Gods|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\fetchData.tga:18:18|t initializing")
+            "|cFF0000FF<|rOG Guild Chat|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\og_to_KMDA.tga:24:24|t |cFFf0FF00Addon Loaded|r " ..
+            KMDAver ..
+            "\n\n" ..
+            "|cFF0000FF<|rOG Guild Chat|cFF0000FF>|r |TInterface\\AddOns\\OldGods\\Textures\\information.tga:24:24|t Retrieving Guild Data")
 
-        --apply the theme
+        --apply the users last selected theme cause thats just nice too do ;)
         InitializeTheme()
 
-        -- load the users save chats
+        -- load the users saved chats
         if OGsavedChat then
             local updatedTitle = UpdateChatHistoryTitle(OGsavedChat)
             updateTargetEditBoxText(SavedChatHistoryWindow.editBox, OGsavedChat)
