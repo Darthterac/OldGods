@@ -1,10 +1,11 @@
---OGGC v2.2.0 'I hope all this work is not wiped out in midnight'
-local KMDAver = "2.2.0" -- Kiss My Darnassus getting some love
+--OGGC v2.3.0 'Save yourself'
+local KMDAver = "2.3.0" -- Kiss My Darnassus Guild Chat ;)
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
 OGsavedChat = OGsavedChat or {}
 OldGodsSavedColors = OldGodsSavedColors or {}
+OldGods_UserThemes = OldGods_UserThemes or {}
 OldGods_LastThemeName = OldGods_LastThemeName or "Your Custom Theme"
 OldGods_LastFontName = OldGods_LastFontName or "Roboto"
 OldGodsGuildActivity = OldGodsGuildActivity or {}
@@ -4589,16 +4590,92 @@ local function CreateColorPicker(defaultR, defaultG, defaultB, defaultA, onColor
     ColorPickerFrame:Show()
 end
 
+function OldGods_SaveUserTheme(themeName)
+    if not themeName or themeName == "" then
+        print("|cffff0000OldGods:|r Theme name cannot be empty.")
+        return
+    end
+
+    OldGods_UserThemes[themeName] = CopyTable(OldGodsSavedColors)
+    OldGods_LastThemeName = themeName
+    print("|cff00ff00OldGods:|r Saved theme '" .. themeName .. "'.")
+end
+
+local function OldGods_DeleteUserTheme(themeName)
+    if not themeName or themeName == "" then
+        print("|cffff0000OldGods:|r Theme name cannot be empty.")
+        return
+    end
+
+    if OldGods_UserThemes[themeName] then
+        OldGods_UserThemes[themeName] = nil
+        print("|cffff9900OldGods:|r Deleted theme '" .. themeName .. "'.")
+    end
+end
+
+local function OldGods_ApplyUserTheme(themeName)
+    local theme = OldGods_UserThemes[themeName]
+    if not theme then
+        print("|cffff0000OldGods:|r Theme '" .. themeName .. "' not found.")
+        return
+    end
+
+    OldGodsSavedColors = CopyTable(theme)
+    OldGods_LastThemeName = themeName
+
+    for key, value in pairs(OldGodsSavedColors) do
+        local resolvedValue = ResolveNestedKey(OG_Themes["Your Custom Theme"], key)
+        if resolvedValue then
+            ResolveNestedKey(OG_Themes["Your Custom Theme"], key, value)
+        end
+    end
+
+    ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"], "Your Custom Theme")
+    print("|cff00ff00OldGods:|r Applied theme '" .. themeName .. "'.")
+end
+
+StaticPopupDialogs["OLDGODS_SAVE_THEME"] = {
+    text = "Enter a name for your theme:",
+    button1 = "Save",
+    button2 = "Cancel",
+    hasEditBox = true,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+    preferredIndex = 3, -- avoids overlap with other popups
+    OnAccept = function(popup)
+        local editBox = _G[popup:GetName() .. "EditBox"]
+        local name = editBox and editBox:GetText()
+        if name and name ~= "" then
+            OldGods_SaveUserTheme(name)
+        else
+            print("|cffff0000OldGods:|r Invalid name.")
+        end
+    end,
+}
+
 local function AddResetButton(parent, theme, colorOptions)
     local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     button:SetSize(150, 30)
     button:SetNormalFontObject("GameFontNormalMed2Outline")
     button:SetHighlightFontObject("GameFontHighlightMed2Outline")
     button:SetText("Reset to Default")
+    button:SetScript("OnEnter", function(self, _)
+        GameTooltip:SetOwner(UIParent, "ANCHOR_BOTTOM")
+        GameTooltip:AddLine("Requires Reload")
+        GameTooltip:AddLine("Does not reset saved themes!", .45, .895, 0)
+        GameTooltip:AddLine("After reset you must /reload ," ..
+            "this will force 'Your Custom Theme' back to " ..
+            "the default white grey and black.", .895, .895, .905, true)
+        GameTooltip:Show()
+    end)
+    button:SetScript("OnLeave", function(self, _)
+        GameTooltip:Hide()
+    end)
 
+    --#region
     button:SetScript("OnClick", function()
         local defaults = theme
-        --local tName = GetCurrentThemeName()
 
         if not defaults then
             return
@@ -4619,8 +4696,42 @@ local function AddResetButton(parent, theme, colorOptions)
         ApplyTheme(GuildChatWindow, theme)
         print("Theme reset to defaults!")
     end)
+    --#endregion
 
-    return button
+    -- Save Button
+    local saveButton = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    saveButton:SetSize(150, 30)
+    saveButton:SetPoint("TOP", button, "BOTTOM", 0, -5)
+    saveButton:SetNormalFontObject("GameFontNormalMed2Outline")
+    saveButton:SetHighlightFontObject("GameFontHighlightMed2Outline")
+    saveButton:SetText("Save Theme")
+    saveButton:SetScript("OnClick", function()
+        StaticPopup_Show("OLDGODS_SAVE_THEME")
+    end)
+
+    --[[ Delete Button
+    local deleteButton = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    deleteButton:SetSize(150, 30)
+    deleteButton:SetPoint("TOP", saveButton, "BOTTOM", 0, -5)
+    deleteButton:SetText("Delete Theme")
+    deleteButton:SetScript("OnClick", function()
+        StaticPopupDialogs["OLDGODS_DELETE_THEME"] = {
+            text = "Enter the name of the theme to delete:",
+            button1 = "Delete",
+            button2 = "Cancel",
+            hasEditBox = true,
+            OnAccept = function(self)
+                local name = self.editBox:GetText()
+                OldGods_DeleteUserTheme(name)
+            end,
+            timeout = 0,
+            whileDead = true,
+            hideOnEscape = true,
+        }
+        StaticPopup_Show("OLDGODS_DELETE_THEME")
+    end)
+    ]]
+    return button, saveButton --, deleteButton
 end
 
 local function PopulateContentFrame_ThemeColorSettings(optionsFrame, theme)
@@ -4667,7 +4778,7 @@ local function PopulateContentFrame_ThemeColorSettings(optionsFrame, theme)
     end
 
     local resetButton = AddResetButton(contentFrame, theme, colorOptions)
-    resetButton:SetPoint("BOTTOM", contentFrame, "BOTTOM", 0, 50)
+    resetButton:SetPoint("BOTTOM", contentFrame, "BOTTOM", 0, 75)
 
     return buttons
 end
@@ -4715,6 +4826,27 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
             rootDescription:CreateButton(themeData.dropDownIcon .. themeName, function(data)
                 ApplyTheme(GuildChatWindow, themeData, themeName)
                 print("Selected Theme:", themeName)
+            end)
+        end
+    end)
+
+    -- Create the User Theme Dropdown
+    local userThemeDropdown = CreateFrame("DropdownButton", "UserThemeDropdown", contentFrame,
+        "WowStyle1DropdownTemplate")
+    userThemeDropdown:SetPoint("TOPLEFT", themeDropdown, "BOTTOMLEFT", 0, -10)
+    userThemeDropdown:SetWidth(200)
+    userThemeDropdown:SetHeight(30)
+    userThemeDropdown:SetDefaultText("Your Saved Themes")
+
+    userThemeDropdown:SetupMenu(function(self, rootDescription)
+        if not next(OldGods_UserThemes) then
+            rootDescription:CreateTitle("No saved themes yet.")
+            return
+        end
+
+        for themeName, themeData in pairs(OldGods_UserThemes) do
+            rootDescription:CreateButton("|TInterface\\Icons\\INV_Misc_Note_01:16|t " .. themeName, function()
+                OldGods_ApplyUserTheme(themeName)
             end)
         end
     end)
@@ -5458,7 +5590,6 @@ end
 
 --#region primary initialize function
 local function InitializeTheme()
-    
     for key, value in pairs(OldGodsSavedColors) do
         local resolvedValue = ResolveNestedKey(OG_Themes["Your Custom Theme"], key)
         if resolvedValue then
@@ -5473,8 +5604,8 @@ local function InitializeTheme()
         print("Theme not found: " .. OldGods_LastThemeName)
         ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"], "Your Custom Theme")
     end
-    
-    if OldGods_LastFontName and OG_Fonts[OldGods_LastFontName] then 
+
+    if OldGods_LastFontName and OG_Fonts[OldGods_LastFontName] then
         print("Applying Font: " .. OldGods_LastFontName)
         ApplyFont(GuildChatWindow.editBox, OG_Fonts[OldGods_LastFontName], OldGods_LastFontName)
     end

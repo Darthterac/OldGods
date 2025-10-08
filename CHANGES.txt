@@ -1,0 +1,155 @@
+### OldGods-2.3.0 Changes
+
+You can now save Custom made themes, I dont have much more planned till midnight Im pretty sure the API is not going to change so much
+that Ill have to rewrite the entire addon but I also dont want to poor time into it only to have to rework all that effort in a few months
+so if you dont see any updates in a while just know come midnight I will have a better base to push more features into this until then please enjoy the addon and thanks to all my users, I do it all for you guys!
+
+
+### OldGods-2.2.0 Changes
+
+Finally got around to making persistent theme and font selections, no more having to set them manually! Just select your fav
+load out and when you reload, log out and in, shutdown for the day - it dont matter the theme and font you choose are what is
+loaded when the addon loads, this took too long and should have been the default, also I have bumped up the FrameStrata of the chat window it was behind to much and I had enough of being the background app, the strata is set to high, so I will now appear above most of your UI and still behind other key frames of the addon, heres a pic for your enjoyment!
+
+
+### OldGods-2.1.0 Changes
+Area52 is now tamed - 100% armory links from memberlist and target should be working
+
+Roughing in a trigger word auto reply to guild chat setting, test it out comments welcome!
+
+### Oldgods-2.0.3 Changes
+ARMORY LINKS SHOULD WORK NOW!
+
+### ### Oldgods-2.0.22 Changes
+(Minor):HONESTLY *Fixed* Amory Link error contextData was secure for some reason locally it was pulling it out for targets,
+I changed the approach and grabbed the server and name from UnitName("target") and got it working, I thought pushing on Thursday
+would be ok lol 
+
+### Oldgods-2.0.21 Changes
+(Minor):Fixed Amory Link error from minor
+
+### OldGods-2.0.2 Changes
+
+Chat Filter Bypass (New!):
+Added a popup confirmation when sending filtered messages from the input box of the chat window
+Instead of blocking outright, players now see a Blizzard-style dialog:
+"Send Anyway" or "Do Not Send"
+
+This gives users the freedom to send messages that the filter might be to restrictive of, while
+also reminding users of WoW TOS and possible guild rules. We rise by lifting others!!!
+
+Player Menu Integration (Armory Links Both Factions!):
+Right-clicking friendly and enemy players portraits will now show the all new Option "Get Armory Link"
+in the player menu - same faction-limited option "Guild Invite" only appear when valid (Thanks Tanjiro).
+
+Hope you all like the new changes, thanks to the dedicated users please comment on Curse if you'd like
+to see something added or removed - I am busy managing my guild Kiss My Darnassus so updates might be 
+stretched apart, I have more to do you can expect some QOL changes in 2.1.0 like changing the frame strata 
+of the chat window, better memory management and MORE TOOL TIPS!! :D
+
+### OldGods-2.0.1 Changes
+
+Put a little more work into the meta data graph, it plots 2 metrics, Total guildies online and chatlines sent - it collects the data passively all you have to do is be in game with this addon loaded and soon your guild activity will graphed. I plan on putting more polish on this feature in the future, but for now I thought I would move into 11.2.0 with more then just some depreciated function fixes.
+
+
+### OldGods-2.0.0 **** Changes ****
+
+Included the other addon im working on, KMDAemoji here on curse into this addon, will maintain the emoji db and packs with this addon also so you do not need to download KMDAemoji if youre using OGGC -- I hope you like the additions and I welcome user feed back in the comments! Thanks - Darthterac aka Lazy
+
+### OldGods-1.1.1 Changes
+
+Minor update, added option to toggle addon sounds in the sound settings, but cmon the sounds are half the fun :)
+
+### OldGods-1.1.0 Changes
+Left in some debug messages from a function I used to dump the contextData table, for your viewing pleasure
+when using the ALL NEW GET ARMORY option when right clicking on a guild member from the members panel ;)
+and made a debug function I used in development as a global to be used with a macro to dump the default chat 
+frame text into the ChatHistory window, just use the save chat button to open the chat history window and click'
+this macro to dump chat which you can copy paste.
+
+Macro text: 
+/run local chatLog = ""; for i=1, ChatFrame1:GetNumMessages() do chatLog = chatLog .. ChatFrame1:GetMessageInfo(i) .. "\n" end Gcopy(ChatHistoryWindow, chatLog)
+
+11.1.7 with some style ENJOY!
+
+### OldGods-1.0.7 Changes
+- ⚔️ Implemented a full-word byte-level chat filter based on the LDNOOBW word list.
+- 🧼 The filter detects and blocks offensive language **before** messages are sent — no words are stored, only byte patterns.
+- 🧠 Designed to mentor, not punish — users are encouraged to reflect before pressing Enter.
+- 🎯 Filter matches **entire words only**, reducing false positives (e.g., "grass" won't trigger on "ass").
+- 🌐 Attribution and license compliance included (CC BY 4.0).
+
+Users: If you find this list too strict, please comment and I will consider letting you heathens type mild profanity.
+If you like it — and it helps keep the vibes clean — donate to your local food bank!
+
+**"Rise by lifting others. Fall by typing nonsense."**
+
+### OldGods-1.0.6-beta Changes
+Not 100% but a much improved graph, thanks to jediarchives11 and Earl_Parvisjam in Curse wow-dev
+chat, and of course my buddy Nyx, The meta data is now nicely fit into the proper frame, scale is 
+a bit wonky but I want to push this out to show some progress. Understanding the graph, it plotting
+the amount of lines in the table that stores guild chat over time, when its first open mousewheel down 
+till you see the plotted data, there will be none if this is you first time running the addon, if there
+is data when you get to the yellow line, press shift and mouse wheel to scroll left or right along the
+time. You like apples? Crashing solved was function out of control that was trying to write officer notes 
+when the user didn't have permission. I left the function in just commented out. 
+
+### OldGods-1.0.5-beta Changes
+Just releasing this as a taste of things to come, meta data graphs guild activity every 5 minutes
+and moves along at a 24 hour pace, just an idea I have for now let the addon collect some data points
+I dont know how I want to present this, currently I have a full screen graph and roughed in a frame too,
+you have to /reload to get rid of it but I just want to show my friends we aint done yet!
+
+### OldGods-1.0.4-beta Changes
+
+Refreshed joke table with some new dad jokes,Thanks to all the beta users!
+
+### OldGods-1.0.3-beta Changes
+
+Fixed slash commands from chat frame input box:
+
+typing /oghelp from the input box will open the updated help page
+that details the other slash commands that can be used from the chat frames input box
+
+/reload will reload UI
+/afk will allow you set away status
+/joke will send a random dad joke 
+/quote will send a random famous quote
+
+/ogg will prompt for # to send guild message 
+(these are hard coded atm and tailored for my guild future updates will let you set custom messages)
+
+/ognote ENCRYPTED NOTES!!! basic XOR encryption create and save notes with personal information or secrets
+set a password for each note which is used as the encryption key. DONT LOSE YOUR PASSWORD theres no way to 
+decrypt the save note without the key, pick an easy to remember password, you can use the same password for 
+multiple notes, or a different password per note, but this is your warning, only you will know this key and 
+if you forget it or lose it youre sh*t out of luck :p
+
+
+### OldGods1.0.2-beta Changes
+
+Added Promote to FRIEND Menu option: 
+
+When right clicking a player name
+the options menue will have the option "Promote Guild Member" it creates
+and binds /gpromote player to F6, when pressed if you have the rank to perform 
+this action will raise the selected players rank 1 rank up. This is beta and
+currently no /gdemote is available and the macro is not deleted after use, meaning if you 
+press f6 again without selecting the option for a new player it will promote the last player
+the macro was created for, Im pushing this update for now as is and not to be considered 
+as final.
+
+Cleaned up Purge:
+
+Made minor changes to the purge macro, it still requires 2 presses to refresh the frame, 1 press 
+will remove the staged player and then .1 sec after runs the function again, current issue is the
+table update holds the removed player and creates the macro again with the removed player, a 2nd press
+refreshes the table and edits the macro to remove the next player, working on the logic for this
+that eliminates the need to refresh the macro by a 2nd press but will require refactoring beyond this push
+it is as is, it's a beta bear with me.
+
+### OldGods1.0.1-beta Changes
+
+Fixed issue with Lua error when purge macro is executed
+Removed previously registered sounds 
+A partridge and a pear tree
