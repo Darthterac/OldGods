@@ -1,5 +1,5 @@
---OGGC v2.3.0 'Save yourself'
-local KMDAver = "2.3.0" -- Kiss My Darnassus Guild Chat ;)
+--OGGC v2.3.1 'SetItemRef'
+local KMDAver = "2.3.1" --minor fix for 11.2.7
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -1096,14 +1096,15 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
     "Type |cFFCCAA99/afk|r set yourself away", "Type |cFFCCAA99/ognote|r to create or view encrypted notes",
     "To veiw the available jokes and quotes",
     "click the |cFF0DAF00next page|r button", "________________________________________",
-    "by |cFF7ba9FFLazyeyez|r aka Darthterac with mentoring from |cFF00F906chatGPT|r",
-    "________________________________________", "|cCF99000AWork in progress Thanks for testing!|r" }
+    "Developed by: |cFFC79C6ELazyeyez-Lightbringer|r aka |cFFC41E3ADarthterac|r",
+    "________________________________________", 
+    "|cFF40C7EBVersion: |r" .. KMDAver .. " Thank you!",
+ }
 
 local GuildData = {
-    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://discord.gg/3Gpja7PVBp to rank to member and join in voice comms for Mythic groups! {star} WELCOME!! Questions? Contact an Officer/GM! Check the calendar events weekly!",
-    "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live The Old Gods! {triangle}",
-    "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Initiates, please log in every 14 days to keep your place. Members, every 28 days will suffice. We stand united, renewed, and stronger than ever.",
-    "{moon} Kiss My Darnassus * Delves and Key's Event * For info & participation just ask for invite or help from a Officer/GM {moon} KMDA {star}" }
+    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://tiny.cc/KMDA to rank to member and join in voice for events and groups! Check the calendar guild events! {star} Questions - Contact an Officer or GM in game or on Discord!",
+    "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live KMDA! {triangle}",
+    "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Please remember to log in once every 28 days to keep your place. {moon} We stand united, renewed, and stronger than ever." }
 
 -- Table that is used to match class to its familiar color in game
 local CLASS_COLORS = {
@@ -1124,14 +1125,14 @@ local CLASS_COLORS = {
 
 -- table that is used to assign colors to separate ranks in the guild
 local RANK_COLORS = {
-    ["GM Lightbringer"] = "FFA800", -- Legendary (orange)
+    ["GM"] = "FFA800",              -- Legendary (orange)
     ["Officer"] = "A335EE",         -- Epic (purple)
     ["Veteran"] = "17a69a",         -- LUX LOVE YOU BUDDY (turquoise) lux's favorite color!
     ["Member"] = "0070DD",          -- Rare (blue)
     ["Initiate"] = "1EFF00"         -- Uncommon (green)
 }
 
---[[ might use this table dont know yet
+--[[ might use this table dont know yet still dont know after months 
 local CLASS_ROLES = {
     ["Death Knight"] = { "DPS", "Tank" },
     ["Demon Hunter"] = { "DPS", "Tank" },
@@ -1146,8 +1147,8 @@ local CLASS_ROLES = {
     ["Shaman"] = { "DPS", "Healer" },
     ["Warlock"] = { "DPS" },
     ["Warrior"] = { "DPS", "Tank" }
-}
-]]
+}]]
+
 --#endregion tables end
 
 --#region Utility and Other functions
@@ -1887,7 +1888,8 @@ local function CreateGuildChatWindow(title)
 
     editBox:SetScript("OnHyperlinkClick", function(self, link, text, button)
         if button == "RightButton" then
-            ChatFrame_OnHyperlinkShow(self, link, text, button)
+            --ChatFrame_OnHyperlinkShow(self, link, text, button) ok so we do this instead
+            SetItemRef(link, text, button, self) -- note the parameters order
         elseif button == "LeftButton" then
             local linkType, linkplayer = strsplit(":", link)
             if linkType == "player" and linkplayer then
@@ -3981,7 +3983,8 @@ local function UpdateSearchResults(searchText)
 
             nameCol:SetScript("OnHyperlinkClick", function(self, link, text, button)
                 if button == "RightButton" then
-                    ChatFrame_OnHyperlinkShow(self, link, text, button)
+                    --C_ChatFrame_OnHyperlinkShow(self, link, text, button)
+                    SetItemRef(link, text, button, self)
                 end
             end)
 
@@ -5276,15 +5279,14 @@ local function OnChatMessage(self, event, message, sender)
     -- Add chatMessage to OG_ChatMessageTable
     if not tContains(OG_ChatMessageTable, chatMessage) then
         table.insert(OG_ChatMessageTable, chatMessage)
-        --Wait .1 seconds for table to be updated then on it goes
-        C_Timer.After(0.1, function()
+        --Wait .05 seconds for table to be updated then on it goes
+        C_Timer.After(0.05, function()
             updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
         end)
     end
     --Play a click for each CHAT_MSG_GUILD event
-
     if OldGodsDB.soundEnabled then
-        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\Chatmessage.mp3", "Master")
+        PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-click-alert6.mp3")
     end
 end
 
