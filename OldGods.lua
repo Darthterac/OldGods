@@ -1097,9 +1097,9 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
     "To veiw the available jokes and quotes",
     "click the |cFF0DAF00next page|r button", "________________________________________",
     "Developed by: |cFFC79C6ELazyeyez-Lightbringer|r aka |cFFC41E3ADarthterac|r",
-    "________________________________________", 
+    "________________________________________",
     "|cFF40C7EBVersion: |r" .. KMDAver .. " Thank you!",
- }
+}
 
 local GuildData = {
     "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://tiny.cc/KMDA to rank to member and join in our community! {star} Any Questions - Contact an Officer or GM in game or on Discord!",
@@ -1125,14 +1125,14 @@ local CLASS_COLORS = {
 
 -- table that is used to assign colors to separate ranks in the guild
 local RANK_COLORS = {
-    ["GM"] = "FFA800",              -- Legendary (orange)
-    ["Officer"] = "A335EE",         -- Epic (purple)
-    ["Veteran"] = "17a69a",         -- LUX LOVE YOU BUDDY (turquoise) lux's favorite color!
-    ["Member"] = "0070DD",          -- Rare (blue)
-    ["Initiate"] = "1EFF00"         -- Uncommon (green)
+    ["GM"] = "FFA800",      -- Legendary (orange)
+    ["Officer"] = "A335EE", -- Epic (purple)
+    ["Veteran"] = "17a69a", -- LUX LOVE YOU BUDDY (turquoise) lux's favorite color!
+    ["Member"] = "0070DD",  -- Rare (blue)
+    ["Initiate"] = "1EFF00" -- Uncommon (green)
 }
 
---[[ might use this table dont know yet still dont know after months 
+--[[ might use this table dont know yet still dont know after months
 local CLASS_ROLES = {
     ["Death Knight"] = { "DPS", "Tank" },
     ["Demon Hunter"] = { "DPS", "Tank" },
@@ -4228,6 +4228,39 @@ end
 --#region Meta data graph
 local graphScrollFrame, graphContent
 
+-- =========================
+--  Data collection config
+-- =========================
+local GRAPH_SAMPLE_SECONDS = 20  -- your ticker interval
+local GRAPH_MAX_SAMPLES    = 180 -- more history
+local GRAPH_PADDING_Y      = 14  -- top padding so lines don't kiss the border
+local GRAPH_MIN_ZOOM       = 2
+local GRAPH_MAX_ZOOM       = 10
+
+-- Zoom = pixels per sample step (spacing)
+local graphZoom            = 5
+
+-- Bucketed activity (reset each tick)
+local GraphBucket          = {
+    chatMsgs = 0,
+    unique = {}, -- set of normalized names
+}
+
+-- Expose a tiny API so OnChatMessage can feed the graph buckets
+function OldGods_Graph_RecordChatter(normalizedSender)
+    -- normalizedSender should already be Ambiguate(sender, "None")
+    GraphBucket.chatMsgs = GraphBucket.chatMsgs + 1
+    if normalizedSender then
+        GraphBucket.unique[normalizedSender] = true
+    end
+end
+
+local function CountSet(t)
+    local n = 0
+    for _ in pairs(t) do n = n + 1 end
+    return n
+end
+
 local function GetOnlineGuildMembers()
     local TotalGuildMembers = GetNumGuildMembers()
     local onlineCount = 0
@@ -4242,27 +4275,161 @@ local function GetOnlineGuildMembers()
     return onlineCount
 end
 
--- Tracking/plotting/timing
-C_Timer.NewTicker(75, function()
+-- =========================
+--  Storage: OldGodsGuildActivity
+-- =========================
+OldGodsGuildActivity = OldGodsGuildActivity or {}
+
+-- =========================
+--  Smoothing helpers (EMA)
+-- =========================
+local function EMA(prev, value, alpha)
+    if prev == nil then return value end
+    return prev + alpha * (value - prev)
+end
+
+-- Tick: snapshot the bucket, then reset it
+C_Timer.NewTicker(GRAPH_SAMPLE_SECONDS, function()
     local timestamp = calDateStamp()
     local online = GetOnlineGuildMembers()
-    local chatLines = #OG_ChatMessageTable or 0
 
-    table.insert(OldGodsGuildActivity, {
+    local chatMsgs = GraphBucket.chatMsgs
+    local uniqueChatters = CountSet(GraphBucket.unique)
+
+    -- reset bucket for next interval
+    GraphBucket.chatMsgs = 0
+    wipe(GraphBucket.unique)
+
+    local last = OldGodsGuildActivity[#OldGodsGuildActivity]
+
+    local entry = {
         timestamp = timestamp,
-        chatCount = chatLines,
-        onlineMembers = online,
-    })
 
-    if #OldGodsGuildActivity > 128 then
+        -- raw
+        chatMsgs = chatMsgs,
+        uniqueChatters = uniqueChatters,
+        onlineMembers = online,
+
+        -- smooth (EMA)
+        chatMsgs_s = EMA(last and last.chatMsgs_s, chatMsgs, 0.35),
+        uniqueChatters_s = EMA(last and last.uniqueChatters_s, uniqueChatters, 0.35),
+        onlineMembers_s = EMA(last and last.onlineMembers_s, online, 0.25),
+    }
+
+    table.insert(OldGodsGuildActivity, entry)
+
+    if #OldGodsGuildActivity > GRAPH_MAX_SAMPLES then
         table.remove(OldGodsGuildActivity, 1)
+    end
+
+    -- If the graph is open, redraw
+    if graphScrollFrame and graphScrollFrame:IsShown() then
+        OldGods_DrawGuildActivityGraph()
     end
 end)
 
+-- =========================
+--  Render pooling (no leaks)
+-- =========================
+local Pool = {
+    lines = {},
+    textures = {},
+    fonts = {},
+    hitboxes = {},
+}
+
+local function AcquireLine()
+    local obj = tremove(Pool.lines)
+    if obj then
+        obj:Show()
+        return obj
+    end
+    return graphContent:CreateLine(nil, "OVERLAY")
+end
+
+local function ReleaseLine(line)
+    line:Hide()
+    line:ClearAllPoints()
+    tinsert(Pool.lines, line)
+end
+
+local function AcquireTexture()
+    local obj = tremove(Pool.textures)
+    if obj then
+        obj:Show()
+        return obj
+    end
+    return graphContent:CreateTexture(nil, "ARTWORK")
+end
+
+local function ReleaseTexture(tex)
+    tex:Hide()
+    tex:ClearAllPoints()
+    tinsert(Pool.textures, tex)
+end
+
+local function AcquireFont()
+    local obj = tremove(Pool.fonts)
+    if obj then
+        obj:Show()
+        return obj
+    end
+    return graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+end
+
+local function ReleaseFont(fs)
+    fs:Hide()
+    fs:ClearAllPoints()
+    fs:SetText("")
+    tinsert(Pool.fonts, fs)
+end
+
+local function AcquireHitbox()
+    local obj = tremove(Pool.hitboxes)
+    if obj then
+        obj:Show()
+        return obj
+    end
+    local f = CreateFrame("Frame", nil, graphContent)
+    f:SetMouseClickEnabled(false)
+    f:EnableMouse(true)
+    return f
+end
+
+local function ReleaseHitbox(f)
+    f:Hide()
+    f:ClearAllPoints()
+    f:SetScript("OnEnter", nil)
+    f:SetScript("OnLeave", nil)
+    tinsert(Pool.hitboxes, f)
+end
+
+-- Active draw lists (so we can release everything each redraw)
+local Active = {
+    lines = {},
+    textures = {},
+    fonts = {},
+    hitboxes = {},
+}
+
+local function ClearActive()
+    for i = 1, #Active.lines do ReleaseLine(Active.lines[i]) end
+    for i = 1, #Active.textures do ReleaseTexture(Active.textures[i]) end
+    for i = 1, #Active.fonts do ReleaseFont(Active.fonts[i]) end
+    for i = 1, #Active.hitboxes do ReleaseHitbox(Active.hitboxes[i]) end
+
+    wipe(Active.lines)
+    wipe(Active.textures)
+    wipe(Active.fonts)
+    wipe(Active.hitboxes)
+end
+
+-- =========================
+--  Frame creation
+-- =========================
 local function CreateGraphFrame(parent)
     if graphScrollFrame then return end
 
-    -- Outer scroll container
     graphScrollFrame = CreateFrame("ScrollFrame", "OldGods_GuildGraphScroll", parent, "BackdropTemplate")
     graphScrollFrame:SetSize(720, 405)
     graphScrollFrame:SetPoint("CENTER", parent, "CENTER", 0, 0)
@@ -4275,91 +4442,42 @@ local function CreateGraphFrame(parent)
         insets = { left = -10, right = -10, top = -10, bottom = -10 }
     })
 
-    -- Make it draggable
     graphScrollFrame:EnableMouse(true)
     graphScrollFrame:SetMovable(true)
     graphScrollFrame:RegisterForDrag("LeftButton")
     graphScrollFrame:SetScript("OnDragStart", graphScrollFrame.StartMoving)
     graphScrollFrame:SetScript("OnDragStop", graphScrollFrame.StopMovingOrSizing)
-    graphScrollFrame:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(graphScrollFrame, "ANCHOR_CURSOR")
-        GameTooltip:AddLine("Use MouseWheel to Scroll Graph!", 1, 1, 1)
-        GameTooltip:AddLine("Scroll Down: Recent Data", 0, 0.85, 0.675)
-        GameTooltip:AddLine("Scroll Up: Past Data", 0.35, 0.60, 0.425)
-        GameTooltip:AddLine("Drag graph from here to position", 0.525, 0.45, 0.385)
-        GameTooltip:Show()
-    end)
-    graphScrollFrame:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-    graphScrollFrame:SetVerticalScroll(graphScrollFrame:GetVerticalScrollRange())
 
-    -- Close button
-    --local closeButton = CreateFrame("Button", nil, graphScrollFrame, "UIPanelCloseButton")
-    --closeButton:SetPoint("TOPRIGHT", -5, -5)
-    --closeButton:SetScript("OnClick", function()
-    --graphScrollFrame:Hide()
-    --end)
-
-    -- Mousewheel 2D scroll [commented out vertical scroll and the need to hold shift for horrizon]
     graphScrollFrame:EnableMouseWheel(true)
     graphScrollFrame:SetScript("OnMouseWheel", function(self, delta)
-        --if IsShiftKeyDown() then
-        self:SetHorizontalScroll(self:GetHorizontalScroll() - delta * 20)
-        -- else
-        -- self:SetVerticalScroll(self:GetVerticalScroll() - delta * 20)
-        --  self:SetVerticalScroll(self:GetVerticalScrollRange())
-        --end
+        if IsControlKeyDown() then
+            graphZoom = math.max(GRAPH_MIN_ZOOM, math.min(GRAPH_MAX_ZOOM, graphZoom + (delta > 0 and 1 or -1)))
+            OldGods_DrawGuildActivityGraph()
+            return
+        end
+        self:SetHorizontalScroll(self:GetHorizontalScroll() - delta * 25)
     end)
 
-    -- Scrollable content
+    graphScrollFrame:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(graphScrollFrame, "ANCHOR_CURSOR")
+        GameTooltip:AddLine("MouseWheel: Scroll", 1, 1, 1)
+        GameTooltip:AddLine("CTRL+Wheel: Zoom", 0, 0.85, 0.675)
+        GameTooltip:AddLine("Drag: Move frame", 0.525, 0.45, 0.385)
+        GameTooltip:Show()
+    end)
+    graphScrollFrame:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
     graphContent = CreateFrame("Frame", nil, graphScrollFrame)
-    graphContent:SetSize(800, 340) -- horrizontal scroll keeping vertical locked
+    graphContent:SetSize(800, 340) -- will be resized dynamically
     graphScrollFrame:SetScrollChild(graphContent)
 
-    -- Background for clarity
     local bg = graphContent:CreateTexture(nil, "BACKGROUND")
-    bg:SetAllPoints(graphScrollFrame, true)
+    bg:SetAllPoints(graphContent)
     bg:SetColorTexture(0.05, 0.05, 0.105, 0.8)
-
-    --[[Grid lines (horizontal)
-    for i = 1, 4 do
-        local grid = graphContent:CreateTexture(nil, "ARTWORK")
-        grid:SetColorTexture(0.3, 0.3, 0.3, 0.4)
-        grid:SetSize(graphContent:GetWidth(), 1)
-        grid:SetPoint("BOTTOMLEFT", 0, i * (graphContent:GetHeight() / 4))
-
-    end
-
-    -- Grid lines (vertical)
-    for i = 1, 10 do
-        local vgrid = graphContent:CreateTexture(nil, "ARTWORK")
-        vgrid:SetColorTexture(0.3, 0.3, 0.3, 0.3)
-        vgrid:SetSize(1, graphContent:GetHeight())
-        vgrid:SetPoint("TOPLEFT", i * (graphContent:GetWidth() / 10), 0)
-    end]]
-
-    local gridSize = 32
-    local width = graphContent:GetWidth() - 10
-    local height = graphContent:GetHeight() - 10
-
-    for y = gridSize, height - gridSize, gridSize do
-        local hLine = graphContent:CreateTexture(nil, "ARTWORK")
-        hLine:SetColorTexture(0.2, 0.2, 0.2, 0.325)
-        hLine:SetSize(width, 1)
-        hLine:SetPoint("BOTTOMLEFT", 0, y)
-    end
-
-    for x = gridSize, width - gridSize, gridSize do
-        local vLine = graphContent:CreateTexture(nil, "ARTWORK")
-        vLine:SetColorTexture(0.2, 0.2, 0.2, 0.325)
-        vLine:SetSize(1, height)
-        vLine:SetPoint("BOTTOMLEFT", x, 0)
-    end
 
     -- Legend box
     local legend = CreateFrame("Frame", nil, graphContent, "BackdropTemplate")
-    legend:SetSize(120, 40)
+    legend:SetSize(160, 58)
     legend:SetPoint("TOPLEFT", 10, -10)
     legend:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
@@ -4371,110 +4489,190 @@ local function CreateGraphFrame(parent)
     })
     legend:SetBackdropColor(0.025, 0.055, 0.115, 0.9)
 
-    -- Chat label (yellow)
-    local chatColor = legend:CreateTexture(nil, "ARTWORK")
-    chatColor:SetColorTexture(1, 1, 0, 1)
-    chatColor:SetSize(12, 12)
-    chatColor:SetPoint("TOPLEFT", 6, -6)
+    -- Chat msgs (yellow)
+    local c1 = legend:CreateTexture(nil, "ARTWORK")
+    c1:SetColorTexture(1, 1, 0, 1)
+    c1:SetSize(12, 12)
+    c1:SetPoint("TOPLEFT", 6, -6)
+    local l1 = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    l1:SetPoint("LEFT", c1, "RIGHT", 4, 0)
+    l1:SetText("Chat msgs / tick")
 
-    local chatLabel = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    chatLabel:SetPoint("LEFT", chatColor, "RIGHT", 4, 0)
-    chatLabel:SetText("Chat Activity")
+    -- Unique chatters (cyan)
+    local c2 = legend:CreateTexture(nil, "ARTWORK")
+    c2:SetColorTexture(0, 0.85, 1, 1)
+    c2:SetSize(12, 12)
+    c2:SetPoint("TOPLEFT", c1, "BOTTOMLEFT", 0, -6)
+    local l2 = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    l2:SetPoint("LEFT", c2, "RIGHT", 4, 0)
+    l2:SetText("Unique chatters")
 
-    -- Online label (green)
-    local onlineColor = legend:CreateTexture(nil, "ARTWORK")
-    onlineColor:SetColorTexture(0, 1, 0, 1)
-    onlineColor:SetSize(12, 12)
-    onlineColor:SetPoint("TOPLEFT", chatColor, "BOTTOMLEFT", 0, -6)
-
-    local onlineLabel = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    onlineLabel:SetPoint("LEFT", onlineColor, "RIGHT", 4, 0)
-    onlineLabel:SetText("Online Players")
+    -- Online (green)
+    local c3 = legend:CreateTexture(nil, "ARTWORK")
+    c3:SetColorTexture(0, 1, 0, 1)
+    c3:SetSize(12, 12)
+    c3:SetPoint("TOPLEFT", c2, "BOTTOMLEFT", 0, -6)
+    local l3 = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    l3:SetPoint("LEFT", c3, "RIGHT", 4, 0)
+    l3:SetText("Online players")
 end
 
-local function OldGods_DrawGuildActivityGraph()
+-- =========================
+--  Draw
+-- =========================
+function OldGods_DrawGuildActivityGraph()
     if not OldGodsGuildActivity or not graphContent then return end
 
-    -- Clean up previous lines
-    for _, region in ipairs({ graphContent:GetRegions() }) do
-        if region:GetObjectType() == "Line" then
-            region:Hide()
-        end
+    ClearActive()
+
+    local n = #OldGodsGuildActivity
+    if n < 2 then return end
+
+    local height      = graphContent:GetHeight()
+    local usableH     = math.max(1, height - GRAPH_PADDING_Y)
+    -- Band layout (bottom -> top) as fractions of usableH
+    local BAND_ONLINE = { y0 = 0, h = usableH * 0.30 }                              -- bottom 30%
+    local BAND_UNIQUE = { y0 = BAND_ONLINE.y0 + BAND_ONLINE.h, h = usableH * 0.30 } -- mid 30%
+    local BAND_CHAT   = { y0 = BAND_UNIQUE.y0 + BAND_UNIQUE.h, h = usableH * 0.40 } -- top 40%
+
+
+    -- Determine per-series max (use smoothed values for stable scaling)
+    local maxChat, maxUnique, maxOnline = 1, 1, 1
+    for i = 1, n do
+        local d   = OldGodsGuildActivity[i]
+        maxChat   = math.max(maxChat, d.chatMsgs_s or d.chatMsgs or 0)
+        maxUnique = math.max(maxUnique, d.uniqueChatters_s or d.uniqueChatters or 0)
+        maxOnline = math.max(maxOnline, d.onlineMembers_s or d.onlineMembers or 0)
     end
 
-    local spacing = 5
-    local maxY = 1
-    for _, data in ipairs(OldGodsGuildActivity) do
-        -- Scale by whichever is bigger: chat or online
-        if data.chatCount > maxY then maxY = data.chatCount end
-        if data.onlineMembers > maxY then maxY = data.onlineMembers end
+    -- Resize content width to fit all samples with current zoom
+    local contentW = math.max(800, (n + 6) * graphZoom)
+    graphContent:SetWidth(contentW)
+
+    -- Grid (cheap + useful)
+    local gridSize = 32
+    for y = gridSize, usableH - gridSize, gridSize do
+        local hLine = AcquireTexture()
+        hLine:SetColorTexture(0.2, 0.2, 0.2, 0.325)
+        hLine:SetSize(contentW, 1)
+        hLine:SetPoint("BOTTOMLEFT", 0, y)
+        tinsert(Active.textures, hLine)
     end
 
-    local height = graphContent:GetHeight()
-    local scaleFactor = height / maxY
+    for x = gridSize, contentW - gridSize, gridSize do
+        local vLine = AcquireTexture()
+        vLine:SetColorTexture(0.2, 0.2, 0.2, 0.325)
+        vLine:SetSize(1, usableH)
+        vLine:SetPoint("BOTTOMLEFT", x, 0)
+        tinsert(Active.textures, vLine)
+    end
 
-    for i = 2, #OldGodsGuildActivity do
+    local function BandSeparator(y)
+        local sep = AcquireTexture()
+        sep:SetColorTexture(1, 1, 1, 0.10)
+        sep:SetSize(contentW, 1)
+        sep:SetPoint("BOTTOMLEFT", 0, y)
+        tinsert(Active.textures, sep)
+    end
+
+    BandSeparator(BAND_ONLINE.y0 + BAND_ONLINE.h)
+    BandSeparator(BAND_UNIQUE.y0 + BAND_UNIQUE.h)
+
+    local function BandBG(band, r, g, b, a)
+        local bg = AcquireTexture()
+        bg:SetColorTexture(r, g, b, a)
+        bg:SetPoint("BOTTOMLEFT", 0, band.y0)
+        bg:SetSize(contentW, band.h)
+        tinsert(Active.textures, bg)
+    end
+
+    BandBG(BAND_CHAT, 1, 1, 0, 0.04)
+    BandBG(BAND_UNIQUE, 0, 0.85, 1, 0.035)
+    BandBG(BAND_ONLINE, 0, 1, 0, 0.03)
+
+    -- Helper to map values -> Y
+    local function YInBand(v, vmax, band)
+        if vmax <= 0 then vmax = 1 end
+        local t = v / vmax
+        if t < 0 then t = 0 elseif t > 1 then t = 1 end
+        return band.y0 + (t * band.h)
+    end
+
+    -- Draw series
+    for i = 2, n do
         local prev = OldGodsGuildActivity[i - 1]
         local curr = OldGodsGuildActivity[i]
 
-        local x1 = (i - 2) * spacing
-        local x2 = (i - 1) * spacing
+        local x1 = (i - 2) * graphZoom
+        local x2 = (i - 1) * graphZoom
 
-        -- Chat line (yellow)
-        local y1c = prev.chatCount * scaleFactor
-        local y2c = curr.chatCount * scaleFactor
-        local lineC = graphContent:CreateLine(nil, "OVERLAY")
-        lineC:SetThickness(1)
-        lineC:SetColorTexture(1, 1, 0, 1) -- yellow
+        -- Chat msgs (yellow)
+        local y1c = YInBand(prev.chatMsgs_s or prev.chatMsgs or 0, maxChat, BAND_CHAT)
+        local y2c = YInBand(curr.chatMsgs_s or curr.chatMsgs or 0, maxChat, BAND_CHAT)
+        local lineC = AcquireLine()
+        lineC:SetThickness(1.2)
+        lineC:SetColorTexture(1, 1, 0, 1)
         lineC:SetStartPoint("BOTTOMLEFT", x1, y1c)
         lineC:SetEndPoint("BOTTOMLEFT", x2, y2c)
+        tinsert(Active.lines, lineC)
 
-        -- Online line (green)
-        local y1o = prev.onlineMembers * scaleFactor
-        local y2o = curr.onlineMembers * scaleFactor
-        local lineO = graphContent:CreateLine(nil, "OVERLAY")
-        lineO:SetThickness(1)
-        lineO:SetColorTexture(0, 1, 0, 1) -- green
+        -- Unique chatters (cyan)
+        local y1u = YInBand(prev.uniqueChatters_s or prev.uniqueChatters or 0, maxUnique, BAND_UNIQUE)
+        local y2u = YInBand(curr.uniqueChatters_s or curr.uniqueChatters or 0, maxUnique, BAND_UNIQUE)
+        local lineU = AcquireLine()
+        lineU:SetThickness(1.2)
+        lineU:SetColorTexture(0, 0.85, 1, 1)
+        lineU:SetStartPoint("BOTTOMLEFT", x1, y1u)
+        lineU:SetEndPoint("BOTTOMLEFT", x2, y2u)
+        tinsert(Active.lines, lineU)
+
+        -- Online (green)
+        local y1o = YInBand(prev.onlineMembers_s or prev.onlineMembers or 0, maxOnline, BAND_ONLINE)
+        local y2o = YInBand(curr.onlineMembers_s or curr.onlineMembers or 0, maxOnline, BAND_ONLINE)
+        local lineO = AcquireLine()
+        lineO:SetThickness(1.2)
+        lineO:SetColorTexture(0, 1, 0, 1)
         lineO:SetStartPoint("BOTTOMLEFT", x1, y1o)
         lineO:SetEndPoint("BOTTOMLEFT", x2, y2o)
+        tinsert(Active.lines, lineO)
 
-        -- Invisible hitbox
-        local hitbox = CreateFrame("Frame", nil, graphContent)
-        hitbox:SetSize(spacing, height) -- covers this slice of the graph
+        -- Tooltip hit slice
+        local hitbox = AcquireHitbox()
+        hitbox:SetSize(graphZoom, height)
         hitbox:SetPoint("BOTTOMLEFT", x1, 0)
-        hitbox:SetMouseClickEnabled(true)
-        hitbox:EnableMouse(true)
         hitbox:SetScript("OnEnter", function()
             GameTooltip:SetOwner(hitbox, "ANCHOR_CURSOR")
             GameTooltip:AddLine(curr.timestamp, 1, 1, 1)
-            GameTooltip:AddDoubleLine("Online: " .. curr.onlineMembers, "Chat: " .. curr.chatCount, 0, 1, 0, 1, 1, 0)
-            --GameTooltip:AddLine("Chat: " .. curr.chatCount, 1, 1, 0)
+            GameTooltip:AddDoubleLine("Online", tostring(curr.onlineMembers), 0, 1, 0, 0, 1, 0)
+            GameTooltip:AddDoubleLine("Chat msgs/tick", tostring(curr.chatMsgs), 1, 1, 0, 1, 1, 0)
+            GameTooltip:AddDoubleLine("Unique chatters", tostring(curr.uniqueChatters), 0, 0.85, 1, 0, 0.85, 1)
             GameTooltip:Show()
         end)
-        hitbox:SetScript("OnLeave", function()
-            GameTooltip:Hide()
-        end)
+        hitbox:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        tinsert(Active.hitboxes, hitbox)
     end
 
-    -- Add time labels
-    for i = 1, #OldGodsGuildActivity, 10 do
+    -- Time labels (every ~10 points, scale with zoom)
+    local step = math.max(10, math.floor(50 / math.max(1, graphZoom)))
+    for i = 1, n, step do
         local entry = OldGodsGuildActivity[i]
-        local x = (i - 1) * spacing
+        local x = (i - 1) * graphZoom
 
-        -- Vertical tick line
-        local tick = graphContent:CreateTexture(nil, "ARTWORK")
+        local tick = AcquireTexture()
         tick:SetColorTexture(0.5, .85, 0.95, 0.625)
         tick:SetSize(1, 16)
         tick:SetPoint("BOTTOMLEFT", x, 0)
+        tinsert(Active.textures, tick)
 
-        -- Timestamp label ( Day of the week over HH:MM )
-        local label = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        local label = AcquireFont()
         label:SetPoint("BOTTOMLEFT", x + 2, 6)
-        label:SetText(entry.timestamp:match("^%d+:%d+")) -- HH:MM only
+        label:SetText(entry.timestamp:match("^%d+:%d+")) -- HH:MM
+        tinsert(Active.fonts, label)
 
-        local daylable = graphContent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-        daylable:SetPoint("BOTTOMLEFT", x + 2, 18)
-        daylable:SetText(entry.timestamp:match(",%s*(%a+),")) -- Day of the week
+        local daylabel = AcquireFont()
+        daylabel:SetPoint("BOTTOMLEFT", x + 2, 18)
+        daylabel:SetText(entry.timestamp:match(",%s*(%a+),")) -- Day
+        tinsert(Active.fonts, daylabel)
     end
 end
 
@@ -5216,8 +5414,10 @@ end
 local function OnChatMessage(self, event, message, sender)
     if not sender or sender == "" then return end
 
-    --Strip server from sender, store in variable
     local normalizedSender = Ambiguate(sender, "none")
+    --this function is for the graph (unique senders)
+    OldGods_Graph_RecordChatter(normalizedSender)
+
     --Declare vars to hold data collected by GuildRosterInfo
     local class, level, rank, zone, publicN, officerN
     for i = 1, GetNumGuildMembers() do
