@@ -1102,9 +1102,9 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
  }
 
 local GuildData = {
-    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://tiny.cc/KMDA to rank to member and join in voice for events and groups! Check the calendar guild events! {star} Questions - Contact an Officer or GM in game or on Discord!",
-    "Attention, guildmates {skull}! The purge begins soon. Expect kicked player alerts—don’t be alarmed. We’re trimming inactive members to keep us strong. Remain active and loyal. Long live KMDA! {triangle}",
-    "Friends, the purge is complete. Take a moment to breathe—our ranks are refreshed. Please remember to log in once every 28 days to keep your place. {moon} We stand united, renewed, and stronger than ever." }
+    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://tiny.cc/KMDA to rank to member and join in our community! {star} Any Questions - Contact an Officer or GM in game or on Discord!",
+    "Attention, guildmates {skull}! The purge will happen now. {skull} Expect kicked player alerts; don’t be alarmed. {star} We’re trimming inactive members and initiates to keep our roster current. {skull} Stand-by!",
+    "Friends, the purge is complete. Take a moment to breathe, our ranks are refreshed. Please log in at least once every 28 days to avoid the purge. {star} If an alt was yeeted we will invite back {star}" }
 
 -- Table that is used to match class to its familiar color in game
 local CLASS_COLORS = {
@@ -3374,8 +3374,8 @@ local function GetInactiveInitiates(threshold)
             macroa = "/clap"
             macrob = "\n/run C_Timer.After(0.1, function() print(\"No actions to preform\") end)"
 
-            -- Apply `/gremove` only to Initiates (14+) and Members (28+)
-            if (rankName == "Initiate" and days >= 14) or (rankName == "Member" and days >= 28) then
+            -- Apply `/gremove` only to Initiates (20+) and Members (28+)
+            if (rankName == "Initiate" and days >= 20) or (rankName == "Member" and days >= 28) then
                 macroa = "/gremove"
                 macrob = "\n/run C_Timer.After(0.1, OldGods_ShowInactiveInitiates)"
             end
@@ -3647,7 +3647,7 @@ end
 
 -- Initial call Global so Macro can call it
 function OldGods_ShowInactiveInitiates()
-    local threshold = 14 -- Default threshold
+    local threshold = 20 -- Default threshold
     local data
     closeFrame()
 

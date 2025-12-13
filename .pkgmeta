@@ -1,3 +1,0 @@
-package-as: OldGods
-ignore: [Modified_API_Functions.csv, New_API_Functions.csv, Removed_API_Functions.csv, WoW_API_Functions_Live.csv, AddOn_vs_Depriciated_API_csv.py, README.md]
-
