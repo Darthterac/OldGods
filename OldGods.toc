@@ -1,5 +1,5 @@
 ## Interface: 110207
-## Version: 2.3.1
+## Version: 2.3.2
 ## IconTexture: 514261
 ## Title: |cFF0000FF<|r|cFFFFFFFFOld Gods-Guild Chat|r|cFF0000FF>|r |cFFFFFF00by |cFF9C4D07Lazyeyez|r
 ## Notes: Guild Interaction and Communication and much more 

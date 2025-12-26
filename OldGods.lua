@@ -1,5 +1,6 @@
---OGGC v2.3.1 'SetItemRef'
-local KMDAver = "2.3.1" --minor fix for 11.2.7
+--OGGC v2.3.2 'HandleModifiedItemClick'
+-- Shift Click to link items in the input box of the chatwindow back in action!
+local KMDAver = "2.3.2"
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -1087,7 +1088,8 @@ local QuoteData = { "The customer is always right, in matters of taste - Harry G
     "Turn your wounds into wisdom - Oprah Winfrey",
     "Be yourself; everyone else is already taken - Oscar Wilde",
     "Life isn’t about finding yourself. It’s about creating yourself - George Bernard Shaw",
-    "You can’t use up creativity. The more you use, the more you have - Maya Angelou" }
+    "You can’t use up creativity. The more you use, the more you have - Maya Angelou"
+}
 
 local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
     "The slash commands used from the input box are...",
@@ -1102,11 +1104,11 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
 }
 
 local GuildData = {
-    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://tiny.cc/KMDA to rank to member and join in our community! {star} Any Questions - Contact an Officer or GM in game or on Discord!",
+    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://discord.gg/fCXTjGhZ to rank to member and join in our community! {star} Any Questions - Contact an Officer or GM in game or on Discord!",
     "Attention, guildmates {skull}! The purge will happen now. {skull} Expect kicked player alerts; don’t be alarmed. {star} We’re trimming inactive members and initiates to keep our roster current. {skull} Stand-by!",
-    "Friends, the purge is complete. Take a moment to breathe, our ranks are refreshed. Please log in at least once every 28 days to avoid the purge. {star} If an alt was yeeted we will invite back {star}" }
+    "Friends, the purge is complete. Take a moment to breathe, our ranks are refreshed. Please log in at least once every 28 days to avoid the purge. {star} If an alt was yeeted we will invite back {star}"
+}
 
--- Table that is used to match class to its familiar color in game
 local CLASS_COLORS = {
     ["Druid"] = "FF7D0A",
     ["Hunter"] = "A9D271",
@@ -1123,7 +1125,6 @@ local CLASS_COLORS = {
     ["Evoker"] = "33937F"
 }
 
--- table that is used to assign colors to separate ranks in the guild
 local RANK_COLORS = {
     ["GM"] = "FFA800",      -- Legendary (orange)
     ["Officer"] = "A335EE", -- Epic (purple)
@@ -1132,7 +1133,7 @@ local RANK_COLORS = {
     ["Initiate"] = "1EFF00" -- Uncommon (green)
 }
 
---[[ might use this table dont know yet still dont know after months
+
 local CLASS_ROLES = {
     ["Death Knight"] = { "DPS", "Tank" },
     ["Demon Hunter"] = { "DPS", "Tank" },
@@ -1147,26 +1148,37 @@ local CLASS_ROLES = {
     ["Shaman"] = { "DPS", "Healer" },
     ["Warlock"] = { "DPS" },
     ["Warrior"] = { "DPS", "Tank" }
-}]]
-
+}
 --#endregion tables end
 
 --#region Utility and Other functions
 local soundEnabled = true
 
-OG_tHax = {} -- this table and function just send what ever is printed to the default chat frame to ChatHistoryWindow
-function Gcopy(ChatHistoryWindow, str)
-    if ChatHistoryWindow then
-        local haxA = ChatHistoryWindow.editBox
+OG_tGcopy = {} --Just updated the variable names and comments
+--Funtion and Table are Global so they can be used in a macro
+--[[ Example Macros:
+
+Example 1:
+Dump global table (_G) keys that contain a specific substring
+into the default chat edit box using Gcopy().
+
+Usage:
+/run wipe(OG_tGcopy); for k in pairs(_G) do if string.find(k, "(housing|decor)") then Gcopy(GuildChatWindow, k) end end
+]]
+
+function Gcopy(GuildChatWindow, str)
+    if GuildChatWindow then
+        local str_Window = GuildChatWindow.editBox
         local str_ = str .. "\n"
-        table.insert(OG_tHax, str_)
+        table.insert(OG_tGcopy, str_)
         print(str_)
-        C_Timer.After(1, function()
-            local haxB = table.concat(OG_tHax, "\n")
-            haxA:SetText(haxB)
+        -- delay allows chat/global dumps to finish populating before write
+        C_Timer.After(3, function()
+            local concatTable_str = table.concat(OG_tGcopy, "\n")
+            str_Window:SetText(concatTable_str)
         end)
     end
-end -- enjoy its part of the next push some cool history of the addon while developing. Use it in a macro
+end
 
 -- obscene language filter
 local function IsMessageFiltered(msg)
@@ -1359,7 +1371,6 @@ local function fancyTransform(text)
         Y = "ÿ",
         Z = "ž"
     }
-
     -- Transform the input text
     local transformed = text:gsub(".", function(c)
         local upper = c:upper()    -- Get uppercase version for matching
@@ -2133,13 +2144,24 @@ local function CreateGuildChatWindow(title)
         self:SetFocus()          -- Ensure inputBox is focused
     end)
 
-    --The magic hooksecurefunc we need to learn more about this, used again in the mail manager with some changes
-    hooksecurefunc("ChatEdit_InsertLink", function(link)
-        if link and inputBox:HasFocus() then
-            inputBox:Insert(link) -- Insert the item link into the inputBox
-            return true
-        end
+    --"ChatEdit_InsertLink" wasnt cutting it since 11.2.7 after trying
+    --and failing to insert the item links with setitemref to the input box
+    --I came across "HandleModifiedItemClick" - which is working 100% for
+    --shift clicking items in the bag/spellbook/chatframes, into the addons 
+    --inputBox  
+    hooksecurefunc("HandleModifiedItemClick", function(link)
+        if not link then return end
+        if not inputBox or not inputBox:HasFocus() then return end
+        local current = inputBox:GetText() or ""
+        local cursor = inputBox:GetCursorPosition()
+        inputBox:SetText(
+            current:sub(1, cursor) ..
+            link ..
+            current:sub(cursor + 1)
+        )
+        inputBox:SetCursorPosition(cursor + #link)
     end)
+
 
     StaticPopupDialogs["OLDGODS_FILTER_BYPASS"] = {
         text = "|TInterface\\AddOns\\OldGods\\Textures\\chat_alert.tga:64:64:0|t Reconsider your message.\n" ..
@@ -2364,7 +2386,7 @@ local function CheckGuildRosterChanges()
                 name .. "|h|r|cFFFFFFFF[|r|cFF" .. classColor .. shortName .. "|r|cFFFFFFFF]|r|h"
 
             if oldrankName ~= rankName then
-                PlaySound(170271)
+                PlaySound(213528)
                 DEFAULT_CHAT_FRAME:AddMessage(
                     "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\rankChange.tga:16:16:0|t Rank change: " ..
                     hyperlinkName ..
@@ -2372,7 +2394,11 @@ local function CheckGuildRosterChanges()
                 previous.rankName = rankName
             end
             if oldlevel ~= level then
-                PlaySound(170271)
+                if level % 10 == 0 then
+                    PlaySound(1519)
+                else
+                    PlaySound(303820)
+                end
                 DEFAULT_CHAT_FRAME:AddMessage(
                     "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16:0|t Level Up: " ..
                     hyperlinkName ..
@@ -2387,7 +2413,6 @@ local function CheckGuildRosterChanges()
                 previous.zone = zone
             end
             if oldpublicNote ~= publicNote then
-                PlaySound(170271)
                 DEFAULT_CHAT_FRAME:AddMessage(
                     "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Public Note Changed: " ..
                     hyperlinkName ..
@@ -2395,7 +2420,6 @@ local function CheckGuildRosterChanges()
                 previous.publicNote = publicNote
             end
             if oldofficerNote ~= officerNote then
-                PlaySound(170271)
                 DEFAULT_CHAT_FRAME:AddMessage(
                     "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16:0|t Officer Note Changed: " ..
                     hyperlinkName ..
@@ -4231,14 +4255,14 @@ local graphScrollFrame, graphContent
 -- =========================
 --  Data collection config
 -- =========================
-local GRAPH_SAMPLE_SECONDS = 20  -- your ticker interval
-local GRAPH_MAX_SAMPLES    = 180 -- more history
-local GRAPH_PADDING_Y      = 14  -- top padding so lines don't kiss the border
-local GRAPH_MIN_ZOOM       = 2
-local GRAPH_MAX_ZOOM       = 10
+local GRAPH_SAMPLE_SECONDS = 60 -- your ticker interval
+local GRAPH_MAX_SAMPLES    = 90 -- more history
+local GRAPH_PADDING_Y      = 12 -- top padding so lines don't kiss the border
+local GRAPH_MIN_ZOOM       = 6
+local GRAPH_MAX_ZOOM       = 12
 
 -- Zoom = pixels per sample step (spacing)
-local graphZoom            = 5
+local graphZoom            = 3
 
 -- Bucketed activity (reset each tick)
 local GraphBucket          = {
@@ -4312,7 +4336,7 @@ C_Timer.NewTicker(GRAPH_SAMPLE_SECONDS, function()
 
         -- smooth (EMA)
         chatMsgs_s = EMA(last and last.chatMsgs_s, chatMsgs, 0.35),
-        uniqueChatters_s = EMA(last and last.uniqueChatters_s, uniqueChatters, 0.35),
+        --uniqueChatters_s = EMA(last and last.uniqueChatters_s, uniqueChatters, 0.35),
         onlineMembers_s = EMA(last and last.onlineMembers_s, online, 0.25),
     }
 
@@ -4459,7 +4483,7 @@ local function CreateGraphFrame(parent)
     end)
 
     graphScrollFrame:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(graphScrollFrame, "ANCHOR_CURSOR")
+        GameTooltip:SetOwner(graphScrollFrame, "ANCHOR_BOTTOMRIGHT", -30, 30)
         GameTooltip:AddLine("MouseWheel: Scroll", 1, 1, 1)
         GameTooltip:AddLine("CTRL+Wheel: Zoom", 0, 0.85, 0.675)
         GameTooltip:AddLine("Drag: Move frame", 0.525, 0.45, 0.385)
@@ -4467,8 +4491,14 @@ local function CreateGraphFrame(parent)
     end)
     graphScrollFrame:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
+    local closeButton = CreateFrame("Button", nil, graphScrollFrame, "UIPanelCloseButton")
+    closeButton:SetPoint("TOPRIGHT", -5, -5)
+    closeButton:SetScript("OnClick", function()
+        graphScrollFrame:Hide()
+    end)
+
     graphContent = CreateFrame("Frame", nil, graphScrollFrame)
-    graphContent:SetSize(800, 340) -- will be resized dynamically
+    graphContent:SetSize(800, 310) -- will be resized dynamically
     graphScrollFrame:SetScrollChild(graphContent)
 
     local bg = graphContent:CreateTexture(nil, "BACKGROUND")
@@ -4476,9 +4506,9 @@ local function CreateGraphFrame(parent)
     bg:SetColorTexture(0.05, 0.05, 0.105, 0.8)
 
     -- Legend box
-    local legend = CreateFrame("Frame", nil, graphContent, "BackdropTemplate")
+    local legend = CreateFrame("Frame", nil, graphScrollFrame, "BackdropTemplate")
     legend:SetSize(160, 58)
-    legend:SetPoint("TOPLEFT", 10, -10)
+    legend:SetPoint("BOTTOMLEFT", 8, 5)
     legend:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
@@ -4493,9 +4523,9 @@ local function CreateGraphFrame(parent)
     local c1 = legend:CreateTexture(nil, "ARTWORK")
     c1:SetColorTexture(1, 1, 0, 1)
     c1:SetSize(12, 12)
-    c1:SetPoint("TOPLEFT", 6, -6)
+    c1:SetPoint("TOPLEFT", 0, -6)
     local l1 = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    l1:SetPoint("LEFT", c1, "RIGHT", 4, 0)
+    l1:SetPoint("LEFT", c1, "RIGHT", 6, 0)
     l1:SetText("Chat msgs / tick")
 
     -- Unique chatters (cyan)
@@ -4504,7 +4534,7 @@ local function CreateGraphFrame(parent)
     c2:SetSize(12, 12)
     c2:SetPoint("TOPLEFT", c1, "BOTTOMLEFT", 0, -6)
     local l2 = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    l2:SetPoint("LEFT", c2, "RIGHT", 4, 0)
+    l2:SetPoint("LEFT", c2, "RIGHT", 6, 0)
     l2:SetText("Unique chatters")
 
     -- Online (green)
@@ -4513,9 +4543,12 @@ local function CreateGraphFrame(parent)
     c3:SetSize(12, 12)
     c3:SetPoint("TOPLEFT", c2, "BOTTOMLEFT", 0, -6)
     local l3 = legend:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    l3:SetPoint("LEFT", c3, "RIGHT", 4, 0)
+    l3:SetPoint("LEFT", c3, "RIGHT", 6, 0)
     l3:SetText("Online players")
 end
+
+CreateGraphFrame()
+graphScrollFrame:Hide()
 
 -- =========================
 --  Draw
@@ -4541,7 +4574,7 @@ function OldGods_DrawGuildActivityGraph()
     for i = 1, n do
         local d   = OldGodsGuildActivity[i]
         maxChat   = math.max(maxChat, d.chatMsgs_s or d.chatMsgs or 0)
-        maxUnique = math.max(maxUnique, d.uniqueChatters_s or d.uniqueChatters or 0)
+        maxUnique = math.max(maxUnique, --[[d.uniqueChatters_s or]] d.uniqueChatters or 0)
         maxOnline = math.max(maxOnline, d.onlineMembers_s or d.onlineMembers or 0)
     end
 
@@ -4550,7 +4583,7 @@ function OldGods_DrawGuildActivityGraph()
     graphContent:SetWidth(contentW)
 
     -- Grid (cheap + useful)
-    local gridSize = 32
+    local gridSize = 16
     for y = gridSize, usableH - gridSize, gridSize do
         local hLine = AcquireTexture()
         hLine:SetColorTexture(0.2, 0.2, 0.2, 0.325)
@@ -4617,8 +4650,10 @@ function OldGods_DrawGuildActivityGraph()
         tinsert(Active.lines, lineC)
 
         -- Unique chatters (cyan)
-        local y1u = YInBand(prev.uniqueChatters_s or prev.uniqueChatters or 0, maxUnique, BAND_UNIQUE)
-        local y2u = YInBand(curr.uniqueChatters_s or curr.uniqueChatters or 0, maxUnique, BAND_UNIQUE)
+        --local y1u = YInBand(prev.uniqueChatters_s or prev.uniqueChatters or 0, maxUnique, BAND_UNIQUE)
+        --local y2u = YInBand(curr.uniqueChatters_s or curr.uniqueChatters or 0, maxUnique, BAND_UNIQUE)
+        local y1u = YInBand(prev.uniqueChatters or 0, maxUnique, BAND_UNIQUE)
+        local y2u = YInBand(curr.uniqueChatters or 0, maxUnique, BAND_UNIQUE)
         local lineU = AcquireLine()
         lineU:SetThickness(1.2)
         lineU:SetColorTexture(0, 0.85, 1, 1)
@@ -4641,7 +4676,7 @@ function OldGods_DrawGuildActivityGraph()
         hitbox:SetSize(graphZoom, height)
         hitbox:SetPoint("BOTTOMLEFT", x1, 0)
         hitbox:SetScript("OnEnter", function()
-            GameTooltip:SetOwner(hitbox, "ANCHOR_CURSOR")
+            GameTooltip:SetOwner(hitbox, "ANCHOR_BOTTOM")
             GameTooltip:AddLine(curr.timestamp, 1, 1, 1)
             GameTooltip:AddDoubleLine("Online", tostring(curr.onlineMembers), 0, 1, 0, 0, 1, 0)
             GameTooltip:AddDoubleLine("Chat msgs/tick", tostring(curr.chatMsgs), 1, 1, 0, 1, 1, 0)
@@ -4710,10 +4745,10 @@ OG_Fast_Options = {
         fastFunction = OldGods_MemberSearch,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\Search.tga:18:18|t ",
     },
-    ["Inactive Purge"] = {
+    --[[["Inactive Purge"] = {
         fastFunction = OldGods_ShowInactiveInitiates,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:18:18|t "
-    },
+    },]] -- taking this out as its meant for officers
     ["Toggle Zone Tracking"] = {
         fastFunction = toggle_ZoneSpam,
         icon = zoneDataSpam and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t " or
