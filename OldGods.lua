@@ -1,6 +1,12 @@
---OGGC v2.3.2 'HandleModifiedItemClick'
--- Shift Click to link items in the input box of the chatwindow back in action!
-local KMDAver = "2.3.2"
+--OGGC v2.3.3 
+local KMDAver = "2.3.3"
+
+--[[
+'Fizzlemizz' on the UI and Macro forums is awesome! All spells professions and talents links 
+are credit to his code he is a master and appears in the comments for the Auto Guild Theme also!
+Now Shift+Click inserts the proper hyperlink for the spells professions and talents in the 
+GuildChatWindow inputBox. 
+]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -2135,33 +2141,55 @@ local function CreateGuildChatWindow(title)
 
     local inputBox = CreateFrame("EditBox", nil, GuildChatWindow, "InputBoxTemplate")
     inputBox:SetSize(400, 35)
-    inputBox:SetPoint("BOTTOM", GuildChatWindow, "BOTTOM", 0, 35) -- Position relative to the parent frame
-    inputBox:SetAutoFocus(false)                                  -- Prevent auto-focusing the input box
+    inputBox:SetPoint("BOTTOM", GuildChatWindow, "BOTTOM", 0, 35)
+    inputBox:SetAutoFocus(false)
     inputBox:EnableMouse(true)
     inputBox:SetHyperlinksEnabled(true)
-    inputBox:SetMaxLetters(3999) -- Set the maximum number of characters I seen this in a movie once
+    inputBox:SetSecureText(false)
+    inputBox:SetMaxLetters(3999)
     inputBox:SetScript("OnMouseDown", function(self)
-        self:SetFocus()          -- Ensure inputBox is focused
+        self:SetFocus()
     end)
+    
+    --#region Fizzlemizz made this, many thanks
+    local owner = {}
 
-    --"ChatEdit_InsertLink" wasnt cutting it since 11.2.7 after trying
-    --and failing to insert the item links with setitemref to the input box
-    --I came across "HandleModifiedItemClick" - which is working 100% for
-    --shift clicking items in the bag/spellbook/chatframes, into the addons 
-    --inputBox  
-    hooksecurefunc("HandleModifiedItemClick", function(link)
-        if not link then return end
-        if not inputBox or not inputBox:HasFocus() then return end
-        local current = inputBox:GetText() or ""
-        local cursor = inputBox:GetCursorPosition()
-        inputBox:SetText(
-            current:sub(1, cursor) ..
-            link ..
-            current:sub(cursor + 1)
-        )
-        inputBox:SetCursorPosition(cursor + #link)
+    EventRegistry:RegisterCallback("TalentButton.OnClick", function(owner, self, button)
+        local spellID = self:GetSpellID();
+        if spellID then
+            local spellLink = C_Spell.GetSpellLink(spellID)
+            inputBox:Insert(spellLink)
+        end
+    end, owner)
+
+    EventRegistry:RegisterCallback("SpellBookItemMixin.OnModifiedClick", function(owner, self, button)
+        local chatLink = C_SpellBook.GetSpellBookItemTradeSkillLink(self.slotIndex, self.spellBank);
+        if not chatLink then
+            chatLink = C_SpellBook.GetSpellBookItemLink(self.slotIndex, self.spellBank);
+        end
+        inputBox:Insert(chatLink)
+    end, owner)
+    
+    EventRegistry:RegisterCallback("ProfessionSpellButton.OnModifiedClick", function(owner, self, button)
+        local slotIndex = ProfessionsBook_GetSpellBookItemSlot(self)
+        local activeSpellBank = Enum.SpellBookSpellBank.Player
+        if not slotIndex then
+            return
+        end
+        local tradeSkillLink = C_SpellBook.GetSpellBookItemTradeSkillLink(slotIndex, activeSpellBank)
+        if tradeSkillLink then
+            inputBox:Insert(tradeSkillLink)
+        else
+            local spellLink = C_SpellBook.GetSpellBookItemLink(slotIndex, activeSpellBank)
+            inputBox:Insert(spellLink)
+        end
+    end, owner)
+    --#endregion Fizzlemizz youre awesome!!
+
+    --i did this part :p
+    hooksecurefunc("HandleModifiedItemClick", function(payload)
+        inputBox:Insert(payload)
     end)
-
 
     StaticPopupDialogs["OLDGODS_FILTER_BYPASS"] = {
         text = "|TInterface\\AddOns\\OldGods\\Textures\\chat_alert.tga:64:64:0|t Reconsider your message.\n" ..
@@ -3296,7 +3324,7 @@ OGM_inputBox:SetScript("OnLeave", function()
 end)
 
 --The magic hooksecurefunc we need to learn more about this, and we are now, so there!
-hooksecurefunc("ChatEdit_InsertLink", function(link)
+hooksecurefunc("HandleModifiedItemClick", function(link)
     if link and OGM_inputBox:HasFocus() then
         local itemID = link:match("item:(%d+)") -- Extract the item ID from the link, dont ask I match and I extract
         if itemID then                          -- but I ask chatGPT everytime I have to make a pattern, one day!!!
