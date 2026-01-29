@@ -1,3 +1,30 @@
+### OldGods-2.4.0
+
+    A clean Simple Theme for users to choose, updated the Custom theme. The Simple UI 
+    goes nice with the Blizzard default damage meter skin. Small updates/fixes for linking code; 
+    you'll notice now the inputBox must have focus before any links are sent to it, no more linking
+    into the default chat frame and finding 10 or so links in the chatwindows inputBox lol! 
+
+#### OldGods-2.3.4
+
+Updated .toc file
+
+### OldGods-2.3.3 Changes
+
+A big thanks to Fizzlemizz on the UI and Macro WoW forums. I researched and tried like a novice to get spells and talents and professions
+along with inventory to insert the hyperlink into the addon chat windows' inputBox for a solid 2 days, the code can be found in: 
+
+OldGods.lua ctrl+F "--#region Fizzlemizz made this, many thanks"
+
+The only thing I changed from Fizz's code was SetText to Insert -- the structure of the code and the API is alien to me! I dont even 
+know how putting the table after the end works, right now doesn't make sense to me lol. I definitely have a way to go with the API 
+and Lua. Fizz Thank you, your help made this update possible! 
+
+### OldGods-2.3.2 Changes
+
+Shift clicking items to link into the inputbox was broken in 11.2.7 -- after some trial and error the issue is solved
+
+
 ### OldGods-2.3.1 Changes
 
 Minor change to address an API function; no details as of now experimental API might change again. See source for diff.

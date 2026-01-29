@@ -1,12 +1,10 @@
---OGGC v2.3.3 
-local KMDAver = "2.3.3"
+--OGGC v2.4.0
+local KMDAver = "2.4.0"
 
---[[
-'Fizzlemizz' on the UI and Macro forums is awesome! All spells professions and talents links 
-are credit to his code he is a master and appears in the comments for the Auto Guild Theme also!
-Now Shift+Click inserts the proper hyperlink for the spells professions and talents in the 
-GuildChatWindow inputBox. 
-]]
+--[[ A clean Simple Theme for users to choose, updated the Custom theme. The Simple UI 
+    goes nice with the Blizzard default damage meter skin. Small updates/fixes for linking code; 
+    you'll notice now the inputBox must have focus before any links are sent to it, no more linking
+    into the default chat frame and finding 10 or so links in the chatwindows inputBox lol! ]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -452,15 +450,15 @@ OG_Themes = {
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
         tileSize = 0,
-        edgeSize = 3,
-        insets = {
-            left = 1,
-            right = 1,
-            top = 1,
-            bottom = 1
+        edgeSize = 1, -- were thinning out the border, going for cleaner simple looks
+        insets = {    -- and were adopting a 1px offset for a sharper looking border 
+            left = -1,
+            right = -1,
+            top = -1,
+            bottom = -1
         },
-        backgroundColor = { r = 0.659, g = 0.659, b = 0.659, a = 0.75 },
-        borderColor = { r = 1, g = 1, b = 1, a = 1 }, --pure red
+        backgroundColor = { r = 0.409, g = 0.409, b = 0.389, a = 0.695 },
+        borderColor = { r = 1, g = 1, b = 1, a = 1 },
         thescrlfrm = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
             edgeFile = "Interface\\Buttons\\WHITE8x8",
@@ -473,15 +471,14 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            myAtlas = "jailerstower-scenario-TrackerHeader",
+            myAtlas = "Artifacts-BG-Shadow", --A transparent option for custom theme, i know it would be nice to pick your own textures I have a lot to fix before I add that, I'm one guy learning the wow API as I go, give it time.
             myAtlasVertex = resetVertex,
             myAtlasTexCoord = { 0, 1, 0, 1 },
-            --myAtlasSetRotation = math.pi/2,
             scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
             scrollThumbTexture = 2022762,
             scrollThumbVertex = resetVertex,
-            scrollThumbSize = { width = 18, height = 18 },
+            scrollThumbSize = { width = 16, height = 16 },
         },
         theStefak = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -496,7 +493,7 @@ OG_Themes = {
                 bottom = 1
             },
             cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
-            cristaFrameBorderColor = { r = 1, g = 1, b = 1, a = 1 }, -- Dark Grey Orange rgb01(0.639, 0.565, 0.506)
+            cristaFrameBorderColor = { r = 1, g = 1, b = 0.895, a = 0.752 },
         },
         theAtari = {
             bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -510,17 +507,87 @@ OG_Themes = {
                 top = 0,
                 bottom = 0
             },
-            isEditBoxBG = { r = 0, g = 0, b = 0, a = 1 },
+            isEditBoxBG = { r = 0, g = 0, b = 0, a = 0.435 }, --let that new transparent atlas breath a bit ;)
+            isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 }, -- I know I should have these repeating values defined and like I said Im one guy learning, not a pro give me time =)
+        },
+        titleColor = { r = 0.05, g = 0.05, b = 0.10, a = 1 },
+        TITLE_font = "Fonts\\FRIZQT__.TTF",
+        TITLE_fontSize = 16,
+        buttonBgColor = { r = 1, g = 1, b = 1, a = 0.485 },
+        buttonBorderColor = { r = 0, g = 0, b = 0, a = 1 },
+        iconTexture = 0, -- nope its gone, ugly ass icon get out of here
+        iconVertex = resetVertex,
+        iconSize = { width = 1, height = 1 }, -- no more icon for custom themes lets users have a cleaner UI 
+    },
+    ["Simple UI"] = {
+        dropDownIcon = "|T1455894:18:18:0|t",
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\Buttons\\WHITE8x8",
+        tile = false,
+        tileSize = 0,
+        edgeSize = 1,
+        insets = { left = -1, right = -1, top = -1, bottom = -1 },
+        backgroundColor = { r = 0.165, g = 0.165, b = 0.095, a = 0.475 },
+        borderColor = { r = 0.878, g = 0.675, b = 0.015, a = 0.805 },
+        thescrlfrm = {
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 0,
+            insets = {
+                left = 0,
+                right = 0,
+                top = 0,
+                bottom = 0
+            },
+            myAtlas = "Artifacts-BG-Shadow", --"Adventures_MissionList_Highlight",--"Adventures-Missions-Shadow",
+            myAtlasVertex = resetVertex,
+            myAtlasTexCoord = { 0, 1, 0, 1 },
+            scrollFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollFrameBorderColor = { r = 0, g = 0, b = 0, a = 0 },
+            scrollThumbTexture = 4687628,
+            scrollThumbVertex = resetVertex,
+            scrollThumbSize = { width = 12, height = 12 },
+        },
+        theStefak = {
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 1,
+            insets = {
+                left = 1,
+                right = 1,
+                top = 1,
+                bottom = 1
+            },
+            cristaFrameBGColor = { r = 0, g = 0, b = 0, a = 0 },
+            cristaFrameBorderColor = { r = 0.875, g = 0.675, b = 0.015, a = 1 },
+        },
+        theAtari = {
+            bgFile = "Interface\\Buttons\\WHITE8x8",
+            edgeFile = "Interface\\Buttons\\WHITE8x8",
+            tile = false,
+            tileSize = 0,
+            edgeSize = 0,
+            insets = {
+                left = 0,
+                right = 0,
+                top = 0,
+                bottom = 0
+            },
+            isEditBoxBG = { r = 0, g = 0, b = 0, a = 0 },
             isEditBoxBorder = { r = 0, g = 0, b = 0, a = 0 },
         },
-        titleColor = { r = 0, g = 0, b = 0, a = 1 },
+        titleColor = { r = 1, g = 0.88, b = 0.07, 0.90 },
         TITLE_font = "Fonts\\FRIZQT__.TTF",
-        TITLE_fontSize = 18,
-        buttonBgColor = { r = 1, g = 1, b = 1, a = 1 },
-        buttonBorderColor = { r = 0, g = 0, b = 0, a = 1 },
-        iconTexture = 1455894,
+        TITLE_fontSize = 16,
+        buttonBgColor = { r = 0.04, g = 0.04, b = 0.04, a = 0.195 },
+        buttonBorderColor = { r = 0.878, g = 0.675, b = 0.035, a = 0.755 },
+        iconTexture = 0,                      --no texture
         iconVertex = resetVertex,
-        iconSize = { width = 48, height = 48 },
+        iconSize = { width = 1, height = 1 }, --hidden
     },
     ["Horde"] = {
         dropDownIcon = "|TInterface\\Timer\\Horde-Logo:26:26|t",
@@ -1160,31 +1227,19 @@ local CLASS_ROLES = {
 --#region Utility and Other functions
 local soundEnabled = true
 
-OG_tGcopy = {} --Just updated the variable names and comments
---Funtion and Table are Global so they can be used in a macro
---[[ Example Macros:
-
-Example 1:
-Dump global table (_G) keys that contain a specific substring
-into the default chat edit box using Gcopy().
-
-Usage:
-/run wipe(OG_tGcopy); for k in pairs(_G) do if string.find(k, "(housing|decor)") then Gcopy(GuildChatWindow, k) end end
-]]
-
+--[[ OG_tGcopy = {} 
 function Gcopy(GuildChatWindow, str)
     if GuildChatWindow then
         local str_Window = GuildChatWindow.editBox
         local str_ = str .. "\n"
         table.insert(OG_tGcopy, str_)
         print(str_)
-        -- delay allows chat/global dumps to finish populating before write
         C_Timer.After(3, function()
             local concatTable_str = table.concat(OG_tGcopy, "\n")
             str_Window:SetText(concatTable_str)
         end)
     end
-end
+end]]
 
 -- obscene language filter
 local function IsMessageFiltered(msg)
@@ -1663,6 +1718,7 @@ local function CreateThemeForPlayersGuild(frame)
             r = tbl.borderColor.r or 1,
             g = tbl.borderColor.g or 1,
             b = tbl.borderColor.b or 1,
+---@diagnostic disable-next-line: undefined-field
             a = tbl.borderColor.a or 1,
         }
 
@@ -1670,6 +1726,7 @@ local function CreateThemeForPlayersGuild(frame)
             r = tbl.backgroundColor.r or 0,
             g = tbl.backgroundColor.g or 0,
             b = tbl.backgroundColor.b or 0,
+---@diagnostic disable-next-line: undefined-field
             a = tbl.backgroundColor.a or 0.6999,
         }
 
@@ -1677,6 +1734,7 @@ local function CreateThemeForPlayersGuild(frame)
             r = tbl.emblemColor.r or 1,
             g = tbl.emblemColor.g or 1,
             b = tbl.emblemColor.b or 1,
+---@diagnostic disable-next-line: undefined-field
             a = tbl.emblemColor.a or 1,
         }
 
@@ -2070,13 +2128,16 @@ local function CreateGuildChatWindow(title)
     end)
 
     -- Add Close button, the X in the top right corner
-    local topRightCloseButton = CreateFrame("Button", nil, GuildChatWindow, "BackdropTemplate")
-    topRightCloseButton:SetSize(17, 17)
+    local topRightCloseButton = CreateFrame("Button", nil, GuildChatWindow, "UIPanelButtonTemplate")
+    topRightCloseButton:SetSize(24, 24)
     topRightCloseButton:SetPoint("TOPRIGHT", GuildChatWindow, "TOPRIGHT", -4, -4)
-    topRightCloseButton:SetNormalFontObject("GameFontNormal")
-    topRightCloseButton:SetHighlightFontObject("GameFontHighlight")
-    topRightCloseButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
-    topRightCloseButton:SetText("X")
+    --topRightCloseButton:SetNormalFontObject("GameFontNormal")
+    --topRightCloseButton:SetHighlightFontObject("GameFontHighlight")
+    --topRightCloseButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    topRightCloseButton:SetNormalAtlas("adventureguide-redx")
+    topRightCloseButton:SetHighlightAtlas("communities-icon-chat-highlight")
+    topRightCloseButton:SetPushedAtlas("communities-icon-chat-pushed")
+    --[[topRightCloseButton:SetText("X")
     local FrameBackdrop = {
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
@@ -2089,10 +2150,10 @@ local function CreateGuildChatWindow(title)
             top = 2,
             bottom = 2
         }
-    }
-    topRightCloseButton:SetBackdrop(FrameBackdrop)
-    topRightCloseButton:SetBackdropColor(0.204, 0.227, 0.329, 1)
-    topRightCloseButton:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
+    }]]
+    --topRightCloseButton:SetBackdrop(FrameBackdrop)
+    --topRightCloseButton:SetBackdropColor(0.204, 0.227, 0.329, 1)
+    --topRightCloseButton:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
     topRightCloseButton:SetScript("OnClick", function()
         toggleGuildChatWindow = not toggleGuildChatWindow -- Flip the toggle state
         toggleButton:SetText(toggleGuildChatWindow and "Hide Chat" or "Show Chat")
@@ -2150,7 +2211,7 @@ local function CreateGuildChatWindow(title)
     inputBox:SetScript("OnMouseDown", function(self)
         self:SetFocus()
     end)
-    
+
     --#region Fizzlemizz made this, many thanks
     local owner = {}
 
@@ -2158,7 +2219,9 @@ local function CreateGuildChatWindow(title)
         local spellID = self:GetSpellID();
         if spellID then
             local spellLink = C_Spell.GetSpellLink(spellID)
-            inputBox:Insert(spellLink)
+            if spellLink and inputBox:HasFocus() then
+                inputBox:Insert(spellLink)
+            end
         end
     end, owner)
 
@@ -2167,9 +2230,11 @@ local function CreateGuildChatWindow(title)
         if not chatLink then
             chatLink = C_SpellBook.GetSpellBookItemLink(self.slotIndex, self.spellBank);
         end
-        inputBox:Insert(chatLink)
+        if chatLink and inputBox:HasFocus() then
+            inputBox:Insert(chatLink)
+        end
     end, owner)
-    
+
     EventRegistry:RegisterCallback("ProfessionSpellButton.OnModifiedClick", function(owner, self, button)
         local slotIndex = ProfessionsBook_GetSpellBookItemSlot(self)
         local activeSpellBank = Enum.SpellBookSpellBank.Player
@@ -2177,18 +2242,22 @@ local function CreateGuildChatWindow(title)
             return
         end
         local tradeSkillLink = C_SpellBook.GetSpellBookItemTradeSkillLink(slotIndex, activeSpellBank)
-        if tradeSkillLink then
+        if tradeSkillLink and inputBox:HasFocus() then
             inputBox:Insert(tradeSkillLink)
         else
             local spellLink = C_SpellBook.GetSpellBookItemLink(slotIndex, activeSpellBank)
-            inputBox:Insert(spellLink)
+            if spellLink and inputBox:HasFocus() then
+                inputBox:Insert(spellLink)
+            end
         end
     end, owner)
     --#endregion Fizzlemizz youre awesome!!
 
     --i did this part :p
     hooksecurefunc("HandleModifiedItemClick", function(payload)
-        inputBox:Insert(payload)
+        if payload and inputBox:HasFocus() then
+            inputBox:Insert(payload)
+        end
     end)
 
     StaticPopupDialogs["OLDGODS_FILTER_BYPASS"] = {
