@@ -1,8 +1,8 @@
 --OGGC v2.4.0
 local KMDAver = "2.4.0"
 
---[[ A clean Simple Theme for users to choose, updated the Custom theme. The Simple UI 
-    goes nice with the Blizzard default damage meter skin. Small updates/fixes for linking code; 
+--[[ A clean Simple Theme for users to choose, updated the Custom theme. The Simple UI
+    goes nice with the Blizzard default damage meter skin. Small updates/fixes for linking code;
     you'll notice now the inputBox must have focus before any links are sent to it, no more linking
     into the default chat frame and finding 10 or so links in the chatwindows inputBox lol! ]]
 
@@ -451,7 +451,7 @@ OG_Themes = {
         tile = false,
         tileSize = 0,
         edgeSize = 1, -- were thinning out the border, going for cleaner simple looks
-        insets = {    -- and were adopting a 1px offset for a sharper looking border 
+        insets = {    -- and were adopting a 1px offset for a sharper looking border
             left = -1,
             right = -1,
             top = -1,
@@ -515,9 +515,9 @@ OG_Themes = {
         TITLE_fontSize = 16,
         buttonBgColor = { r = 1, g = 1, b = 1, a = 0.485 },
         buttonBorderColor = { r = 0, g = 0, b = 0, a = 1 },
-        iconTexture = 0, -- nope its gone, ugly ass icon get out of here
+        iconTexture = 0,                      -- nope its gone, ugly ass icon get out of here
         iconVertex = resetVertex,
-        iconSize = { width = 1, height = 1 }, -- no more icon for custom themes lets users have a cleaner UI 
+        iconSize = { width = 1, height = 1 }, -- no more icon for custom themes lets users have a cleaner UI
     },
     ["Simple UI"] = {
         dropDownIcon = "|T1455894:18:18:0|t",
@@ -1227,7 +1227,7 @@ local CLASS_ROLES = {
 --#region Utility and Other functions
 local soundEnabled = true
 
---[[ OG_tGcopy = {} 
+--[[ OG_tGcopy = {}
 function Gcopy(GuildChatWindow, str)
     if GuildChatWindow then
         local str_Window = GuildChatWindow.editBox
@@ -1718,7 +1718,7 @@ local function CreateThemeForPlayersGuild(frame)
             r = tbl.borderColor.r or 1,
             g = tbl.borderColor.g or 1,
             b = tbl.borderColor.b or 1,
----@diagnostic disable-next-line: undefined-field
+            ---@diagnostic disable-next-line: undefined-field
             a = tbl.borderColor.a or 1,
         }
 
@@ -1726,7 +1726,7 @@ local function CreateThemeForPlayersGuild(frame)
             r = tbl.backgroundColor.r or 0,
             g = tbl.backgroundColor.g or 0,
             b = tbl.backgroundColor.b or 0,
----@diagnostic disable-next-line: undefined-field
+            ---@diagnostic disable-next-line: undefined-field
             a = tbl.backgroundColor.a or 0.6999,
         }
 
@@ -1734,7 +1734,7 @@ local function CreateThemeForPlayersGuild(frame)
             r = tbl.emblemColor.r or 1,
             g = tbl.emblemColor.g or 1,
             b = tbl.emblemColor.b or 1,
----@diagnostic disable-next-line: undefined-field
+            ---@diagnostic disable-next-line: undefined-field
             a = tbl.emblemColor.a or 1,
         }
 
@@ -2212,7 +2212,7 @@ local function CreateGuildChatWindow(title)
         self:SetFocus()
     end)
 
-    --#region Fizzlemizz made this, many thanks
+    --[[#region Fizzlemizz made this, many thanks (found a nice solution keeping this in to remind me how smart fizz is =)
     local owner = {}
 
     EventRegistry:RegisterCallback("TalentButton.OnClick", function(owner, self, button)
@@ -2251,14 +2251,24 @@ local function CreateGuildChatWindow(title)
             end
         end
     end, owner)
-    --#endregion Fizzlemizz youre awesome!!
+    --#endregion Fizzlemizz youre awesome!!]]
 
-    --i did this part :p
+    --i did this part :p its for linking from inventory (bags)
     hooksecurefunc("HandleModifiedItemClick", function(payload)
         if payload and inputBox:HasFocus() then
             inputBox:Insert(payload)
         end
     end)
+    
+    --i did this part too, thanks agian Fizzlemizz you sent me on a journey!
+    --every spell, profession, achievement, talent, etc that can be linked is 
+    --with just this small hook ;)
+    hooksecurefunc(ChatFrameUtil, "InsertLink", function(link)
+        if link and inputBox:HasFocus() then
+            inputBox:Insert(link)
+        end
+    end)
+
 
     StaticPopupDialogs["OLDGODS_FILTER_BYPASS"] = {
         text = "|TInterface\\AddOns\\OldGods\\Textures\\chat_alert.tga:64:64:0|t Reconsider your message.\n" ..
@@ -2525,7 +2535,7 @@ local function CheckGuildRosterChanges()
             end
         end
     end
-    C_Timer.After(10, CacheGuildRoster)
+    C_Timer.After(11, CacheGuildRoster)
 end
 
 -- ***WARNING*** CALLING THIS FUNCTION CAUSES GAME CRASHES - USE WITH CAUTION BE SURE RANK IS OFFICER OR ABOVE
