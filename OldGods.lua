@@ -5555,6 +5555,21 @@ end
 local function OnChatMessage(self, event, message, sender)
     if not sender or sender == "" then return end
 
+     -- Check if sender is a "Secret Value" (true when in instances)
+    if issecretvalue(sender) then
+        -- In instances, we skip roster lookup and color formatting 
+        -- because string.format and concatenation fail on secrets.
+        local chatMessage = "[Unknown Secret Value]: " .. message 
+        table.insert(OG_ChatMessageTable, chatMessage)
+        
+        C_Timer.After(0.05, function()
+            updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
+        end) -- we dont screw with trying to make everything a secure what ever, I aint refactoring all that shit
+        return -- End function early for secrets
+    end
+
+
+    --not a secrete then game on, untill they come for us in the open world, gg blizzard
     local normalizedSender = Ambiguate(sender, "none")
     --this function is for the graph (unique senders)
     OldGods_Graph_RecordChatter(normalizedSender)
