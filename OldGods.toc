@@ -1,9 +1,9 @@
 ## Interface: 120000, 120001
-## Version: 2.4.0
+## Version: 2.4.1
 ## IconTexture: 514261
-## Title: |cFF0000FF<|r|cFFFFFFFFOld Gods-Guild Chat|r|cFF0000FF>|r |cFFFFFF00by |cFF9C4D07Lazyeyez|r
+## Title: |cFF0000FF<|r|cFFFFFFFFOld Gods-Guild Chat|r|cFF0000FF>|r |cFFFFFF00by |cFFC79C6ELazyeyez|r
 ## Notes: Guild Interaction and Communication and much more 
-## Author: Lazyeyez-Lightbringer, Nyx(ChatGPT) + help from Fizzlemizz ty ;) 
+## Author: Lazyeyez-Lightbringer
 ## SavedVariables: OldGodsDB, OGsavedChat, OldGodsSavedColors, OldGods_UserThemes, OldGods_LastThemeName, OldGods_LastFontName, OldGodsGuildActivity, OG_TrackGuildRoster, OG_EncryptedNotes, OG_AfkMsg, OldGods_BadMailDB, OldGods_AutoReturnEnabled
 
 OldGods.lua

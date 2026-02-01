@@ -1,3 +1,16 @@
+### OldGods-2.4.1
+
+Removed the EventRegistry:RegisterCallback code and replaced an old hook with a new one: 
+
+```lua
+hooksecurefunc(ChatFrameUtil, "InsertLink", function(link)
+    if link and inputBox:HasFocus() then
+        inputBox:Insert(link)
+    end
+end)
+```
+Nothing major just a hacky solution to the issue of linking tihngs!
+
 ### OldGods-2.4.0
 
     A clean Simple Theme for users to choose, updated the Custom theme. The Simple UI 

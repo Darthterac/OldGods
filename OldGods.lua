@@ -1,10 +1,9 @@
---OGGC v2.4.0
-local KMDAver = "2.4.0"
+--OGGC v2.4.1
+local KMDAver = "2.4.1"
 
---[[ A clean Simple Theme for users to choose, updated the Custom theme. The Simple UI
-    goes nice with the Blizzard default damage meter skin. Small updates/fixes for linking code;
-    you'll notice now the inputBox must have focus before any links are sent to it, no more linking
-    into the default chat frame and finding 10 or so links in the chatwindows inputBox lol! ]]
+--[[ ChatUtil.InsertLink hooked and gated with HasFocus does all the hyperlinka - Big thanks still 
+     going out to Fizzlemizz, if it wasn't for his linking solutions I'd not have know where to look
+     to create this hook!]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -2253,16 +2252,16 @@ local function CreateGuildChatWindow(title)
     end, owner)
     --#endregion Fizzlemizz youre awesome!!]]
 
-    --i did this part :p its for linking from inventory (bags)
+    --[[i did this part :p its for linking from inventory (bags)
     hooksecurefunc("HandleModifiedItemClick", function(payload)
         if payload and inputBox:HasFocus() then
             inputBox:Insert(payload)
         end
-    end)
+    end) Ok I found the best method for all of this is the next hook]]
     
     --i did this part too, thanks agian Fizzlemizz you sent me on a journey!
-    --every spell, profession, achievement, talent, etc that can be linked is 
-    --with just this small hook ;)
+    --every spell, profession, achievement, talent, inventory, etc.. that can be linked is 
+    --with just this small hook - lazy? no, im just letting blizzard do all the work  ;)
     hooksecurefunc(ChatFrameUtil, "InsertLink", function(link)
         if link and inputBox:HasFocus() then
             inputBox:Insert(link)
@@ -2535,7 +2534,7 @@ local function CheckGuildRosterChanges()
             end
         end
     end
-    C_Timer.After(11, CacheGuildRoster)
+    C_Timer.After(10.1, CacheGuildRoster)
 end
 
 -- ***WARNING*** CALLING THIS FUNCTION CAUSES GAME CRASHES - USE WITH CAUTION BE SURE RANK IS OFFICER OR ABOVE
@@ -5577,7 +5576,7 @@ local function OnChatMessage(self, event, message, sender)
             break
         end
     end
-
+    
     -- If key data is not assigned function ends
     if not class or not level or not rank then
         print("|cFFFF0000ERROR: class, level or rank missing|r Function OnChatMessage")
