@@ -1,7 +1,7 @@
 --OGGC v2.4.1
 local KMDAver = "2.4.1"
 
---[[ ChatUtil.InsertLink hooked and gated with HasFocus does all the hyperlinka - Big thanks still 
+--[[ ChatUtil.InsertLink hooked and gated with HasFocus does all the hyperlinka - Big thanks still
      going out to Fizzlemizz, if it wasn't for his linking solutions I'd not have know where to look
      to create this hook!]]
 
@@ -2258,9 +2258,9 @@ local function CreateGuildChatWindow(title)
             inputBox:Insert(payload)
         end
     end) Ok I found the best method for all of this is the next hook]]
-    
+
     --i did this part too, thanks agian Fizzlemizz you sent me on a journey!
-    --every spell, profession, achievement, talent, inventory, etc.. that can be linked is 
+    --every spell, profession, achievement, talent, inventory, etc.. that can be linked is
     --with just this small hook - lazy? no, im just letting blizzard do all the work  ;)
     hooksecurefunc(ChatFrameUtil, "InsertLink", function(link)
         if link and inputBox:HasFocus() then
@@ -5488,6 +5488,7 @@ end
 --#region OnChatMessage called Functions
 
 --chatMessageSpice takes parameters from data gathered in OnChatMessage()
+
 --this is where all color is added, and string.format then returns chatMessage
 local function chatMessageSpice(sender, message, class)
     local senderWithoutServer = Ambiguate(sender, "none")
@@ -5552,24 +5553,39 @@ end
 --#endregion
 
 --#region OnChatMessage: Event CHAT_MSG_GUILD
+local OG_InstancePause = {
+    active = false,
+    startTime = nil,
+    instanceType = nil,
+}
+
 local function OnChatMessage(self, event, message, sender)
     if not sender or sender == "" then return end
 
-     -- Check if sender is a "Secret Value" (true when in instances)
-    if issecretvalue(sender) then
-        -- In instances, we skip roster lookup and color formatting 
-        -- because string.format and concatenation fail on secrets.
-        local chatMessage = "[Unknown Secret Value]: " .. message 
+    -- Leaving instance → resume + elapsed time
+    if OG_InstancePause.active then
+        local elapsed = GetTime() - OG_InstancePause.startTime
+
+        local minutes = math.floor(elapsed / 60)
+        local seconds = math.floor(elapsed % 60)
+
+        local chatMessage = string.format(
+            "|cffc77dffOG|r: Guild chat resumed after |cff00ff00%02d:%02d|r",
+            minutes,
+            seconds
+        )
+
         table.insert(OG_ChatMessageTable, chatMessage)
-        
         C_Timer.After(0.05, function()
             updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
-        end) -- we dont screw with trying to make everything a secure what ever, I aint refactoring all that shit
-        return -- End function early for secrets
+        end)
+
+        -- Reset pause state
+        OG_InstancePause.active = false
+        OG_InstancePause.startTime = nil
+        OG_InstancePause.instanceType = nil
     end
 
-
-    --not a secrete then game on, untill they come for us in the open world, gg blizzard
     local normalizedSender = Ambiguate(sender, "none")
     --this function is for the graph (unique senders)
     OldGods_Graph_RecordChatter(normalizedSender)
@@ -5591,7 +5607,7 @@ local function OnChatMessage(self, event, message, sender)
             break
         end
     end
-    
+
     -- If key data is not assigned function ends
     if not class or not level or not rank then
         print("|cFFFF0000ERROR: class, level or rank missing|r Function OnChatMessage")
@@ -5646,9 +5662,57 @@ local function OnChatMessage(self, event, message, sender)
     end
 end
 
+-- Guild Chat Restricted cause of taint? unregister CHAT_MSG_GUILD 
+-- avoids even touching a secret; use C_ChatInfo.InChatMessagingLockdown()
 local OnChatMessageEventFrame = CreateFrame("Frame")
-OnChatMessageEventFrame:RegisterEvent("CHAT_MSG_GUILD")
-OnChatMessageEventFrame:SetScript("OnEvent", OnChatMessage)
+
+--The enable function 
+local function OG_EnableGuildChat()
+    OnChatMessageEventFrame:RegisterEvent("CHAT_MSG_GUILD")
+end
+--The disable function
+local function OG_DisableGuildChat()
+    OnChatMessageEventFrame:UnregisterEvent("CHAT_MSG_GUILD")
+end
+--The update function that's called by 2 other events cause im sneaky 
+local function OG_UpdateChatRestrictionState()
+    local restricted, reason = C_ChatInfo.InChatMessagingLockdown()
+
+    if restricted then
+        OG_DisableGuildChat()
+
+        if not OG_InstancePause.active then
+            OG_InstancePause.active = true
+            OG_InstancePause.startTime = GetTime()
+            OG_InstancePause.instanceType = reason
+
+            local chatMessage = string.format(
+                "|cffc77dffOG|r: Guild chat paused |cff939399(%s)|r",
+                tostring(reason)
+            )
+
+            table.insert(OG_ChatMessageTable, chatMessage)
+            C_Timer.After(0.05, function()
+                updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
+            end)
+        end
+    else
+        OG_EnableGuildChat()
+    end
+end
+--The events we are registering that were using to toggle CHAT_MSG_GUILD, sneaky sneaky ;)
+OnChatMessageEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+OnChatMessageEventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+--When these events fire and not CHAT_MSG_GUILD we update CHAT_MSG_GUILD registry
+OnChatMessageEventFrame:SetScript("OnEvent", function(self, event, ...)
+    if event ~= "CHAT_MSG_GUILD" then
+        OG_UpdateChatRestrictionState()
+        return
+    end
+    -- At this point: guaranteed safe no longer passing a restricted value 
+    -- log off the computer, touch some grass, slop that work uwu_underground are awesome
+    OnChatMessage(self, event, ...)
+end)
 --#endregion OnChatMessage ends here
 
 --#region Auto Messaging: Event CHAT_MSG_GUILD
@@ -5689,8 +5753,8 @@ end
 
 --event frame
 local AfkMsg_frame = CreateFrame("Frame")
-AfkMsg_frame:RegisterEvent("CHAT_MSG_GUILD")
-AfkMsg_frame:SetScript("OnEvent", onTriggerWord)
+--AfkMsg_frame:RegisterEvent("CHAT_MSG_GUILD")
+---AfkMsg_frame:SetScript("OnEvent", onTriggerWord)
 --#endregion AUTO MESSAGES ends here
 
 --#region reworked Help Window
