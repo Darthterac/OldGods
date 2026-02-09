@@ -9,7 +9,8 @@ hooksecurefunc(ChatFrameUtil, "InsertLink", function(link)
     end
 end)
 ```
-Nothing major just a hacky solution to the issue of linking tihngs!
+Nothing major just a hacky solution to the issue of linking tihngs! also
+pausing guild chat while chat lock down is detected more to come!!
 
 ### OldGods-2.4.0
 

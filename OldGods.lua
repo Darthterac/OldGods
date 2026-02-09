@@ -1,9 +1,7 @@
 --OGGC v2.4.1
 local KMDAver = "2.4.1"
 
---[[ ChatUtil.InsertLink hooked and gated with HasFocus does all the hyperlinka - Big thanks still
-     going out to Fizzlemizz, if it wasn't for his linking solutions I'd not have know where to look
-     to create this hook!]]
+--[[ Event and secret values tackled along with a hook for shift clicking everything into the inputBox ]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
