@@ -1,3 +1,10 @@
+### OldGods-2.4.2a
+
+ADDON_RESTRICTION_STATE_CHANGED: type, state
+
+Reworked the restrictions event logic, chat window now shows why chat is paused 
+and when it resumes this is just a fast push to stop Lua errors and keep users happy :D <3 u
+
 ### OldGods-2.4.1
 
 Removed the EventRegistry:RegisterCallback code and replaced an old hook with a new one: 

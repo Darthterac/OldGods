@@ -1,7 +1,7 @@
---OGGC v2.4.1
-local KMDAver = "2.4.1"
+--OGGC v2.4.2a
+local KMDAver = "2.4.2a"
 
---[[ Event and secret values tackled along with a hook for shift clicking everything into the inputBox ]]
+--[[ Reworked the restrictions logic, chat window now shows why chat is paused and when it resumes this is just a fast push to stop Lua errors ]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -5551,38 +5551,8 @@ end
 --#endregion
 
 --#region OnChatMessage: Event CHAT_MSG_GUILD
-local OG_InstancePause = {
-    active = false,
-    startTime = nil,
-    instanceType = nil,
-}
-
 local function OnChatMessage(self, event, message, sender)
     if not sender or sender == "" then return end
-
-    -- Leaving instance → resume + elapsed time
-    if OG_InstancePause.active then
-        local elapsed = GetTime() - OG_InstancePause.startTime
-
-        local minutes = math.floor(elapsed / 60)
-        local seconds = math.floor(elapsed % 60)
-
-        local chatMessage = string.format(
-            "|cffc77dffOG|r: Guild chat resumed after |cff00ff00%02d:%02d|r",
-            minutes,
-            seconds
-        )
-
-        table.insert(OG_ChatMessageTable, chatMessage)
-        C_Timer.After(0.05, function()
-            updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
-        end)
-
-        -- Reset pause state
-        OG_InstancePause.active = false
-        OG_InstancePause.startTime = nil
-        OG_InstancePause.instanceType = nil
-    end
 
     local normalizedSender = Ambiguate(sender, "none")
     --this function is for the graph (unique senders)
@@ -5660,56 +5630,92 @@ local function OnChatMessage(self, event, message, sender)
     end
 end
 
--- Guild Chat Restricted cause of taint? unregister CHAT_MSG_GUILD 
--- avoids even touching a secret; use C_ChatInfo.InChatMessagingLockdown()
 local OnChatMessageEventFrame = CreateFrame("Frame")
 
---The enable function 
 local function OG_EnableGuildChat()
     OnChatMessageEventFrame:RegisterEvent("CHAT_MSG_GUILD")
+    --will print a texture and message and play some alert sound here
 end
---The disable function
+
 local function OG_DisableGuildChat()
     OnChatMessageEventFrame:UnregisterEvent("CHAT_MSG_GUILD")
+    --will print a texture and message and play some alert sound here
 end
---The update function that's called by 2 other events cause im sneaky 
-local function OG_UpdateChatRestrictionState()
-    local restricted, reason = C_ChatInfo.InChatMessagingLockdown()
 
-    if restricted then
-        OG_DisableGuildChat()
+local function GetRestrictionName(value)
+    for name, enumValue in pairs(Enum.AddOnRestrictionType) do
+        if enumValue == value then
+            return name
+        end
+    end
+    return "Unknown"
+end
+
+local OG_InstancePause = {
+    active = false,
+    startTime = nil,
+    activeRestrictions = {}
+}
+
+OnChatMessageEventFrame:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
+OnChatMessageEventFrame:SetScript("OnEvent", function(self, event, ...)
+    if event ~= "ADDON_RESTRICTION_STATE_CHANGED" then
+        if event == "CHAT_MSG_GUILD" then
+            OnChatMessage(self, event, ...)
+        end
+        return
+    end
+
+    local type, state = ...
+    local restrictionName = GetRestrictionName(type)
+
+    if state == Enum.AddOnRestrictionState.Activating
+        or state == Enum.AddOnRestrictionState.Active then
+        OG_InstancePause.activeRestrictions[type] = true
 
         if not OG_InstancePause.active then
             OG_InstancePause.active = true
             OG_InstancePause.startTime = GetTime()
-            OG_InstancePause.instanceType = reason
+
+            OG_DisableGuildChat()
 
             local chatMessage = string.format(
-                "|cffc77dffOG|r: Guild chat paused |cff939399(%s)|r",
-                tostring(reason)
+            "|cFFFFFFFF[|r|cFF0000FFOG|r|cFFFFFFFF]|r: Guild chat paused due to |cff55FF99(|r|cffF0F0FF%s|r|cff55FF99)|r\nGuild Chat will resume when addon restrictions are lifted!",
+                restrictionName)
+            table.insert(OG_ChatMessageTable, chatMessage)
+            updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
+            print("Restriction started:", restrictionName)
+        end
+        return
+    end
+
+    if state == Enum.AddOnRestrictionState.Inactive then
+        OG_InstancePause.activeRestrictions[type] = nil
+        if next(OG_InstancePause.activeRestrictions) == nil then
+            local elapsed = GetTime() - OG_InstancePause.startTime
+            local minutes = math.floor(elapsed / 60)
+            local seconds = math.floor(elapsed % 60)
+
+            OG_EnableGuildChat()
+
+            local chatMessage = string.format("|cFFFFFFFF[|r|cFF0000FFOG|r|cFFFFFFFF]|r: Guild chat resumed after |cff00ff00%02d:%02d|r",
+                minutes,
+                seconds
             )
 
             table.insert(OG_ChatMessageTable, chatMessage)
-            C_Timer.After(0.05, function()
-                updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
-            end)
+            updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
+
+            --will print a texture and message and play some alert sound here
+
+            OG_InstancePause.active = false
+            OG_InstancePause.startTime = nil
+        else
+            --just looking at the event, going to pair this with state for info while
+            --AddOnRestrictionState.Active is true, right now it's always 'combat' 
+            print("Restriction lifted:", restrictionName)
         end
-    else
-        OG_EnableGuildChat()
     end
-end
---The events we are registering that were using to toggle CHAT_MSG_GUILD, sneaky sneaky ;)
-OnChatMessageEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-OnChatMessageEventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
---When these events fire and not CHAT_MSG_GUILD we update CHAT_MSG_GUILD registry
-OnChatMessageEventFrame:SetScript("OnEvent", function(self, event, ...)
-    if event ~= "CHAT_MSG_GUILD" then
-        OG_UpdateChatRestrictionState()
-        return
-    end
-    -- At this point: guaranteed safe no longer passing a restricted value 
-    -- log off the computer, touch some grass, slop that work uwu_underground are awesome
-    OnChatMessage(self, event, ...)
 end)
 --#endregion OnChatMessage ends here
 
