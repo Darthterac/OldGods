@@ -1,3 +1,12 @@
+### OldGods-2.5.0a
+
+Massive overhaul of the Member Search, removed modmenu hooks amd had to remove icons
+from dropdown menus to solve taint issues when interacting with blizzards damage meter
+I will test out modmenu and adding the functions back to the menus for players and enemys
+ie. getting Armory Links, sending Ginvites and more. For now enjoy the new member search!
+ 
+
+
 ### OldGods-2.4.2a
 
 ADDON_RESTRICTION_STATE_CHANGED: type, state

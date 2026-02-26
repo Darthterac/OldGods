@@ -1,7 +1,7 @@
---OGGC v2.4.2a
-local KMDAver = "2.4.2a"
+--OGGC v2.5.0a
+local KMDAver = "2.5.0a"
 
---[[ Reworked the restrictions logic, chat window now shows why chat is paused and when it resumes this is just a fast push to stop Lua errors ]]
+--[[ Isolated and solved menu taint - it was having icons in drop down menus which was causing the problem. I have removed all menu.modmenu hooks for now and revamped the member search huge changes! will test modmenus for next relesae right now were taint and error free! gg ]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -439,10 +439,11 @@ OG_ChatMessageTable = {}
 OG_TooltipInfoTable = {}
 
 --#region Global table OG_Themes
+local CurrentTheme
 local resetVertex = { r = 1, g = 1, b = 1, a = 1 }
 OG_Themes = {
     ["Your Custom Theme"] = { -- Custom theme default when user resets theme or first time addon loads - the reset function nils the keys,values in the OldGodsSavedColors SavedVariable
-        dropDownIcon = "|T1455894:18:18:0|t",
+        dropDownIcon = "|T1455894|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -517,7 +518,7 @@ OG_Themes = {
         iconSize = { width = 1, height = 1 }, -- no more icon for custom themes lets users have a cleaner UI
     },
     ["Simple UI"] = {
-        dropDownIcon = "|T1455894:18:18:0|t",
+        dropDownIcon = "|T1455894|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -587,7 +588,7 @@ OG_Themes = {
         iconSize = { width = 1, height = 1 }, --hidden
     },
     ["Horde"] = {
-        dropDownIcon = "|TInterface\\Timer\\Horde-Logo:26:26|t",
+        dropDownIcon = "|TInterface\\Timer\\Horde-Logo|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -662,7 +663,7 @@ OG_Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["Alliance"] = {
-        dropDownIcon = "|TInterface\\Timer\\Alliance-Logo:26:26|t",
+        dropDownIcon = "|TInterface\\Timer\\Alliance-Logo|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -737,7 +738,7 @@ OG_Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["Hacker"] = {
-        dropDownIcon = "|T4667414:18:18:0|t",
+        dropDownIcon = "|T4667414|t",
         bgFile = "Interface\\AddOns\\OldGods\\Textures\\hacker.tga",
         edgeFile = "Interface\\AddOns\\OldGods\\Textures\\hackerborder.tga",
         tile = false,
@@ -812,7 +813,7 @@ OG_Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["ChatGPT"] = {
-        dropDownIcon = "|T5648287:18:18:0|t",
+        dropDownIcon = "|T5648287|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -887,7 +888,7 @@ OG_Themes = {
         iconSize = { width = 48, height = 48 },
     },
     ["WoW Theme"] = {
-        dropDownIcon = "|T1120721:18:18:0|t",
+        dropDownIcon = "|T1120721|t",
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Buttons\\WHITE8x8",
         tile = false,
@@ -1003,7 +1004,196 @@ OG_Fonts = {
 
 --#endregion Global Tables
 
---#region Jokes Quotes Guild Tables
+--#region Jokes Quotes Guild Tables - Accents
+
+local tableAccents = {
+   ["À"] = "A",
+   ["Á"] = "A",
+   ["Â"] = "A",
+   ["Ã"] = "A",
+   ["Ä"] = "A",
+   ["Å"] = "A",
+   ["Æ"] = "AE",
+   ["Ç"] = "C",
+   ["È"] = "E",
+   ["É"] = "E",
+   ["Ê"] = "E",
+   ["Ë"] = "E",
+   ["Ì"] = "I",
+   ["Í"] = "I",
+   ["Î"] = "I",
+   ["Ï"] = "I",
+   ["Ð"] = "D",
+   ["Ñ"] = "N",
+   ["Ò"] = "O",
+   ["Ó"] = "O",
+   ["Ô"] = "O",
+   ["Õ"] = "O",
+   ["Ö"] = "O",
+   ["Ø"] = "O",
+   ["Ù"] = "U",
+   ["Ú"] = "U",
+   ["Û"] = "U",
+   ["Ü"] = "U",
+   ["Ý"] = "Y",
+   ["Þ"] = "P",
+   ["ß"] = "ss",
+   ["à"] = "a",
+   ["á"] = "a",
+   ["â"] = "a",
+   ["ã"] = "a",
+   ["ä"] = "a",
+   ["å"] = "a",
+   ["æ"] = "ae",
+   ["ç"] = "c",
+   ["è"] = "e",
+   ["é"] = "e",
+   ["ê"] = "e",
+   ["ë"] = "e",
+   ["ì"] = "i",
+   ["í"] = "i",
+   ["î"] = "i",
+   ["ï"] = "i",
+   ["ð"] = "d",
+   ["ñ"] = "n",
+   ["ò"] = "o",
+   ["ó"] = "o",
+   ["ô"] = "o",
+   ["õ"] = "o",
+   ["ö"] = "o",
+   ["ø"] = "o",
+   ["ù"] = "u",
+   ["ú"] = "u",
+   ["û"] = "u",
+   ["ü"] = "u",
+   ["ý"] = "y",
+   ["þ"] = "p",
+   ["ÿ"] = "y",
+   ["Ā"] = "A",
+   ["Ă"] = "A",
+   ["Ą"] = "A",
+   ["Ć"] = "C",
+   ["Ĉ"] = "C",
+   ["Ċ"] = "C",
+   ["Č"] = "C",
+   ["Ď"] = "D",
+   ["Đ"] = "D",
+   ["Ē"] = "E",
+   ["Ĕ"] = "E",
+   ["Ė"] = "E",
+   ["Ę"] = "E",
+   ["Ě"] = "E",
+   ["Ĝ"] = "G",
+   ["Ğ"] = "G",
+   ["Ġ"] = "G",
+   ["Ģ"] = "G",
+   ["Ĥ"] = "H",
+   ["Ħ"] = "H",
+   ["Ĩ"] = "I",
+   ["Ī"] = "I",
+   ["Ĭ"] = "I",
+   ["Į"] = "I",
+   ["İ"] = "I",
+   ["Ĳ"] = "IJ",
+   ["Ĵ"] = "J",
+   ["Ķ"] = "K",
+   ["Ĺ"] = "L",
+   ["Ļ"] = "L",
+   ["Ľ"] = "L",
+   ["Ŀ"] = "L",
+   ["Ł"] = "L",
+   ["Ń"] = "N",
+   ["Ņ"] = "N",
+   ["Ň"] = "N",
+   ["Ŋ"] = "N",
+   ["Ō"] = "O",
+   ["Ŏ"] = "O",
+   ["Ő"] = "O",
+   ["Ŕ"] = "R",
+   ["Ŗ"] = "R",
+   ["Ř"] = "R",
+   ["Ś"] = "S",
+   ["Ŝ"] = "S",
+   ["Ş"] = "S",
+   ["Š"] = "S",
+   ["Ţ"] = "T",
+   ["Ť"] = "T",
+   ["Ŧ"] = "T",
+   ["Ũ"] = "U",
+   ["Ū"] = "U",
+   ["Ŭ"] = "U",
+   ["Ů"] = "U",
+   ["Ű"] = "U",
+   ["Ų"] = "U",
+   ["Ŵ"] = "W",
+   ["Ŷ"] = "Y",
+   ["Ÿ"] = "Y",
+   ["Ź"] = "Z",
+   ["Ż"] = "Z",
+   ["Ž"] = "Z",
+   ["ā"] = "a",
+   ["ă"] = "a",
+   ["ą"] = "a",
+   ["ć"] = "c",
+   ["ĉ"] = "c",
+   ["ċ"] = "c",
+   ["č"] = "c",
+   ["ď"] = "d",
+   ["đ"] = "d",
+   ["ē"] = "e",
+   ["ĕ"] = "e",
+   ["ė"] = "e",
+   ["ę"] = "e",
+   ["ě"] = "e",
+   ["ĝ"] = "g",
+   ["ğ"] = "g",
+   ["ġ"] = "g",
+   ["ģ"] = "g",
+   ["ĥ"] = "h",
+   ["ħ"] = "h",
+   ["ĩ"] = "i",
+   ["ī"] = "i",
+   ["ĭ"] = "i",
+   ["į"] = "i",
+   ["ı"] = "i",
+   ["ĳ"] = "ij",
+   ["ĵ"] = "j",
+   ["ķ"] = "k",
+   ["ĺ"] = "l",
+   ["ļ"] = "l",
+   ["ľ"] = "l",
+   ["ŀ"] = "l",
+   ["ł"] = "l",
+   ["ń"] = "n",
+   ["ņ"] = "n",
+   ["ň"] = "n",
+   ["ŋ"] = "n",
+   ["ō"] = "o",
+   ["ŏ"] = "o",
+   ["ő"] = "o",
+   ["ŕ"] = "r",
+   ["ŗ"] = "r",
+   ["ř"] = "r",
+   ["ś"] = "s",
+   ["ŝ"] = "s",
+   ["ş"] = "s",
+   ["š"] = "s",
+   ["ţ"] = "t",
+   ["ť"] = "t",
+   ["ŧ"] = "t",
+   ["ũ"] = "u",
+   ["ū"] = "u",
+   ["ŭ"] = "u",
+   ["ů"] = "u",
+   ["ű"] = "u",
+   ["ų"] = "u",
+   ["ŵ"] = "w",
+   ["ŷ"] = "y",
+   ["ź"] = "z",
+   ["ż"] = "z",
+   ["ž"] = "z",
+}
+
 local JokeData = { "Why cant you trust an atom? Because they make up literally everything.",
     "What happens to an illegally parked frog? It gets toad away.",
     "Why did the parents not like their sons biology teacher? He had skeletons in his closet.",
@@ -1063,7 +1253,9 @@ local JokeData = { "Why cant you trust an atom? Because they make up literally e
     "Dad: What is the difference between a piano, a tuna, and a pot of glue? Me: I don't know. Dad: You can tuna piano but you can't piano a tuna. Me: What about the pot of glue? Dad: I knew you'd get stuck on that.",
 }
 
-local QuoteData = { "The customer is always right, in matters of taste - Harry Gordon Selfridge",
+local QuoteData = {
+    "02:19:47:[Mamakitty]: I have one.  I don't know who said this, but my dad always told me \"You want to make God laugh, tell him your plans\"",
+    "The customer is always right, in matters of taste - Harry Gordon Selfridge",
     "The only limit to our realization of tomorrow is our doubts of today - Franklin D. Roosevelt",
     "In the middle of every difficulty lies opportunity - Albert Einstein",
     "Do not go where the path may lead, go instead where there is no path and leave a trail - Ralph Waldo Emerson",
@@ -1174,7 +1366,7 @@ local helpData = { "Welcome to the |cAA0040FFOld Gods Guild Chat|r AddOn!",
 }
 
 local GuildData = {
-    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://discord.gg/fCXTjGhZ to rank to member and join in our community! {star} Any Questions - Contact an Officer or GM in game or on Discord!",
+    "Welcome to Kiss My Darnassus {moon} KMDA {moon} https://discord.gg/TtnvWv5XBM to rank to member and join in our community! {star} Any Questions - Contact an Officer or GM in game or on Discord!",
     "Attention, guildmates {skull}! The purge will happen now. {skull} Expect kicked player alerts; don’t be alarmed. {star} We’re trimming inactive members and initiates to keep our roster current. {skull} Stand-by!",
     "Friends, the purge is complete. Take a moment to breathe, our ranks are refreshed. Please log in at least once every 28 days to avoid the purge. {star} If an alt was yeeted we will invite back {star}"
 }
@@ -1224,19 +1416,36 @@ local CLASS_ROLES = {
 --#region Utility and Other functions
 local soundEnabled = true
 
---[[ OG_tGcopy = {}
+OG_tGcopy = {}
+
 function Gcopy(GuildChatWindow, str)
     if GuildChatWindow then
         local str_Window = GuildChatWindow.editBox
         local str_ = str .. "\n"
         table.insert(OG_tGcopy, str_)
-        print(str_)
-        C_Timer.After(3, function()
-            local concatTable_str = table.concat(OG_tGcopy, "\n")
-            str_Window:SetText(concatTable_str)
-        end)
+        --print(str_)
+        local concatTable_str = table.concat(OG_tGcopy, "\n")
+        str_Window:SetText(concatTable_str)
     end
-end]]
+end
+
+-- Function to send a random line from JokeData table
+local function sendRandomJokeToGuild()
+    local maxIndex = #JokeData
+    if maxIndex == 0 then
+        print("Error: No jokes available.")
+        return
+    end
+
+    local lineNumber = math.random(1, maxIndex)
+    local line = JokeData[lineNumber]
+    if line then
+        C_ChatInfo.SendChatMessage(line, "GUILD")
+        print(string.format("Line %d from JokeData table was sent.", lineNumber))
+    else
+        print("Error: No line found.")
+    end
+end
 
 -- obscene language filter
 local function IsMessageFiltered(msg)
@@ -1737,7 +1946,7 @@ local function CreateThemeForPlayersGuild(frame)
 
         -- Ensure the guild has a theme entry, otherwise initialize it
         OG_Themes[guildName] = OG_Themes[guildName] or {
-            dropDownIcon = "|T" .. tbl.emblemFileID .. ":24:30|t",
+            dropDownIcon = "|T" .. tbl.emblemFileID .. "|t",
             bgFile = "Interface\\Buttons\\WHITE8x8",
             edgeFile = "Interface\\Buttons\\WHITE8x8",
             tile = false,
@@ -1971,24 +2180,6 @@ local function CreateGuildChatWindow(title)
                     GameTooltip:SetOwner(self, "ANCHOR_CURSOR_RIGHT")
                     GameTooltip:ClearLines()
                     GameTooltip:AddLine(playerData.formattedTooltip, 1, 1, 1, true) -- Use the pre-formatted tooltip
-                    --Apply custom backdrop settings
-                    if not GameTooltip.hasCustomBackdrop then
-                        Mixin(GameTooltip, BackdropTemplateMixin)
-                        ---@diagnostic disable-next-line: undefined-field
-                        GameTooltip:SetBackdrop({
-                            bgFile = "Interface\\AddOns\\OldGods\\Textures\\tooltipbg.tga",
-                            edgeFile = "Interface\\AddOns\\OldGods\\Textures\\myBorder.tga",
-                            tile = false,
-                            tileSize = 16,
-                            edgeSize = 4,
-                            insets = { left = 0, right = 0, top = 0, bottom = 0 },
-                        })
-                        ---@diagnostic disable-next-line: undefined-field
-                        GameTooltip:SetBackdropColor(.45, .55, .75, .457)
-                        ---@diagnostic disable-next-line: undefined-field
-                        GameTooltip:SetBackdropBorderColor(1, 1, 1, 1)
-                        GameTooltip.hasCustomBackdrop = true
-                    end
                     GameTooltip:Show()
                     if not OG_clickedSoundPlayed then
                         PlaySoundFile(1391166, "Master")
@@ -2760,449 +2951,6 @@ SlashCmdList["OGNOTE"] = function(msg)
 end
 --#endregion
 
---#region ModifyMenu
-local function ModMenu_RankGuild_Up(contextData)
-    if not contextData or not contextData.name then
-        print("Old Gods: No player found to promote.")
-        return
-    end
-
-    local targetPlayer = contextData.name .. "-" .. contextData.server
-
-    if CanGuildPromote() then
-        -- Ensure we always get the full player name
-        local macroName = "OG_Promote"
-        local macroIcon = 134238
-        local macroText = "/gpromote " .. targetPlayer
-        local macroIndex = GetMacroIndexByName(macroName)
-        local keyBind = "F6"
-
-        -- Check if macro exists, else create/update it
-        if macroIndex == 0 then
-            C_Timer.After(0.1, function()
-                if GetNumMacros() < MAX_ACCOUNT_MACROS then
-                    CreateMacro(macroName, macroIcon, macroText, nil)
-                    -- **Ensure message is printed if `/gpromote` is detected**
-                    if string.find(macroText, "/gpromote") then
-                        print(
-                            "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created!")
-                        DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
-                            targetPlayer ..
-                            " staged for promotion |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16|t")
-                        print("[OG]: Press " .. keyBind .. " for action on " .. targetPlayer)
-                        UIErrorsFrame:AddMessage(
-                            "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0,
-                            0.0, 1, 5)
-                    end
-                else
-                    print(
-                        "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFC8C800ATTENTION|r - Maximum number of macros reached.|r")
-                    return
-                end
-            end)
-        else
-            -- Update existing macro
-            EditMacro(macroIndex, macroName, macroIcon, macroText)
-            -- **Ensure message is printed if `/gpromote` is detected**
-            if string.find(macroText, "/gpromote") then
-                print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Updated!")
-                DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
-                    targetPlayer ..
-                    " staged for promotion |TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:16:16|t")
-                print("[OG]: Press " .. keyBind .. " for action on " .. targetPlayer)
-                UIErrorsFrame:AddMessage(
-                    "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0, 0.0, 1,
-                    5)
-            end
-        end
-
-        -- Bind macro to key
-        C_Timer.After(0.2, function()
-            if keyBind and keyBind ~= "" and macroIndex > 0 then
-                SetBindingMacro(keyBind, macroIndex)
-                SaveBindings(GetCurrentBindingSet())
-            end
-        end)
-    end
-end
-
-
-local function ModMenu_SendGuild_Invite(contextData)
-    if not contextData or not contextData.name then
-        print("Old Gods: No player found to invite.")
-        return
-    end
-
-    local targetPlayer = contextData.name
-    if CanGuildInvite() then
-        C_GuildInfo.Invite(targetPlayer)
-        print("Old Gods: Guild invite sent to " .. targetPlayer .. "!")
-    else
-        print("Old Gods: You do not have guild invite permissions.")
-    end
-end
-
-local function CopiedNameTrickframe(CopiedName)
-    local FrameBackdrop = {
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        tile = false,
-        tileSize = 0,
-        edgeSize = 2,
-        insets = {
-            left = 2,
-            right = 2,
-            top = 2,
-            bottom = 2
-        }
-    }
-
-    local trickFrame = CreateFrame("EditBox", "trickFrame", UIParent, "BackdropTemplate")
-    trickFrame:SetPoint("CENTER", UIParent)
-    trickFrame:SetSize(190, 30) -- Resized for a single-line input
-    trickFrame:SetFrameStrata("TOOLTIP")
-    trickFrame:SetFontObject("GameFontNormal")
-    trickFrame:SetBackdrop(FrameBackdrop)
-    trickFrame:SetBackdropColor(0.204, 0.227, 0.329, 1)
-    trickFrame:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
-
-    -- Enable mouse interaction
-    trickFrame:EnableMouse(true)
-
-    -- EditBox properties
-    trickFrame:SetMultiLine(false)
-    trickFrame:SetAutoFocus(false)
-    trickFrame:SetTextInsets(5, 5, 0, 0) -- Prevents text clipping
-    trickFrame:SetText(CopiedName)
-
-    -- Highlight text & play a sound on show
-    trickFrame:SetScript("OnMouseDown", function(self)
-        self:SetText(CopiedName)
-        self:SetFocus()
-        UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
-        if OldGodsDB.soundEnabled then
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
-        end
-        C_Timer.After(0.1, function()
-            self:HighlightText(0, -1)
-        end)
-    end)
-
-    local trickButton = CreateFrame("Button", nil, trickFrame, "BackdropTemplate")
-    trickButton:SetPoint("RIGHT", trickFrame, -5, 0)
-    trickButton:SetSize(20, 20)
-    trickButton:SetNormalTexture("Interface\\AddOns\\OldGods\\Textures\\Delete.tga")
-    trickButton:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
-    trickButton:SetFrameStrata("TOOLTIP")
-    trickButton:SetBackdrop(FrameBackdrop)
-    trickButton:SetBackdropColor(0.204, 0.227, 0.329, 1)
-    trickButton:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
-
-    trickButton:SetScript("OnClick", function()
-        if OldGodsDB.soundEnabled then
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
-        end
-        trickFrame:Hide()
-    end)
-
-    trickFrame:Show() -- Ensure it appears
-end
-
-local function ArmoryLinkLoL(CopiedNameLink)
-    local FrameBackdrop = {
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        tile = false,
-        tileSize = 0,
-        edgeSize = 2,
-        insets = {
-            left = 2,
-            right = 2,
-            top = 2,
-            bottom = 2
-        }
-    }
-
-    local linkFrame = CreateFrame("EditBox", "linkFrame", UIParent, "BackdropTemplate")
-    linkFrame:SetPoint("CENTER", UIParent)
-    linkFrame:SetSize(520, 36) -- Resized for a single-line input fits most links in with https:// showing ( safety first )
-    linkFrame:SetFrameStrata("TOOLTIP")
-    linkFrame:SetFontObject("GameFontNormal")
-    linkFrame:SetBackdrop(FrameBackdrop)
-    linkFrame:SetBackdropColor(0.204, 0.227, 0.329, 1)
-    linkFrame:SetBackdropBorderColor(0.741, 0.176, 0.176, 0.761)
-
-    -- Enable mouse interaction
-    linkFrame:EnableMouse(true)
-
-    -- EditBox properties
-    linkFrame:SetMultiLine(false)
-    linkFrame:SetAutoFocus(false)
-    linkFrame:SetTextInsets(3, 3, 3, 3) -- Prevents text clipping
-    linkFrame:SetText(CopiedNameLink)
-
-    -- Highlight text & play a sound on show
-    linkFrame:SetScript("OnMouseDown", function(self)
-        self:SetText(CopiedNameLink)
-        self:SetFocus()
-        UIErrorsFrame:AddMessage("Press CTRL+C to Copy!", 1.0, 1.0, 0.0, 1, 5)
-        print(CreateAtlasMarkup("Battlenet-ClientIcon-WoW", 18, 18), " Press Control+C to Copy Link!") -- this is cute its the WOW logo, theyll give me shit
-        if OldGodsDB.soundEnabled then
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
-        end
-        C_Timer.After(0.1, function()
-            self:HighlightText(0, -1)
-        end)
-    end)
-
-    linkFrame:SetScript("OnKeyDown", function(self, key)
-        if IsControlKeyDown() and key == "C" then
-            if OldGodsDB.soundEnabled then
-                PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
-            end
-            local linkColor = "|cFFaF10bF" .. CopiedNameLink .. "|r\n"
-            print(CreateAtlasMarkup("Battlenet-ClientIcon-WoW", 18, 18), "Copied armory link: \n" .. linkColor)
-        end
-    end)
-
-    local linkButton = CreateFrame("Button", nil, linkFrame, "BackdropTemplate")
-    linkButton:SetPoint("RIGHT", linkFrame, -5, 0)
-    linkButton:SetSize(32, 32)
-
-    linkButton.tex = linkButton:CreateTexture()
-    linkButton.tex:SetPoint("RIGHT", linkFrame, -5, 0)
-    linkButton.tex:SetAtlas("adventureguide-redx") -- adventureguide-redx high res X button thank you texture atlas viewer and agian to fizzle it started with a jocular back and forth an turned into something cool
-    linkButton.tex:SetSize(31, 31)
-    linkButton:SetFrameStrata("TOOLTIP")
-
-    linkButton:SetScript("OnClick", function()
-        if OldGodsDB.soundEnabled then
-            PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-close-alert2.mp3")
-        end
-        linkFrame:Hide()
-    end)
-
-    linkFrame:Show() -- Ensure it appears
-end
-
-local function ModMenu_CopyNameTrick(contextData)
-    if not contextData or not contextData.name then
-        print("Old Gods: No player found to copy.")
-        return
-    end
-
-    -- Ensure we always get the full player name
-    local CopiedName = contextData.name
-    if contextData.realm and contextData.realm ~= "" then
-        CopiedName = CopiedName .. "-" .. contextData.realm
-    end
-
-    CopiedNameTrickframe(CopiedName)
-end
-
-local function UrlFriendlyRealmName(realm) -- Function to format the return of realm from UnitName("target")
-    if not realm then return nil end       -- and GetRealmName() into Blizzards url syntax.
-    -- No need for a comparison table we just format in this order
-
-    realm = realm:gsub("([A-Za-z])[Oo][Ff](%u)", "%1-of-%2") -- 1. Puts the -of- in the string                 | "AlterofStorms" to "Atler-of-Storms" |
-    realm = realm:gsub("(%l)(%u)", "%1-%2")                  -- 2. Puts the - between lower and uppercase
-    realm = realm:gsub("(%l)([0-9])", "%1-%2")               -- 2.1 hahaha Area52 you sneaky bugger
-    realm = realm:gsub("\'", "")                             -- 3. Strip the hyphen returning url syntax       | "Kel'Thuzud" to "KelThuzud"          |
-    realm = realm:gsub("%s+", "-")                           -- 4. GetRealmName() edgecase " " becomes -       | "Moon Guard" to "Moon-Gaurd"         |
-
-    return
-        realm -- 5. return the formated string like a boss, get a beer, do more tests dont push on a friday :}
-end
-
-
-local function ModMenu_GetArmoryLinkTarget(contextData)
-    if not contextData then return end -- legacy were not using contextData in this function, if we decide to expand this function well keep it
-
-    local name, realm = UnitName("target")
-
-    if realm then
-        realm = UrlFriendlyRealmName(realm) -- not on our realm but needs to be formated
-    end
-
-    if not realm or realm == nil then
-        realm = GetRealmName()              -- on our realm but may have a space or ' or ie. AlterofStorms so we make it Alter-of-Storms
-        realm = UrlFriendlyRealmName(realm) -- so we format it also
-    end
-
-    -- realm in both edge cases has been formated by UrlFriendlyRealmName() and returns URL friendly string to use
-    CopiedNameLink = "https://worldofwarcraft.blizzard.com/en-us/character/us/" .. realm .. "/" .. name .. "/"
-    ArmoryLinkLoL(CopiedNameLink) -- Now we pass the string to the main function and were done!
-end
-
-local function ModMenu_GetArmoryLink(contextData)
-    if not contextData then
-        return
-    end
-
-    local CopiedNameLink
-    if contextData.server and contextData.server ~= "" then
-        local realm = contextData.server
-        realm = UrlFriendlyRealmName(realm)
-        CopiedNameLink = "https://worldofwarcraft.blizzard.com/en-us/character/us/" ..
-            realm .. "/" .. contextData.name .. "/"
-    end
-
-    ArmoryLinkLoL(CopiedNameLink) -- so far so good need to test on people from other realms still
-end
-
-local OG_ModifyMenuFriend_Buttons = {
-    ["Promote Guild Member"] = {
-        lfunction = ModMenu_RankGuild_Up,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:18:18|t "
-    },
-    ["Copy Character Name"] = {
-        lfunction = ModMenu_CopyNameTrick,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
-    },
-    ["Get Armory Link"] = {
-        lfunction = ModMenu_GetArmoryLink,
-        icon =
-        "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t " --[235503]="Interface/FriendsFrame/UI-FriendsFrame-Link",
-    },
-}
-
-local OG_ModifyMenuPlayer_Buttons = {
-    ["Send Guild Invite"] = {
-        lfunction = ModMenu_SendGuild_Invite,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
-    },
-    ["Get Armory Link"] = {
-        lfunction = ModMenu_GetArmoryLinkTarget,
-        icon = "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t "
-    },
-    ["Copy Character Name"] = {
-        lfunction = ModMenu_CopyNameTrick,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
-    },
-}
-
-local OG_ModifyMenuEnemyPlayer_Buttons = {
-    ["Get Armory Link"] = {
-        lfunction = ModMenu_GetArmoryLinkTarget,
-        icon = "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t "
-    },
-}
-
-Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, contextData)
-    rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options: Friend")
-    for bLabel, bData in pairs(OG_ModifyMenuFriend_Buttons) do
-        rootDescription:CreateButton(bData.icon .. bLabel, function()
-            bData.lfunction(contextData) -- Pass contextData properly
-        end)
-    end
-end)
-
-Menu.ModifyMenu("MENU_UNIT_PLAYER", function(ownerRegion, rootDescription, contextData)
-    rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options: Player")
-    for bLabel, bData in pairs(OG_ModifyMenuPlayer_Buttons) do
-        rootDescription:CreateButton(bData.icon .. bLabel, function()
-            bData.lfunction(contextData) -- Pass contextData properly
-        end)
-    end
-end)
-
-Menu.ModifyMenu("MENU_UNIT_ENEMY_PLAYER", function(ownerRegion, rootDescription, contextData)
-    rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options: Player")
-    for bLabel, bData in pairs(OG_ModifyMenuEnemyPlayer_Buttons) do
-        rootDescription:CreateButton(bData.icon .. bLabel, function()
-            bData.lfunction(contextData) -- Pass contextData properly
-        end)
-    end
-end)
-
---[[local function ModMenu_GetArmoryLink(contextData)
-    if not contextData then
-        print("Old Gods: No player found to copy.")
-        return
-    end
-
-    --print("Old Gods: Received contextData:") --leaving this in for later ill cicle back
-    --DumpTable(contextData)                   --Player menu is to weird tables in tables and functions in tables Im not worried about it
-    --ill show you gCoopy in action its kinda slick
-    local CopiedNameLink
-    if contextData.server and contextData.server ~= "" then
-        CopiedNameLink = "https://worldofwarcraft.blizzard.com/en-us/character/us/" ..
-            contextData.server .. "/" .. contextData.name .. "/"
-    end
-
-    ArmoryLinkLoL(CopiedNameLink)
-end
-
-local OG_ModifyMenuFriend_Buttons = {
-    ["Promote Guild Member"] = {
-        lfunction = ModMenu_RankGuild_Up,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\levelChange.tga:18:18|t "
-    },
-    ["Copy Character Name"] = {
-        lfunction = ModMenu_CopyNameTrick,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\CopyPaste.tga:18:18|t "
-    },
-    ["Get Armory Link"] = {
-        lfunction = ModMenu_GetArmoryLink,
-        icon =
-        "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t " --[235503]="Interface/FriendsFrame/UI-FriendsFrame-Link",
-    },
-}
-
-local OG_ModifyMenuPlayer_Buttons = {
-    ["Send Guild Invite"] = {
-        lfunction = ModMenu_SendGuild_Invite,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Invite.tga:18:18|t "
-    },
-    ["Get Armory Link"] = {
-        lfunction = ModMenu_GetArmoryLink,
-        icon =
-        "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t " --[235503]="Interface/FriendsFrame/UI-FriendsFrame-Link",
-    },
-}
-
-Menu.ModifyMenu("MENU_UNIT_PLAYER", function(ownerRegion, rootDescription, contextData)
-    rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options: Player")
-    for bLabel, bData in pairs(OG_ModifyMenuPlayer_Buttons) do
-        rootDescription:CreateButton(bData.icon .. bLabel, function()
-            bData.lfunction(contextData) -- Pass contextData properly
-        end)
-    end
-end)
-
-local OG_ModifyMenuEnemyPlayer_Buttons = {
-    ["Get Armory Link"] = {
-        lfunction = ModMenu_GetArmoryLink,
-        icon =
-        "|TInterface\\FriendsFrame\\UI-FriendsFrame-Link:18:18|t "
-    },
-}
-
-Menu.ModifyMenu("MENU_UNIT_ENEMY_PLAYER", function(ownerRegion, rootDescription, contextData)
-    rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options: Player")
-    for bLabel, bData in pairs(OG_ModifyMenuEnemyPlayer_Buttons) do
-        rootDescription:CreateButton(bData.icon .. bLabel, function()
-            bData.lfunction(contextData) -- Pass contextData properly
-        end)
-    end
-end)
-
-Menu.ModifyMenu("MENU_UNIT_FRIEND", function(ownerRegion, rootDescription, contextData)
-    rootDescription:CreateDivider()
-    rootDescription:CreateTitle("Old Gods Options: Friend")
-    for bLabel, bData in pairs(OG_ModifyMenuFriend_Buttons) do
-        rootDescription:CreateButton(bData.icon .. bLabel, function()
-            bData.lfunction(contextData) -- Pass contextData properly
-        end)
-    end
-end)]]
---#endregion ModifyMenu
-
 --#region Grief Mail
 local gMailframe = CreateFrame("Frame", "OldGodsMailFrame", UIParent, "BasicFrameTemplateWithInset")
 gMailframe:SetSize(380, 460)
@@ -3804,431 +3552,873 @@ end
 
 --#endregion Inactive players
 
---#region MemberSearch
-local guildRosterCache = {}
-local searchFrame, scrollFrame, SR_scrollChild
+--#region Notes
+local notesFrame -- Store the frame to avoid recreating it
 
--- Refresh the guild roster cache
-local function RefreshGuildRosterCache()
-    wipe(guildRosterCache) -- Clear old data
+local function KMDA_NewNote()
+   if notesFrame then
+      notesFrame.titleBox:SetText("")
+      notesFrame.editBox:SetText("")
+      notesFrame.selectedNote = nil
+      notesFrame.editBox:SetFocus()
+   end
+end
 
-    for i = 1, GetNumGuildMembers() do
-        local name, rank, _, _, _, _, _, _, online, _, _, _, _, _ = GetGuildRosterInfo(i)
-        local _, _, day, hour = GetGuildRosterLastOnline(i)
-        local hyperlinkName = "|Hplayer:" .. name .. "|h[" .. name .. "]|h"
-        day = day and day or 0
-        hour = hour and hour or 0
-        NDay = day
-        NHour = hour
+local function KMDA_OpenSavedNote(title)
+   if notesFrame and KMDA_SavedNotes and KMDA_SavedNotes[title] then
+      notesFrame.titleBox:SetText(title)
+      notesFrame.editBox:SetText(KMDA_SavedNotes[title])
+      notesFrame.selectedNote = title
+   end
+end
 
-        table.insert(guildRosterCache, {
-            linkName   = hyperlinkName,
-            name       = name,
-            rank       = rank,
-            online     = online,
-            day        = day,
-            hour       = hour,
-            lastOnline = day .. " D " .. hour .. " Hr",
-        })
+local function CreateNotesFrame()
+   -- Initialize SavedVariables if they don't exist
+   if not KMDA_SavedNotes then KMDA_SavedNotes = {} end
 
-        table.sort(guildRosterCache, function(a, b)
-            -- 1) If both members share the same "online" status:
-            if a.online == b.online then
-                if a.online == true then
-                    -- Both are online - sort by name
-                    return a.name < b.name
-                else
-                    -- Both are offline, compare day/hour
-                    -- We want "least time offline" first, so smaller days come first.
-                    if a.day == b.day then
-                        -- Same day, compare hours
-                        return a.hour < b.hour
-                    else
-                        -- Compare days
-                        return a.day < b.day
-                    end
+   if not notesFrame then
+      notesFrame = CreateFrame("Frame", "KMDANotesFrame", UIParent, "BasicFrameTemplateWithInset")
+      notesFrame:SetSize(800, 400)
+      notesFrame:SetPoint("CENTER")
+      notesFrame:SetMovable(true)
+      notesFrame:EnableMouse(true)
+      notesFrame:RegisterForDrag("LeftButton")
+      notesFrame:SetScript("OnDragStart", notesFrame.StartMoving)
+      notesFrame:SetScript("OnDragStop", notesFrame.StopMovingOrSizing)
+
+      notesFrame.title = notesFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+      notesFrame.title:SetPoint("CENTER", notesFrame.TitleBg, "CENTER", 0, 0)
+      notesFrame.title:SetText("KMDA Notes")
+
+      local dropdown = CreateFrame("DropdownButton", "KMDANotesDropdown", notesFrame, "WowStyle1DropdownTemplate")
+      dropdown:SetPoint("TOPLEFT", 20, -40)
+      dropdown:SetWidth(200)
+      dropdown:SetDefaultText("Select an Option")
+
+      dropdown:SetupMenu(function(self, rootDescription)
+         rootDescription:CreateButton("1.) Create New Note", KMDA_NewNote)
+
+         local savedMenu = rootDescription:CreateButton("2.) Open Saved Note")
+         local sortedTitles = {}
+         for title in pairs(KMDA_SavedNotes) do
+            table.insert(sortedTitles, title)
+         end
+         table.sort(sortedTitles)
+         for _, title in ipairs(sortedTitles) do
+            savedMenu:CreateButton(title, function() KMDA_OpenSavedNote(title) end)
+         end
+      end)
+
+      -- Title Input Box (Right of Dropdown)
+      local titleBox = CreateFrame("EditBox", nil, notesFrame, "InputBoxTemplate")
+      titleBox:SetSize(300, 30)
+      titleBox:SetPoint("LEFT", dropdown, "RIGHT", 20, 0)
+      titleBox:SetAutoFocus(false)
+      notesFrame.titleBox = titleBox
+
+      local titleLabel = titleBox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+      titleLabel:SetPoint("BOTTOMLEFT", titleBox, "TOPLEFT", 0, 2)
+      titleLabel:SetText("Note Title:")
+
+      -- Multi-line Edit Box with ScrollFrame
+      local scrollFrame = CreateFrame("ScrollFrame", nil, notesFrame, "UIPanelScrollFrameTemplate, BackdropTemplate")
+      scrollFrame:SetPoint("TOPLEFT", dropdown, "BOTTOMLEFT", 0, -20)
+      scrollFrame:SetPoint("BOTTOMRIGHT", notesFrame, "BOTTOMRIGHT", -30, 50) -- Padding for buttons
+
+      scrollFrame:SetBackdrop({
+         bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+         tile = true,
+         tileSize = 16,
+         edgeSize = 16,
+         insets = { left = 3, right = 3, top = 3, bottom = 3 }
+      })
+      scrollFrame:SetBackdropColor(0, 0, 0, 0.5)
+      scrollFrame:SetBackdropBorderColor(0.8, 0.8, 0.8, 1)
+
+      local editBox = CreateFrame("EditBox", nil, scrollFrame)
+      editBox:SetMultiLine(true)
+      editBox:SetFontObject(ChatFontNormal)
+      editBox:SetWidth(730)
+      editBox:SetTextInsets(5, 5, 5, 5)
+      editBox:SetAutoFocus(false)
+      scrollFrame:SetScrollChild(editBox)
+      notesFrame.editBox = editBox
+
+      -- Click scrollframe to focus editbox
+      scrollFrame:SetScript("OnMouseDown", function() editBox:SetFocus() end)
+
+      -- Buttons
+      local btnSave = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+      btnSave:SetSize(100, 30)
+      btnSave:SetPoint("BOTTOMLEFT", 20, 10)
+      btnSave:SetText("Save Note")
+      btnSave:SetScript("OnClick", function()
+         local title = titleBox:GetText()
+         if title and title ~= "" then
+            KMDA_SavedNotes[title] = editBox:GetText()
+            notesFrame.selectedNote = title
+            print("KMDA: Note '" .. title .. "' saved.")
+         else
+            print("KMDA: Please enter a title.")
+         end
+      end)
+
+      local btnEdit = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+      btnEdit:SetSize(100, 30)
+      btnEdit:SetPoint("LEFT", btnSave, "RIGHT", 10, 0)
+      btnEdit:SetText("Edit Note")
+      btnEdit:SetScript("OnClick", function() editBox:SetFocus() end)
+
+      local btnDelete = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+      btnDelete:SetSize(100, 30)
+      btnDelete:SetPoint("LEFT", btnEdit, "RIGHT", 10, 0)
+      btnDelete:SetText("Delete Note")
+      btnDelete:SetScript("OnClick", function()
+         local title = titleBox:GetText()
+         if title and KMDA_SavedNotes[title] then
+            KMDA_SavedNotes[title] = nil
+            KMDA_NewNote()
+            print("KMDA: Note '" .. title .. "' deleted.")
+         end
+      end)
+
+      notesFrame.CloseButton:SetScript("OnClick", function()
+         notesFrame:Hide()
+      end)
+   end
+   notesFrame:Show()
+end
+--#endregion Notes
+
+--#region MemberSearch RightClick Functions
+local function ArmoryLinkLoL(CopiedNameLink, playerName)
+    local linkFrame = _G["OldGodsArmoryLinkFrame"]
+    if not linkFrame then
+        linkFrame = CreateFrame("Frame", "OldGodsArmoryLinkFrame", UIParent, "BasicFrameTemplateWithInset")
+        linkFrame:SetSize(450, 125)
+        linkFrame:SetPoint("CENTER")
+        linkFrame:SetFrameStrata("TOOLTIP")
+        linkFrame:EnableMouse(true)
+        linkFrame:SetMovable(true)
+        linkFrame:RegisterForDrag("LeftButton")
+        linkFrame:SetScript("OnDragStart", linkFrame.StartMoving)
+        linkFrame:SetScript("OnDragStop", linkFrame.StopMovingOrSizing)
+
+        linkFrame.title = linkFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        linkFrame.title:SetPoint("CENTER", linkFrame.TitleBg, "CENTER", 0, 0)
+
+        linkFrame.instruction = linkFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        linkFrame.instruction:SetPoint("TOP", linkFrame, "TOP", 0, -35)
+        linkFrame.instruction:SetText("Press Control + C to copy")
+
+        local editBox = CreateFrame("EditBox", nil, linkFrame, "InputBoxTemplate")
+        editBox:SetSize(400, 30)
+        editBox:SetPoint("CENTER", linkFrame, "CENTER", 0, -5)
+        editBox:SetAutoFocus(true)
+        linkFrame.editBox = editBox
+
+        editBox:SetScript("OnEscapePressed", function() linkFrame:Hide() end)
+
+        editBox:SetScript("OnTextChanged", function(self)
+            if self:GetText() ~= self.link then
+                self:SetText(self.link)
+                self:HighlightText()
+            end
+        end)
+
+        editBox:SetScript("OnKeyUp", function(self, key)
+            if IsControlKeyDown() and key == "C" then
+                if OldGodsDB.soundEnabled then
+                    PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-open-selected-alert6.mp3")
                 end
-            else
-                -- 2) One is online, the other is offline. Online goes first:
-                return a.online
+                print(CreateAtlasMarkup("Battlenet-ClientIcon-WoW", 18, 18), " Link Copied!")
+                linkFrame:Hide()
             end
         end)
     end
+
+    linkFrame.title:SetText("Armory Link for " .. (playerName or "Unknown"))
+    linkFrame.editBox.link = CopiedNameLink
+    linkFrame.editBox:SetText(CopiedNameLink)
+    linkFrame.editBox:HighlightText()
+    linkFrame:Show()
+    linkFrame.editBox:SetFocus()
+end
+
+local function UrlFriendlyRealmName(realm) -- Function to format the return of realm from UnitName("target")
+    if not realm then return nil end       -- and GetRealmName() into Blizzards url syntax.
+    -- No need for a comparison table we just format in this order
+
+    realm = realm:gsub("([A-Za-z])[Oo][Ff](%u)", "%1-of-%2") -- 1. Puts the -of- in the string                 | "AlterofStorms" to "Atler-of-Storms" |
+    realm = realm:gsub("(%l)(%u)", "%1-%2")                  -- 2. Puts the - between lower and uppercase
+    realm = realm:gsub("(%l)([0-9])", "%1-%2")               -- 2.1 hahaha Area52 you sneaky bugger
+    realm = realm:gsub("\'", "")                             -- 3. Strip the hyphen returning url syntax       | "Kel'Thuzud" to "KelThuzud"          |
+    realm = realm:gsub("%s+", "-")                           -- 4. GetRealmName() edgecase " " becomes -       | "Moon Guard" to "Moon-Gaurd"         |
+
+    return realm -- 5. return the formated string like a boss, get a beer, do more tests dont push on a friday :}
+end
+
+local function ModMenu_GetArmoryLink(playerFullName)
+    if not playerFullName then return end
+
+    local name, realm = strsplit("-", playerFullName)
+    if not realm or realm == "" then
+        realm = GetRealmName()
+    end
+
+    if name and realm then
+        realm = UrlFriendlyRealmName(realm)
+        local CopiedNameLink = "https://worldofwarcraft.blizzard.com/en-us/character/us/" ..
+            realm .. "/" .. name .. "/"
+        ArmoryLinkLoL(CopiedNameLink, name)
+    end
+end
+--#endregion MemberSearch RightClick Functions
+
+
+--#region MemberSearch
+local guildRosterCache = {}
+local searchFrame, scrollFrame, SR_scrollChild
+local playerManagementFrame
+
+local function stripChars(str)
+   if not str then return "" end
+   local normalisedString = str:gsub("[%z\1-\127\194-\244][\128-\191]*", tableAccents)
+   return string.lower(normalisedString)
+end
+
+local function SetupMacroAndBind(action, player)
+   if InCombatLockdown() then
+      print("KMDA: Cannot update macros/bindings in combat.")
+      return
+   end
+
+   local macroName = "KMDA_Action"
+   local macroIndex = GetMacroIndexByName(macroName)
+   local command = (action == "promote" and "/gpromote " or "/gdemote ") .. player
+
+   if macroIndex == 0 then
+      local numAccountMacros, numCharacterMacros = GetNumMacros()
+      if numAccountMacros >= 120 then
+         print("KMDA: General macro slots are full. Please delete one to use this feature.")
+         return
+      end
+      macroIndex = CreateMacro(macroName, "INV_MISC_QUESTIONMARK", command, nil)
+   else
+      EditMacro(macroIndex, macroName, "INV_MISC_QUESTIONMARK", command)
+   end
+
+   local key = playerManagementFrame.selectedKey or "F5"
+   SetBindingMacro(key, macroIndex)
+
+   PlaySound(SOUNDKIT.READY_CHECK)
+   print("KMDA: Action Ready! Press " ..
+      key .. " to " .. (action == "promote" and "Promote" or "Demote") .. " " .. player)
+end
+
+-- Refresh the guild roster cache
+local function RefreshGuildRosterCache()
+   wipe(guildRosterCache) -- Clear old data
+   for i = 1, GetNumGuildMembers() do
+      local name, rank, _, _, class, _, _, _, online, _, _, _, _, _ = GetGuildRosterInfo(i)
+      local _, _, day, hour = GetGuildRosterLastOnline(i)
+      local hyperlinkName = "|Hplayer:" .. name .. "|h[" .. name .. "]|h"
+      local day = day and day or 0
+      local hour = hour and hour or 0
+
+      table.insert(guildRosterCache, {
+         linkName       = hyperlinkName,
+         name           = name,
+         normalizedName = stripChars(name),
+         rank           = rank,
+         class          = class,
+         online         = online,
+         day            = day,
+         hour           = hour,
+         lastOnline     = day .. " D " .. hour .. " Hr",
+      })
+   end
+
+   table.sort(guildRosterCache, function(a, b)
+      -- 1) If both members share the same "online" status:
+      if a.online == b.online then
+         if a.online == true then
+            -- Both are online - sort by name
+            return a.name < b.name
+         else
+            -- Both are offline, compare day/hour
+            -- We want "least time offline" first, so smaller days come first.
+            if a.day == b.day then
+               -- Same day, compare hours
+               return a.hour < b.hour
+            else
+               -- Compare days
+               return a.day < b.day
+            end
+         end
+      else
+         -- 2) One is online, the other is offline. Online goes first:
+         return a.online
+      end
+   end)
 end
 
 -- Clear previous search results
 local function ClearSearchResults()
-    for _, child in ipairs({ SR_scrollChild:GetChildren() }) do
-        child:Hide()
-        child:SetParent(nil) -- Prevent lingering references
-    end
+   for _, child in ipairs({ SR_scrollChild:GetChildren() }) do
+      child:Hide()
+      child:SetParent(nil) -- Prevent lingering references
+   end
 end
 
-local function stripChars(str)
-    local tableAccents = {}
-    -- Standard Latin Accents
-    tableAccents["À"] = "A"
-    tableAccents["Á"] = "A"
-    tableAccents["Â"] = "A"
-    tableAccents["Ã"] = "A"
-    tableAccents["Ä"] = "A"
-    tableAccents["Å"] = "A"
-    tableAccents["Æ"] = "AE"
-    tableAccents["Ç"] = "C"
-    tableAccents["È"] = "E"
-    tableAccents["É"] = "E"
-    tableAccents["Ê"] = "E"
-    tableAccents["Ë"] = "E"
-    tableAccents["Ì"] = "I"
-    tableAccents["Í"] = "I"
-    tableAccents["Î"] = "I"
-    tableAccents["Ï"] = "I"
-    tableAccents["Ð"] = "D"
-    tableAccents["Ñ"] = "N"
-    tableAccents["Ò"] = "O"
-    tableAccents["Ó"] = "O"
-    tableAccents["Ô"] = "O"
-    tableAccents["Õ"] = "O"
-    tableAccents["Ö"] = "O"
-    tableAccents["Ø"] = "O"
-    tableAccents["Ù"] = "U"
-    tableAccents["Ú"] = "U"
-    tableAccents["Û"] = "U"
-    tableAccents["Ü"] = "U"
-    tableAccents["Ý"] = "Y"
-    tableAccents["Þ"] = "P"
-    tableAccents["ß"] = "ss"
-    -- Lowercase Variants
-    tableAccents["à"] = "a"
-    tableAccents["á"] = "a"
-    tableAccents["â"] = "a"
-    tableAccents["ã"] = "a"
-    tableAccents["ä"] = "a"
-    tableAccents["å"] = "a"
-    tableAccents["æ"] = "ae"
-    tableAccents["ç"] = "c"
-    tableAccents["è"] = "e"
-    tableAccents["é"] = "e"
-    tableAccents["ê"] = "e"
-    tableAccents["ë"] = "e"
-    tableAccents["ì"] = "i"
-    tableAccents["í"] = "i"
-    tableAccents["î"] = "i"
-    tableAccents["ï"] = "i"
-    tableAccents["ð"] = "d"
-    tableAccents["ñ"] = "n"
-    tableAccents["ò"] = "o"
-    tableAccents["ó"] = "o"
-    tableAccents["ô"] = "o"
-    tableAccents["õ"] = "o"
-    tableAccents["ö"] = "o"
-    tableAccents["ø"] = "o"
-    tableAccents["ù"] = "u"
-    tableAccents["ú"] = "u"
-    tableAccents["û"] = "u"
-    tableAccents["ü"] = "u"
-    tableAccents["ý"] = "y"
-    tableAccents["þ"] = "p"
-    tableAccents["ÿ"] = "y"
-    -- **Additional Eastern European Characters**
-    tableAccents["Ā"] = "A"
-    tableAccents["Ă"] = "A"
-    tableAccents["Ą"] = "A"
-    tableAccents["Ć"] = "C"
-    tableAccents["Ĉ"] = "C"
-    tableAccents["Ċ"] = "C"
-    tableAccents["Č"] = "C"
-    tableAccents["Ď"] = "D"
-    tableAccents["Đ"] = "D"
-    tableAccents["Ē"] = "E"
-    tableAccents["Ĕ"] = "E"
-    tableAccents["Ė"] = "E"
-    tableAccents["Ę"] = "E"
-    tableAccents["Ě"] = "E"
-    tableAccents["Ĝ"] = "G"
-    tableAccents["Ğ"] = "G"
-    tableAccents["Ġ"] = "G"
-    tableAccents["Ģ"] = "G"
-    tableAccents["Ĥ"] = "H"
-    tableAccents["Ħ"] = "H"
-    tableAccents["Ĩ"] = "I"
-    tableAccents["Ī"] = "I"
-    tableAccents["Ĭ"] = "I"
-    tableAccents["Į"] = "I"
-    tableAccents["İ"] = "I"
-    tableAccents["Ĳ"] = "IJ"
-    tableAccents["Ĵ"] = "J"
-    tableAccents["Ķ"] = "K"
-    tableAccents["Ĺ"] = "L"
-    tableAccents["Ļ"] = "L"
-    tableAccents["Ľ"] = "L"
-    tableAccents["Ŀ"] = "L"
-    tableAccents["Ł"] = "L"
-    tableAccents["Ń"] = "N"
-    tableAccents["Ņ"] = "N"
-    tableAccents["Ň"] = "N"
-    tableAccents["Ŋ"] = "N"
-    tableAccents["Ō"] = "O"
-    tableAccents["Ŏ"] = "O"
-    tableAccents["Ő"] = "O"
-    tableAccents["Ŕ"] = "R"
-    tableAccents["Ŗ"] = "R"
-    tableAccents["Ř"] = "R"
-    tableAccents["Ś"] = "S"
-    tableAccents["Ŝ"] = "S"
-    tableAccents["Ş"] = "S"
-    tableAccents["Š"] = "S"
-    tableAccents["Ţ"] = "T"
-    tableAccents["Ť"] = "T"
-    tableAccents["Ŧ"] = "T"
-    tableAccents["Ũ"] = "U"
-    tableAccents["Ū"] = "U"
-    tableAccents["Ŭ"] = "U"
-    tableAccents["Ů"] = "U"
-    tableAccents["Ű"] = "U"
-    tableAccents["Ų"] = "U"
-    tableAccents["Ŵ"] = "W"
-    tableAccents["Ŷ"] = "Y"
-    tableAccents["Ÿ"] = "Y"
-    tableAccents["Ź"] = "Z"
-    tableAccents["Ż"] = "Z"
-    tableAccents["Ž"] = "Z"
-    -- Lowercase versions of Eastern European characters
-    tableAccents["ā"] = "a"
-    tableAccents["ă"] = "a"
-    tableAccents["ą"] = "a"
-    tableAccents["ć"] = "c"
-    tableAccents["ĉ"] = "c"
-    tableAccents["ċ"] = "c"
-    tableAccents["č"] = "c"
-    tableAccents["ď"] = "d"
-    tableAccents["đ"] = "d"
-    tableAccents["ē"] = "e"
-    tableAccents["ĕ"] = "e"
-    tableAccents["ė"] = "e"
-    tableAccents["ę"] = "e"
-    tableAccents["ě"] = "e"
-    tableAccents["ĝ"] = "g"
-    tableAccents["ğ"] = "g"
-    tableAccents["ġ"] = "g"
-    tableAccents["ģ"] = "g"
-    tableAccents["ĥ"] = "h"
-    tableAccents["ħ"] = "h"
-    tableAccents["ĩ"] = "i"
-    tableAccents["ī"] = "i"
-    tableAccents["ĭ"] = "i"
-    tableAccents["į"] = "i"
-    tableAccents["ı"] = "i"
-    tableAccents["ĳ"] = "ij"
-    tableAccents["ĵ"] = "j"
-    tableAccents["ķ"] = "k"
-    tableAccents["ĺ"] = "l"
-    tableAccents["ļ"] = "l"
-    tableAccents["ľ"] = "l"
-    tableAccents["ŀ"] = "l"
-    tableAccents["ł"] = "l"
-    tableAccents["ń"] = "n"
-    tableAccents["ņ"] = "n"
-    tableAccents["ň"] = "n"
-    tableAccents["ŋ"] = "n"
-    tableAccents["ō"] = "o"
-    tableAccents["ŏ"] = "o"
-    tableAccents["ő"] = "o"
-    tableAccents["ŕ"] = "r"
-    tableAccents["ŗ"] = "r"
-    tableAccents["ř"] = "r"
-    tableAccents["ś"] = "s"
-    tableAccents["ŝ"] = "s"
-    tableAccents["ş"] = "s"
-    tableAccents["š"] = "s"
-    tableAccents["ţ"] = "t"
-    tableAccents["ť"] = "t"
-    tableAccents["ŧ"] = "t"
-    tableAccents["ũ"] = "u"
-    tableAccents["ū"] = "u"
-    tableAccents["ŭ"] = "u"
-    tableAccents["ů"] = "u"
-    tableAccents["ű"] = "u"
-    tableAccents["ų"] = "u"
-    tableAccents["ŵ"] = "w"
-    tableAccents["ŷ"] = "y"
-    tableAccents["ź"] = "z"
-    tableAccents["ż"] = "z"
-    tableAccents["ž"] = "z"
+-- Create Player Management Frame
+local function CreatePlayerManagementFrame()
+   if playerManagementFrame then return end
 
-    local normalisedString = ''
-    --its the fucking bytes, its been the bytes the whole time
-    --this function comes from https://stackoverflow.com/questions/50459102/replace-accented-characters-in-string-to-standard-with-lua
-    --credit to the pattern and table is not mine ChatGPT walked me around the edge of nailing this without giving me something to copy paste other then this
-    --table so any mother fucker that thinks using chatGPT means you dont learn I have 5 days of trial and error to prove otherwise. I tried matching and using sets
-    --in a table, I tried key values in every possible combination. I studied pattern matching docs on lua.org and learned the byte difference of UTF8 so I started googling
-    --"lua byte pattern" I found you can print(string.byte('a')) but struggled to with creating a pattern set to use bytes - I didnt give up for 5 fucking days working with
-    --chatGPT as he wouldnt just give me the awnser, he started laughing at at one point the awnswers were so mangled and out of scope I thought he was tormenting me lol.
-    --I thought he gave up on showing me any useful code after naggin him about this ability for my addon with a one track mind.
-    --ChatGPT is a mentor, teacher, how I have his responses set up to me not a addon developer, he certainly tried and the entire scope implementation of this function chatGPT
-    --has given me insight, but the trial error and research I own, the pattern is credit to the user 'aJynks' on stackoverflow
-    normalisedString = str:gsub("[%z\1-\127\194-\244][\128-\191]*", tableAccents)
+   playerManagementFrame = CreateFrame("Frame", "KMDAPlayerManagementFrame", UIParent, "BackdropTemplate")
+   playerManagementFrame:SetSize(300, 320)
+   playerManagementFrame:SetFrameStrata("TOOLTIP")
+   playerManagementFrame:SetBackdrop({
+      bgFile = "Interface\\Buttons\\WHITE8x8",
+      edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+      tile = true,
+      tileSize = 32,
+      edgeSize = 32,
+      insets = { left = 8, right = 8, top = 8, bottom = 8 },
+   })
+   playerManagementFrame:SetBackdropColor(0, 0, 0, 0.9)
+   playerManagementFrame:EnableMouse(true)
+   playerManagementFrame:SetClampedToScreen(true)
 
-    return string.lower(normalisedString)
+   -- Title
+   playerManagementFrame.title = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+   playerManagementFrame.title:SetPoint("TOP", 0, -15)
+   playerManagementFrame.title:SetText("Player Management")
+
+   -- Player Name
+   playerManagementFrame.playerName = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+   playerManagementFrame.playerName:SetPoint("TOP", playerManagementFrame.title, "BOTTOM", 0, -10)
+   playerManagementFrame.playerName:SetFont("Fonts\\FRIZQT__.TTF", 19)
+
+   -- Level and Rank
+   playerManagementFrame.levelRank = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+   playerManagementFrame.levelRank:SetFont("Fonts\\FRIZQT__.TTF", 16)
+   playerManagementFrame.levelRank:SetTextColor(1, 1, 0) -- Yellow
+   playerManagementFrame.levelRank:SetPoint("TOP", playerManagementFrame.playerName, "BOTTOM", 0, -5)
+
+   -- Keybind Display
+   playerManagementFrame.keybindDisplay = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+   playerManagementFrame.keybindDisplay:SetFont("Fonts\\FRIZQT__.TTF", 14)
+   playerManagementFrame.keybindDisplay:SetTextColor(0.6, 0.8, 1) -- Light Blue
+   playerManagementFrame.keybindDisplay:SetPoint("RIGHT", playerManagementFrame, "RIGHT", -20, 0)
+   playerManagementFrame.keybindDisplay:SetPoint("TOP", playerManagementFrame.levelRank, "BOTTOM", 0, -10)
+   playerManagementFrame.keybindDisplay:SetHeight(25)
+
+   -- Key Selection Dropdown
+   playerManagementFrame.selectedKey = "F5"
+   local keyDropdown = CreateFrame("DropdownButton", nil, playerManagementFrame, "WowStyle1DropdownTemplate")
+   keyDropdown:SetPoint("TOP", playerManagementFrame.levelRank, "BOTTOM", 0, -12)
+   keyDropdown:SetPoint("RIGHT", playerManagementFrame.keybindDisplay, "LEFT", -5, 0)
+   keyDropdown:SetWidth(120)
+   keyDropdown:SetDefaultText("Bind: F5")
+   playerManagementFrame.keybindDisplay:SetText(playerManagementFrame.selectedKey)
+
+   -- Status Display
+   playerManagementFrame.statusDisplay = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+   playerManagementFrame.statusDisplay:SetPoint("LEFT", playerManagementFrame, "LEFT", 20, 0)
+   playerManagementFrame.statusDisplay:SetPoint("TOP", keyDropdown, "TOP", 0, 0)
+   playerManagementFrame.statusDisplay:SetPoint("BOTTOM", keyDropdown, "BOTTOM", 0, 0)
+   playerManagementFrame.statusDisplay:SetJustifyH("LEFT")
+
+   keyDropdown:SetupMenu(function(self, rootDescription)
+      for _, key in ipairs({ "F5", "F6", "F7", "F8" }) do
+         rootDescription:CreateButton(key, function()
+            playerManagementFrame.selectedKey = key
+            keyDropdown:SetText("Bind: " .. key)
+            if playerManagementFrame.keybindDisplay then
+               playerManagementFrame.keybindDisplay:SetText(key)
+            end
+         end)
+      end
+   end)
+
+   -- Promote Button
+   playerManagementFrame.promoteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
+   playerManagementFrame.promoteBtn:SetSize(100, 25)
+   playerManagementFrame.promoteBtn:SetPoint("TOP", keyDropdown, "BOTTOM", 0, -10)
+   playerManagementFrame.promoteBtn:SetText("Promote")
+   playerManagementFrame.promoteBtn:SetScript("OnClick", function()
+      if playerManagementFrame.selectedPlayer then
+         SetupMacroAndBind("promote", playerManagementFrame.selectedPlayer)
+      end
+   end)
+
+   -- Whisper Button
+   playerManagementFrame.whisperBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
+   playerManagementFrame.whisperBtn:SetSize(100, 25)
+   playerManagementFrame.whisperBtn:SetPoint("RIGHT", playerManagementFrame.promoteBtn, "LEFT", -10, 0)
+   playerManagementFrame.whisperBtn:SetText("Whisper")
+   playerManagementFrame.whisperBtn:SetScript("OnClick", function()
+      if playerManagementFrame.selectedPlayer then
+         ChatFrame_OpenChat("/w " .. playerManagementFrame.selectedPlayer .. " ")
+      end
+   end)
+
+   -- Demote Button
+   playerManagementFrame.demoteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
+   playerManagementFrame.demoteBtn:SetSize(100, 25)
+   playerManagementFrame.demoteBtn:SetPoint("TOP", playerManagementFrame.promoteBtn, "BOTTOM", 0, -5)
+   playerManagementFrame.demoteBtn:SetText("Demote")
+   playerManagementFrame.demoteBtn:SetScript("OnClick", function()
+      if playerManagementFrame.selectedPlayer then
+         SetupMacroAndBind("demote", playerManagementFrame.selectedPlayer)
+      end
+   end)
+
+   -- Invite Button
+   playerManagementFrame.inviteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
+   playerManagementFrame.inviteBtn:SetSize(100, 25)
+   playerManagementFrame.inviteBtn:SetPoint("RIGHT", playerManagementFrame.demoteBtn, "LEFT", -10, 0)
+   playerManagementFrame.inviteBtn:SetText("Invite")
+   playerManagementFrame.inviteBtn:SetScript("OnClick", function()
+      if playerManagementFrame.selectedPlayer then
+         C_PartyInfo.InviteUnit(playerManagementFrame.selectedPlayer)
+      end
+   end)
+
+   -- Player Note Label
+   local pNoteLabel = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+   pNoteLabel:SetPoint("TOPLEFT", playerManagementFrame.inviteBtn, "BOTTOMLEFT", -20, -15)
+   pNoteLabel:SetText("Player Note:")
+
+   -- Player Note EditBox
+   local pNoteBox = CreateFrame("EditBox", nil, playerManagementFrame, "InputBoxTemplate")
+   pNoteBox:SetSize(220, 30)
+   pNoteBox:SetPoint("TOPLEFT", pNoteLabel, "BOTTOMLEFT", 0, -5)
+   pNoteBox:SetAutoFocus(false)
+   playerManagementFrame.pNoteBox = pNoteBox
+
+   pNoteBox:SetScript("OnEnterPressed", function(self)
+      local index = playerManagementFrame.selectedIndex
+      if index then
+         GuildRosterSetPublicNote(index, self:GetText())
+         print("KMDA: Player note updated.")
+      end
+      self:ClearFocus()
+   end)
+
+   -- Officer Note Label
+   local oNoteLabel = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+   oNoteLabel:SetPoint("TOPLEFT", pNoteBox, "BOTTOMLEFT", 0, -10)
+   oNoteLabel:SetText("Officer Note:")
+
+   -- Officer Note EditBox
+   local oNoteBox = CreateFrame("EditBox", nil, playerManagementFrame, "InputBoxTemplate")
+   oNoteBox:SetSize(220, 30)
+   oNoteBox:SetPoint("TOPLEFT", oNoteLabel, "BOTTOMLEFT", 0, -5)
+   oNoteBox:SetAutoFocus(false)
+   playerManagementFrame.oNoteBox = oNoteBox
+
+   oNoteBox:SetScript("OnEnterPressed", function(self)
+      local index = playerManagementFrame.selectedIndex
+      if index then
+         GuildRosterSetOfficerNote(index, self:GetText())
+         print("KMDA: Officer note updated.")
+      end
+      self:ClearFocus()
+   end)
+
+   -- Close Button
+   local closeButton = CreateFrame("Button", nil, playerManagementFrame, "UIPanelCloseButton")
+   closeButton:SetPoint("TOPRIGHT", -5, -5)
+   closeButton:SetScript("OnClick", function()
+      playerManagementFrame:Hide()
+   end)
 end
 
--- Dynamic search matching players with accented names usiing normal ascii search input i wouldnt stop till i got it :D
+--#region MemberSearch RightClick Menu 
+local KMDARightClickMenu
+
+local function HideRightClickMenu()
+   if KMDARightClickMenu then
+      KMDARightClickMenu:Hide()
+   end
+end
+
+-- Helper to create styled, clickable text lines in our menu
+local function CreateMenuOption(parent, text, yOffset, onClick)
+   local button = CreateFrame("Button", nil, parent)
+   button:SetSize(parent:GetWidth() - 20, 20)
+   button:SetPoint("TOP", 0, yOffset)
+   button:SetText(text)
+
+   local fontString = button:GetFontString()
+   fontString:SetFontObject("GameFontNormal")
+
+   button:SetScript("OnEnter", function(self)
+      fontString:SetTextColor(0.5, 0.75, 1.0) -- Light Blue
+   end)
+
+   button:SetScript("OnLeave", function(self)
+      fontString:SetTextColor(1, 1, 1) -- White
+   end)
+
+   button:SetScript("OnMouseDown", function(self)
+      fontString:SetTextColor(0.8, 0.6, 1.0) -- Purple
+   end)
+
+   button:SetScript("OnMouseUp", function(self)
+      -- Revert to hover color if still hovering
+      if self:IsMouseOver() then
+         fontString:SetTextColor(0.5, 0.75, 1.0) -- Light Blue
+      else
+         fontString:SetTextColor(1, 1, 1) -- White
+      end
+   end)
+
+   button:SetScript("OnClick", function()
+      onClick()
+      C_Timer.After(0.5, HideRightClickMenu)
+   end)
+
+   -- Set initial state
+   fontString:SetTextColor(1, 1, 1) -- White
+
+   return button
+end
+
+--right click menu functions
+local function CreateRightClickMenu()
+   if KMDARightClickMenu then return end
+
+   KMDARightClickMenu = CreateFrame("Frame", "KMDARightClickMenu", UIParent, "BackdropTemplate")
+   KMDARightClickMenu:SetFrameStrata("TOOLTIP")
+   KMDARightClickMenu:SetSize(150, 125)
+   KMDARightClickMenu:SetBackdrop({
+      bgFile = "Interface/DialogFrame/UI-DialogBox-Background-Dark",
+      edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+      tile = true, tileSize = 16, edgeSize = 16,
+      insets = { left = 4, right = 4, top = 4, bottom = 4 }
+   })
+   KMDARightClickMenu:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
+   KMDARightClickMenu:Hide()
+
+   -- Title for player name
+   KMDARightClickMenu.title = KMDARightClickMenu:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   local font, height, flags = KMDARightClickMenu.title:GetFont()
+   KMDARightClickMenu.title:SetFont(font, height + 2, flags)
+   KMDARightClickMenu.title:SetPoint("TOP", 0, -10)
+
+   -- Invite Option
+   KMDARightClickMenu.invite = CreateMenuOption(KMDARightClickMenu, "Invite", -35, function()
+      if KMDARightClickMenu.playerName then
+         C_PartyInfo.InviteUnit(KMDARightClickMenu.playerName)
+      end
+   end)
+
+   -- Whisper Option
+   KMDARightClickMenu.whisper = CreateMenuOption(KMDARightClickMenu, "Whisper", -55, function()
+      if KMDARightClickMenu.playerName then
+         ChatFrame_OpenChat("/w " .. KMDARightClickMenu.playerName .. " ")
+      end
+   end)
+
+   -- Notes Option
+   KMDARightClickMenu.notes = CreateMenuOption(KMDARightClickMenu, "Notes", -75, function()
+      if KMDARightClickMenu.playerName then
+         CreateNotesFrame()
+         local playerName = KMDARightClickMenu.playerName
+         if KMDA_SavedNotes and KMDA_SavedNotes[playerName] then
+            KMDA_OpenSavedNote(playerName)
+         else
+            KMDA_NewNote() -- Clears fields
+            if notesFrame and notesFrame.titleBox then
+               notesFrame.titleBox:SetText(playerName) -- Set title for new note
+               notesFrame.editBox:SetFocus()
+            end
+         end
+      end
+   end)
+
+   --ModMenu_GetArmoryLink
+   KMDARightClickMenu.armoryLink = CreateMenuOption(KMDARightClickMenu, "Armory Link", -95, function()
+      if KMDARightClickMenu.playerName then
+         ModMenu_GetArmoryLink(KMDARightClickMenu.playerName)
+      end
+   end)
+
+
+   -- Hide if the mouse leaves the menu area
+   KMDARightClickMenu:SetScript("OnLeave", function(self)
+      C_Timer.After(0.1, function()
+         if not self:IsMouseOver() then
+            self:Hide()
+         end
+      end)
+   end)
+end
+
+local function ShowRightClickMenu(name, class)
+   CreateRightClickMenu() -- Ensure it's created
+
+   KMDARightClickMenu.playerName = name -- Keep full name for functions
+   local color = GetClassColor(class or "")
+   local shortName = Ambiguate(name, "short") -- Use short name for display
+   KMDARightClickMenu.title:SetText("|cFF" .. color .. shortName .. "|r")
+
+   KMDARightClickMenu:ClearAllPoints()
+   local uiScale = UIParent:GetEffectiveScale()
+   local x, y = GetCursorPosition()
+   KMDARightClickMenu:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x / uiScale, y / uiScale)
+   KMDARightClickMenu:Raise()
+   KMDARightClickMenu:Show()
+end
+--#endregion MemberSearch RightClick Menu
+
+local function ShowPlayerManagementFrame(name, online)
+   CreatePlayerManagementFrame()
+   playerManagementFrame.selectedPlayer = name
+
+   -- Find member index and notes
+   local index, note, officerNote, class, level, rank, years, months, days, hours
+   for i = 1, GetNumGuildMembers() do
+      local n, r, _, l, c, _, nNote, oNote = GetGuildRosterInfo(i)
+      if n == name then
+         index = i
+         note = nNote
+         officerNote = oNote
+         class = c
+         level = l
+         rank = r
+         years, months, days, hours = GetGuildRosterLastOnline(i)
+         break
+      end
+   end
+
+   if class then
+      local color = GetClassColor(class)
+      playerManagementFrame.playerName:SetText("|cFF" .. color .. name .. "|r")
+   else
+      playerManagementFrame.playerName:SetText(name)
+      if online then
+         playerManagementFrame.playerName:SetTextColor(0, 1, 0) -- Green
+      else
+         playerManagementFrame.playerName:SetTextColor(1, 1, 0) -- Yellow
+      end
+   end
+
+   if level and rank then
+      local rankColor = GetRankColor(rank)
+      playerManagementFrame.levelRank:SetText("Level: " .. level .. "   Rank: |cFF" .. rankColor .. rank .. "|r")
+   else
+      playerManagementFrame.levelRank:SetText("")
+   end
+
+   if online then
+      playerManagementFrame.statusDisplay:SetText("  Online Now!")
+      playerManagementFrame.statusDisplay:SetTextColor(0, 1, 0) -- Green
+   else
+      local totalDays = (years or 0) * 365 + (months or 0) * 30 + (days or 0)
+      if totalDays > 0 then
+         playerManagementFrame.statusDisplay:SetText("Offline " .. totalDays .. " days")
+      else
+         playerManagementFrame.statusDisplay:SetText("Offline " .. hours .. " hours")
+      end
+      playerManagementFrame.statusDisplay:SetTextColor(1, 0.15, 0.15, 0.85)
+   end
+
+   playerManagementFrame.selectedIndex = index
+   playerManagementFrame.pNoteBox:SetText(note or "")
+   playerManagementFrame.oNoteBox:SetText(officerNote or "")
+   playerManagementFrame.pNoteBox:SetCursorPosition(0)
+   playerManagementFrame.oNoteBox:SetCursorPosition(0)
+
+   playerManagementFrame:ClearAllPoints()
+   if searchFrame and searchFrame:IsShown() then
+      playerManagementFrame:SetPoint("LEFT", searchFrame, "RIGHT", 0, 0)
+   else
+      playerManagementFrame:SetPoint("CENTER")
+   end
+   playerManagementFrame:Show()
+end
+
+-- Dynamic search matching players with accented names usiing normal ascii search input
 local function UpdateSearchResults(searchText)
-    ClearSearchResults() -- Remove old results
+   ClearSearchResults() -- Remove old results
+   
+   local offsetY = 10
+   local rowHeight = 20
 
-    local offsetY = 10
-    local rowHeight = 20
+   for _, member in ipairs(guildRosterCache) do
+      --local normalizedMemberName = stripChars(member.name) removed after refactoring
+      local playerName = member.name
+      local status = member.online and "|cff00ff00Online|r" or
+          string.format("|cffff0000Offline|r (%s)", member.lastOnline)
 
-    for _, member in ipairs(guildRosterCache) do
-        local normalizedMemberName = stripChars(member.name)
-        local playerName = member.linkName
-        local status = member.online and "|cff00ff00Online|r" or
-            string.format("|cffff0000Offline|r (%s)", member.lastOnline)
+      -- Compare normalized strings
+      if member.normalizedName:find(searchText, 1, true) then
+         -- Create a new row for each matching result
+         local row = CreateFrame("Frame", nil, SR_scrollChild)
+         row:SetSize(440, rowHeight)
+         row:SetPoint("TOPLEFT", SR_scrollChild, "TOPLEFT", 0, -offsetY)
 
-        -- Compare normalized strings
-        if normalizedMemberName:find(searchText, 1, true) then
-            -- Create a new row for each matching result
-            local row = CreateFrame("Frame", nil, SR_scrollChild)
-            row:SetSize(440, rowHeight)
-            row:SetPoint("TOPLEFT", SR_scrollChild, "TOPLEFT", 0, -offsetY)
+         ----------------------------------------------------------
+         -- 1) Name Column
+         ----------------------------------------------------------
+         local nameCol = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+         nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
+         nameCol:SetSize(190, rowHeight)
+         nameCol:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+         nameCol:SetText(playerName)
+         nameCol:SetNormalFontObject("GameFontNormal")
+         nameCol:SetHighlightFontObject("GameFontHighlight")
 
-            ----------------------------------------------------------
-            -- 1) Name Column
-            ----------------------------------------------------------
-            local nameCol = CreateFrame("Button", nil, row)
-            nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
-            nameCol:SetSize(190, rowHeight)
-            nameCol:EnableMouse(true)
-            nameCol:SetHyperlinksEnabled(true)
+         nameCol:SetScript("OnClick", function(self, button)
+            if button == "RightButton" then
+               ShowRightClickMenu(member.name, member.class)
+            elseif button == "LeftButton" then
+               ShowPlayerManagementFrame(member.name, member.online)
+            end
+         end)
 
-            local nameText = nameCol:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            nameText:SetAllPoints()
-            nameText:SetJustifyH("LEFT")
-            nameText:SetText(playerName)
+         ----------------------------------------------------------
+         -- 2) Rank Column
+         ----------------------------------------------------------
+         local rankCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+         -- Position it to the right of the name column, with a small gap
+         rankCol:SetPoint("LEFT", nameCol, "RIGHT", 10, 0)
+         rankCol:SetWidth(85)
+         rankCol:SetJustifyH("LEFT")
+         rankCol:SetText(member.rank)
 
-            nameCol:SetFontString(nameText)
-            nameCol:SetNormalFontObject("GameFontNormal")
+         ----------------------------------------------------------
+         -- 3) Status Column
+         ----------------------------------------------------------
+         local statusCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+         -- Again position it to the right, with a small gap
+         statusCol:SetPoint("LEFT", rankCol, "RIGHT", 10, 0)
+         statusCol:SetWidth(180)
+         statusCol:SetJustifyH("LEFT")
+         statusCol:SetText(status)
 
-            nameCol:SetScript("OnHyperlinkClick", function(self, link, text, button)
-                if button == "RightButton" then
-                    --C_ChatFrame_OnHyperlinkShow(self, link, text, button)
-                    SetItemRef(link, text, button, self)
-                end
-            end)
-
-            ----------------------------------------------------------
-            -- 2) Rank Column
-            ----------------------------------------------------------
-            local rankCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            -- Position it to the right of the name column, with a small gap
-            rankCol:SetPoint("LEFT", nameCol, "RIGHT", 10, 0)
-            rankCol:SetWidth(85)
-            rankCol:SetJustifyH("LEFT")
-            rankCol:SetText(member.rank)
-
-            ----------------------------------------------------------
-            -- 3) Status Column
-            ----------------------------------------------------------
-            local statusCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            -- Again position it to the right, with a small gap
-            statusCol:SetPoint("LEFT", rankCol, "RIGHT", 10, 0)
-            statusCol:SetWidth(180)
-            statusCol:SetJustifyH("LEFT")
-            statusCol:SetText(status)
-
-            -- Increase the offset so the next row appears below
-            offsetY = offsetY + rowHeight
-        end
-    end
+         -- Increase the offset so the next row appears below
+         offsetY = offsetY + rowHeight
+      end
+   end
 
 
-    -- Adjust scroll child height so it can accommodate all rows
-    SR_scrollChild:SetSize(440, math.max(offsetY, scrollFrame:GetHeight()))
+   -- Adjust scroll child height so it can accommodate all rows
+   SR_scrollChild:SetSize(440, math.max(offsetY, scrollFrame:GetHeight()))
 end
 
 -- Create the search frame (only once)
-local function CreateSearchFrame(parent)
-    if searchFrame then return end -- Reuse the frame if it already exists
+local function CreateSearchFrame()
+   if searchFrame then return end -- Reuse the frame if it already exists
 
-    searchFrame = CreateFrame("Frame", "SearchFrame", UIParent, "BackdropTemplate")
-    searchFrame:SetSize(500, 340)
-    searchFrame:SetPoint("LEFT", parent)
-    searchFrame:SetFrameStrata("FULLSCREEN_DIALOG")
-    searchFrame:SetFrameLevel(1)
-    searchFrame:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true,
-        tileSize = 32,
-        edgeSize = 32,
-        insets = { left = 8, right = 8, top = 8, bottom = 8 },
-    })
-    searchFrame:SetBackdropColor(0, 0, 0, 1)
-    searchFrame:EnableMouse(true)
-    searchFrame:SetMovable(true)
-    searchFrame:RegisterForDrag("LeftButton")
-    searchFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    searchFrame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+   searchFrame = CreateFrame("Frame", "KMDA_SearchFrame", UIParent, "BackdropTemplate")
+   searchFrame:SetSize(500, 340)
+   searchFrame:SetPoint("CENTER")
+   searchFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+   searchFrame:SetFrameLevel(1)
+   searchFrame:SetBackdrop({
+      bgFile = "Interface\\Buttons\\WHITE8x8",
+      edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+      tile = true,
+      tileSize = 32,
+      edgeSize = 32,
+      insets = { left = 8, right = 8, top = 8, bottom = 8 },
+   })
+   searchFrame:SetBackdropColor(0, 0, 0, 1)
+   searchFrame:EnableMouse(true)
+   searchFrame:SetMovable(true)
+   searchFrame:RegisterForDrag("LeftButton")
+   searchFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+   searchFrame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 
-    -- Title bar
-    local title = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    title:SetPoint("TOP", 0, -10)
-    title:SetText("Member Search")
+   searchFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+   searchFrame:SetScript("OnEvent", function(self, event)
+      if event == "GUILD_ROSTER_UPDATE" and self:IsVisible() then
+         RefreshGuildRosterCache()
+         local inputBox = _G["KMDA_SearchInputBox"]
+         local searchText = inputBox and stripChars(inputBox:GetText()) or ""
+         UpdateSearchResults(searchText)
+      end
+   end)
 
-    -- Input box label
-    local inputLabel = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLeftOrange")
-    inputLabel:SetPoint("TOPLEFT", 95, -40)
-    inputLabel:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Search:")
+   -- Title bar
+   local title = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+   title:SetPoint("TOP", 0, -10)
+   title:SetText("Member Search")
 
-    -- Input box for search
-    local inputBox = CreateFrame("EditBox", "SearchInputBox", searchFrame, "InputBoxTemplate")
-    inputBox:SetSize(200, 30)
-    inputBox:SetPoint("LEFT", inputLabel, "RIGHT", 5, 0)
-    inputBox:SetAutoFocus(false)
-    inputBox:SetScript("OnTextChanged", function(self)
-        local searchTextGet = self:GetText()
-        local searchText = string.lower(searchTextGet)
-        UpdateSearchResults(searchText)
-    end)
+   -- Input box label
+   local inputLabel = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLeftOrange")
+   inputLabel:SetPoint("TOPLEFT", 95, -40)
+   inputLabel:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Search:")
 
-    -- Close button
-    local closeButton = CreateFrame("Button", nil, searchFrame, "UIPanelCloseButton")
-    closeButton:SetPoint("TOPRIGHT", -5, -5)
-    closeButton:SetScript("OnClick", function()
-        searchFrame:Hide()
-    end)
+   -- Input box for search
+   local inputBox = CreateFrame("EditBox", "KMDA_SearchInputBox", searchFrame, "InputBoxTemplate")
+   inputBox:SetSize(200, 30)
+   inputBox:SetPoint("LEFT", inputLabel, "RIGHT", 5, 0)
+   inputBox:SetAutoFocus(false)
+   inputBox:SetScript("OnTextChanged", function(self)
+      local searchTextGet = self:GetText()
+      --local searchText = string.lower(searchTextGet) removed after refactor
+      local searchText = stripChars(searchTextGet) -- Normalize search input too
+      UpdateSearchResults(searchText)
+   end)
 
-    -- Headers for columns
-    local headers = {
-        { text = "Name",   width = 150, point = "TOPLEFT", offsetX = 10 },
-        { text = "Rank",   width = 100, point = "TOPLEFT", offsetX = 160 },
-        { text = "Status", width = 100, point = "TOPLEFT", offsetX = 270 },
-    }
+   -- Refresh Search Button
+   local refreshButton = CreateFrame("Button", nil, searchFrame, "UIPanelButtonTemplate")
+   refreshButton:SetSize(60, 22)
+   refreshButton:SetPoint("LEFT", inputBox, "RIGHT", 5, 0)
+   refreshButton:SetText("Refresh")
+   refreshButton:SetScript("OnClick", function()
+      C_GuildInfo.GuildRoster()
+      inputBox:SetText("")
+      inputBox:ClearFocus()
+   end)
 
-    for _, header in ipairs(headers) do
-        local headerText = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        headerText:SetSize(header.width, 20)
-        headerText:SetPoint(header.point, searchFrame, header.point, header.offsetX, -60)
-        headerText:SetText(header.text)
-    end
+   -- Close button
+   local closeButton = CreateFrame("Button", nil, searchFrame, "UIPanelCloseButton")
+   closeButton:SetPoint("TOPRIGHT", -5, -5)
+   closeButton:SetScript("OnClick", function()
+      searchFrame:Hide()
+   end)
 
-    -- Scrollable list for results
-    scrollFrame = CreateFrame("ScrollFrame", "SearchResultsScrollFrame", searchFrame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetSize(searchFrame:GetWidth() - 40, searchFrame:GetHeight() - 90)
-    scrollFrame:SetPoint("BOTTOM", 0, 10)
+   -- Headers for columns
+   local headers = {
+      { text = "Name",   width = 150, point = "TOPLEFT", offsetX = 10 },
+      { text = "Rank",   width = 100, point = "TOPLEFT", offsetX = 160 },
+      { text = "Status", width = 100, point = "TOPLEFT", offsetX = 270 },
+   }
 
-    SR_scrollChild = CreateFrame("Frame", nil, scrollFrame)
-    scrollFrame:SetScrollChild(SR_scrollChild)
-    return SR_scrollChild
+   for _, header in ipairs(headers) do
+      local headerText = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+      headerText:SetSize(header.width, 20)
+      headerText:SetPoint(header.point, searchFrame, header.point, header.offsetX, -60)
+      headerText:SetText(header.text)
+   end
+
+   -- Scrollable list for results
+   scrollFrame = CreateFrame("ScrollFrame", "KMDA_SearchResultsScrollFrame", searchFrame, "UIPanelScrollFrameTemplate")
+   scrollFrame:SetSize(searchFrame:GetWidth() - 40, searchFrame:GetHeight() - 90)
+   scrollFrame:SetPoint("BOTTOM", 0, 10)
+
+   SR_scrollChild = CreateFrame("Frame", nil, scrollFrame)
+   scrollFrame:SetScrollChild(SR_scrollChild)
+   return SR_scrollChild
 end
 
 -- Main function to initiate member search
-local function OldGods_MemberSearch()
-    RefreshGuildRosterCache() -- Update cache
-    CreateSearchFrame()
-    searchFrame:Show()
+local function KMDA_MemberSearch()
+   C_GuildInfo.GuildRoster() -- Trigger GUILD_ROSTER_UPDATE
+   RefreshGuildRosterCache() -- Update cache
+   CreateSearchFrame()
+   searchFrame:Show()
 end
---#endregion OldGods_MemberSearch
+--#endregion MemberSearch
+
 
 --#region create AfkMsgFrame
 local function CreateAfkMsgFrame(parent)
@@ -4846,7 +5036,7 @@ end
 
 OG_Fast_Options = {
     ["Member Search"] = {
-        fastFunction = OldGods_MemberSearch,
+        fastFunction = KMDA_MemberSearch,
         icon = "|TInterface\\AddOns\\OldGods\\Textures\\Search.tga:18:18|t ",
     },
     --[[["Inactive Purge"] = {
@@ -5142,7 +5332,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     fontDropdown:SetDefaultText("Select Font")
     fontDropdown:SetupMenu(function(self, rootDescription)
         for fontName, fontData in pairs(OG_Fonts) do
-            rootDescription:CreateButton("|TInterface\\Icons\\INV_Letter_01:24:24:0|t " .. fontName, function(data)
+            rootDescription:CreateButton(fontName, function(data)
                 ApplyFont(GuildChatWindow.editBox, fontData, fontName)
                 print("Selected Font:", fontName)
             end)
@@ -5163,7 +5353,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     themeDropdown:SetDefaultText("Select Theme")
     themeDropdown:SetupMenu(function(self, rootDescription)
         for themeName, themeData in pairs(OG_Themes) do
-            rootDescription:CreateButton(themeData.dropDownIcon .. themeName, function(data)
+            rootDescription:CreateButton(themeName, function(data) --themeData.dropDownIcon .. 
                 ApplyTheme(GuildChatWindow, themeData, themeName)
                 print("Selected Theme:", themeName)
             end)
@@ -5185,7 +5375,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
         end
 
         for themeName, themeData in pairs(OldGods_UserThemes) do
-            rootDescription:CreateButton("|TInterface\\Icons\\INV_Misc_Note_01:16|t " .. themeName, function()
+            rootDescription:CreateButton(themeName, function()
                 OldGods_ApplyUserTheme(themeName)
             end)
         end
@@ -5223,7 +5413,7 @@ local function PopulateContentFrame_GuildSettings(optionsFrame)
 
     local guildOptions = {
         { label = "Inactive Initiates", key = OldGods_ShowInactiveInitiates },
-        { label = "Member Search",      key = OldGods_MemberSearch },
+        { label = "Member Search",      key = KMDA_MemberSearch },
         { label = "Meta Data",          key = OldGods_MetaDataGraph },
         { label = "Automated Busy MSG", key = OldGods_AutoAfkMsg },
         { label = "x4",                 key = dummyFunction },
@@ -5619,10 +5809,7 @@ local function OnChatMessage(self, event, message, sender)
     -- Add chatMessage to OG_ChatMessageTable
     if not tContains(OG_ChatMessageTable, chatMessage) then
         table.insert(OG_ChatMessageTable, chatMessage)
-        --Wait .05 seconds for table to be updated then on it goes
-        C_Timer.After(0.05, function()
-            updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
-        end)
+        updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
     end
     --Play a click for each CHAT_MSG_GUILD event
     if OldGodsDB.soundEnabled then
@@ -5630,25 +5817,14 @@ local function OnChatMessage(self, event, message, sender)
     end
 end
 
+--Event frame for OnChatMessage
 local OnChatMessageEventFrame = CreateFrame("Frame")
-
 local function OG_EnableGuildChat()
     OnChatMessageEventFrame:RegisterEvent("CHAT_MSG_GUILD")
-    --will print a texture and message and play some alert sound here
 end
 
 local function OG_DisableGuildChat()
     OnChatMessageEventFrame:UnregisterEvent("CHAT_MSG_GUILD")
-    --will print a texture and message and play some alert sound here
-end
-
-local function GetRestrictionName(value)
-    for name, enumValue in pairs(Enum.AddOnRestrictionType) do
-        if enumValue == value then
-            return name
-        end
-    end
-    return "Unknown"
 end
 
 local OG_InstancePause = {
@@ -5657,48 +5833,55 @@ local OG_InstancePause = {
     activeRestrictions = {}
 }
 
+OG_EnableGuildChat()
+
 OnChatMessageEventFrame:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
 OnChatMessageEventFrame:SetScript("OnEvent", function(self, event, ...)
     if event ~= "ADDON_RESTRICTION_STATE_CHANGED" then
         if event == "CHAT_MSG_GUILD" then
             OnChatMessage(self, event, ...)
         end
+
         return
     end
 
     local type, state = ...
-    local restrictionName = GetRestrictionName(type)
+    local restrictionName = type
+    local restrictionState = state
 
-    if state == Enum.AddOnRestrictionState.Activating
-        or state == Enum.AddOnRestrictionState.Active then
-        OG_InstancePause.activeRestrictions[type] = true
+    -- 1. ADDING TO THE TABLE
+    if restrictionState == Enum.AddOnRestrictionState.Activating or restrictionState == Enum.AddOnRestrictionState.Active then
+        OG_InstancePause.activeRestrictions[restrictionName] = restrictionState
 
         if not OG_InstancePause.active then
             OG_InstancePause.active = true
             OG_InstancePause.startTime = GetTime()
-
             OG_DisableGuildChat()
 
             local chatMessage = string.format(
-            "|cFFFFFFFF[|r|cFF0000FFOG|r|cFFFFFFFF]|r: Guild chat paused due to |cff55FF99(|r|cffF0F0FF%s|r|cff55FF99)|r\nGuild Chat will resume when addon restrictions are lifted!",
-                restrictionName)
+                "|cFFFFFFFF[|r|cFF0000FFOG|r|cFFFFFFFF]|r: Guild chat paused due to |cff55FF99(|r|cffF0F0FF%s|r|cff55FF99)|r(%s)",
+                restrictionName, restrictionState)
             table.insert(OG_ChatMessageTable, chatMessage)
             updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
-            print("Restriction started:", restrictionName)
         end
         return
     end
 
-    if state == Enum.AddOnRestrictionState.Inactive then
-        OG_InstancePause.activeRestrictions[type] = nil
+    -- 2. REMOVING FROM THE TABLE
+    if restrictionState == Enum.AddOnRestrictionState.Inactive then
+        -- FIX: Use restrictionName instead of type so the keys match!
+        OG_InstancePause.activeRestrictions[restrictionName] = nil
+
+        -- If the table is now completely empty, all restrictions are gone
         if next(OG_InstancePause.activeRestrictions) == nil then
-            local elapsed = GetTime() - OG_InstancePause.startTime
+            local elapsed = OG_InstancePause.startTime and (GetTime() - OG_InstancePause.startTime) or 0
             local minutes = math.floor(elapsed / 60)
             local seconds = math.floor(elapsed % 60)
 
             OG_EnableGuildChat()
 
-            local chatMessage = string.format("|cFFFFFFFF[|r|cFF0000FFOG|r|cFFFFFFFF]|r: Guild chat resumed after |cff00ff00%02d:%02d|r",
+            local chatMessage = string.format(
+                "|cFFFFFFFF[|r|cFF0000FFOG|r|cFFFFFFFF]|r: Guild chat resumed after |cff00ff00%02d:%02d|r",
                 minutes,
                 seconds
             )
@@ -5706,14 +5889,13 @@ OnChatMessageEventFrame:SetScript("OnEvent", function(self, event, ...)
             table.insert(OG_ChatMessageTable, chatMessage)
             updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
 
-            --will print a texture and message and play some alert sound here
-
             OG_InstancePause.active = false
             OG_InstancePause.startTime = nil
         else
-            --just looking at the event, going to pair this with state for info while
-            --AddOnRestrictionState.Active is true, right now it's always 'combat' 
-            print("Restriction lifted:", restrictionName)
+            -- There are still other restrictions active
+            local resNameStateMsg = string.format("Restriction Name: |cFF000FF0%s|r\nRestriction State: |cFFFFFF00%s|r",
+                restrictionName, restrictionState)
+            print(resNameStateMsg)
         end
     end
 end)
