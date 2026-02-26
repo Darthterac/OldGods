@@ -1,5 +1,10 @@
 ### OldGods-2.5.1
 
+emergency path, name conflict with blizzards main menu Options button UPDATE IMMEDIATELY
+
+
+### OldGods-2.5.1
+
 Reworked fast options menu, changed it from hovering region to hover the options button
 fades in and out smoothly - Purge function updated - Notes added to Guild Options and Fast Options
 menu.

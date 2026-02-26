@@ -1,7 +1,7 @@
---OGGC v2.5.1
-local KMDAver = "2.5.1"
+--OGGC v2.5.1b
+local KMDAver = "2.5.1b"
 
---[[ Reworked Fast Options to use my own menu, added notes to fast options and Guild Options, updated Purge function ]]
+--[[ Emergency patch - Accidently had the optionsButton Name Conflict with blizzard Menu Options button ]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -2355,17 +2355,17 @@ local function CreateGuildChatWindow(title)
         end
     end)
 
-    local optionsButton = CreateFrame("Button", "optionsButton", GuildChatWindow, "BackdropTemplate")
-    optionsButton:SetSize(120, 25)
-    optionsButton:SetPoint("BOTTOMRIGHT", GuildChatWindow, "BOTTOM", 195, 10)
-    optionsButton:SetText("Options")
-    optionsButton:SetNormalFontObject("GameFontNormal")
-    optionsButton:SetHighlightFontObject("GameFontHighlight")
-    optionsButton:EnableMouse(true)
-    optionsButton:SetPushedTexture(5926319)
+    local KMDA_optionsButton = CreateFrame("Button", "OldGodsChatKMDA_optionsButton", GuildChatWindow, "BackdropTemplate")
+    KMDA_optionsButton:SetSize(120, 25)
+    KMDA_optionsButton:SetPoint("BOTTOMRIGHT", GuildChatWindow, "BOTTOM", 195, 10)
+    KMDA_optionsButton:SetText("Options")
+    KMDA_optionsButton:SetNormalFontObject("GameFontNormal")
+    KMDA_optionsButton:SetHighlightFontObject("GameFontHighlight")
+    KMDA_optionsButton:EnableMouse(true)
+    KMDA_optionsButton:SetPushedTexture(5926319)
  
-    GuildChatWindow.optionsButton = optionsButton
-    GuildChatWindow.buttons = { copyButton, SaveClearButton, optionsButton, toggleButton }
+    GuildChatWindow.KMDA_optionsButton = KMDA_optionsButton
+    GuildChatWindow.buttons = { copyButton, SaveClearButton, KMDA_optionsButton, toggleButton }
 
     local inputBox = CreateFrame("EditBox", nil, GuildChatWindow, "InputBoxTemplate")
     inputBox:SetSize(400, 35)
@@ -4882,7 +4882,7 @@ local function CreateFastOptionsMenu()
 
     OG_FastOptionsMenu:SetScript("OnLeave", function(self)
         C_Timer.After(0.2, function()
-            if not self:IsMouseOver() and not GuildChatWindow.optionsButton:IsMouseOver() then
+            if not self:IsMouseOver() and not GuildChatWindow.KMDA_optionsButton:IsMouseOver() then
                 HideFastOptionsMenu()
             end
         end)
@@ -5544,7 +5544,7 @@ optionsFrame:Hide()
 
 -- Toggle the big single-frame window when the Options button is clicked
 for _, button in ipairs(GuildChatWindow.buttons) do
-    if button:GetName() == "optionsButton" then
+    if button:GetName() == "OldGodsChatKMDA_optionsButton" then
         button:SetScript("OnClick", function()
             if optionsFrame:IsShown() then
                 return
