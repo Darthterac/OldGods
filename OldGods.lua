@@ -12,6 +12,7 @@ OldGods_LastThemeName = OldGods_LastThemeName or "Your Custom Theme"
 OldGods_LastFontName = OldGods_LastFontName or "Roboto"
 OldGodsGuildActivity = OldGodsGuildActivity or {}
 OG_TrackGuildRoster = OG_TrackGuildRoster or {}
+KMDA_SavedNotes = KMDA_SavedNotes or {}
 OG_EncryptedNotes = OG_EncryptedNotes or {}
 OG_AfkMsg = OG_AfkMsg or {}
 OldGods_BadMailDB = OldGods_BadMailDB or {}
