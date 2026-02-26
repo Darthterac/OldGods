@@ -1,7 +1,7 @@
---OGGC v2.5.0a
-local KMDAver = "2.5.0a"
+--OGGC v2.5.1
+local KMDAver = "2.5.1"
 
---[[ Isolated and solved menu taint - it was having icons in drop down menus which was causing the problem. I have removed all menu.modmenu hooks for now and revamped the member search huge changes! will test modmenus for next relesae right now were taint and error free! gg ]]
+--[[ Reworked Fast Options to use my own menu, added notes to fast options and Guild Options, updated Purge function ]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -14,7 +14,6 @@ OldGodsGuildActivity = OldGodsGuildActivity or {}
 OG_TrackGuildRoster = OG_TrackGuildRoster or {}
 KMDA_SavedNotes = KMDA_SavedNotes or {}
 OG_EncryptedNotes = OG_EncryptedNotes or {}
-OG_AfkMsg = OG_AfkMsg or {}
 OldGods_BadMailDB = OldGods_BadMailDB or {}
 OldGods_AutoReturnEnabled = OldGods_AutoReturnEnabled or false
 --#endregion Global savedvariables
@@ -2364,29 +2363,8 @@ local function CreateGuildChatWindow(title)
     optionsButton:SetHighlightFontObject("GameFontHighlight")
     optionsButton:EnableMouse(true)
     optionsButton:SetPushedTexture(5926319)
-
-    local fastOptionsMenuZone = CreateFrame("Button", "fastOptionsMenuZone", optionsButton, "BackdropTemplate")
-    fastOptionsMenuZone:SetPoint("BOTTOMRIGHT", optionsButton)
-    fastOptionsMenuZone:SetSize(10, 10)
-    local FrameBackdrop = {
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Buttons\\WHITE8x8",
-        tile = false,
-        tileSize = 0,
-        edgeSize = 2,
-        insets = {
-            left = 0,
-            right = 0,
-            top = 0,
-            bottom = 0
-        }
-    }
-    fastOptionsMenuZone:SetBackdrop(FrameBackdrop)
-    fastOptionsMenuZone:SetBackdropColor(0, 1, 0, 0.655)
-    fastOptionsMenuZone:SetBackdropBorderColor(0.5, 0.5, 0.15, 1)
-    fastOptionsMenuZone:EnableMouse(true)
-
-    GuildChatWindow.CustomFastOptionsZone = { fastOptionsMenuZone }
+ 
+    GuildChatWindow.optionsButton = optionsButton
     GuildChatWindow.buttons = { copyButton, SaveClearButton, optionsButton, toggleButton }
 
     local inputBox = CreateFrame("EditBox", nil, GuildChatWindow, "InputBoxTemplate")
@@ -2401,57 +2379,6 @@ local function CreateGuildChatWindow(title)
         self:SetFocus()
     end)
 
-    --[[#region Fizzlemizz made this, many thanks (found a nice solution keeping this in to remind me how smart fizz is =)
-    local owner = {}
-
-    EventRegistry:RegisterCallback("TalentButton.OnClick", function(owner, self, button)
-        local spellID = self:GetSpellID();
-        if spellID then
-            local spellLink = C_Spell.GetSpellLink(spellID)
-            if spellLink and inputBox:HasFocus() then
-                inputBox:Insert(spellLink)
-            end
-        end
-    end, owner)
-
-    EventRegistry:RegisterCallback("SpellBookItemMixin.OnModifiedClick", function(owner, self, button)
-        local chatLink = C_SpellBook.GetSpellBookItemTradeSkillLink(self.slotIndex, self.spellBank);
-        if not chatLink then
-            chatLink = C_SpellBook.GetSpellBookItemLink(self.slotIndex, self.spellBank);
-        end
-        if chatLink and inputBox:HasFocus() then
-            inputBox:Insert(chatLink)
-        end
-    end, owner)
-
-    EventRegistry:RegisterCallback("ProfessionSpellButton.OnModifiedClick", function(owner, self, button)
-        local slotIndex = ProfessionsBook_GetSpellBookItemSlot(self)
-        local activeSpellBank = Enum.SpellBookSpellBank.Player
-        if not slotIndex then
-            return
-        end
-        local tradeSkillLink = C_SpellBook.GetSpellBookItemTradeSkillLink(slotIndex, activeSpellBank)
-        if tradeSkillLink and inputBox:HasFocus() then
-            inputBox:Insert(tradeSkillLink)
-        else
-            local spellLink = C_SpellBook.GetSpellBookItemLink(slotIndex, activeSpellBank)
-            if spellLink and inputBox:HasFocus() then
-                inputBox:Insert(spellLink)
-            end
-        end
-    end, owner)
-    --#endregion Fizzlemizz youre awesome!!]]
-
-    --[[i did this part :p its for linking from inventory (bags)
-    hooksecurefunc("HandleModifiedItemClick", function(payload)
-        if payload and inputBox:HasFocus() then
-            inputBox:Insert(payload)
-        end
-    end) Ok I found the best method for all of this is the next hook]]
-
-    --i did this part too, thanks agian Fizzlemizz you sent me on a journey!
-    --every spell, profession, achievement, talent, inventory, etc.. that can be linked is
-    --with just this small hook - lazy? no, im just letting blizzard do all the work  ;)
     hooksecurefunc(ChatFrameUtil, "InsertLink", function(link)
         if link and inputBox:HasFocus() then
             inputBox:Insert(link)
@@ -3222,336 +3149,331 @@ end)
 
 --#region Content Frame Guild Functions
 
---#region Inactive players
---Changes, many see Diff, should be fully optimized and not require multiple key presses for updating the frame and macro
-local frame, scrollChild
 
-local inactiveInitiates = {} --Changes moved table init outside function
+--#region Purge
+local purgeFrame, purgeScrollChild
+local inactiveMembers = {}
 
-local function GetInactiveInitiates(threshold)
-    --Changes added check for type and if table has any data
-    --if so we wipe the table so it repopulated with the next
-    --matching player player at the threshold with out having to press f5 twice
-    if type(inactiveInitiates) == "table" and #inactiveInitiates > 0 then
-        wipe(inactiveInitiates)
-    end
+local function GetInactiveMembers(threshold, showAllRanks)
+   if type(inactiveMembers) == "table" and #inactiveMembers > 0 then
+      wipe(inactiveMembers)
+   end
 
-    local numGuildMembers = GetNumGuildMembers()
-    for i = 1, numGuildMembers do
-        local name, rankName, rankIndex = GetGuildRosterInfo(i)
+   local numGuildMembers = GetNumGuildMembers()
+   for i = 1, numGuildMembers do
+      local fullName, rankName, rankIndex = GetGuildRosterInfo(i)
 
-        if rankName then
-            local _, _, days = GetGuildRosterLastOnline(i)
-            days = days or 0 -- Ensure days is never nil
-            local macroa, macrob
+      if showAllRanks or rankName == "Initiate" then
+         local _, _, days = GetGuildRosterLastOnline(i)
+         days = days or 0
+         local macroa, macrob
 
-            local hyperlinkName = "|Hplayer:" .. name .. "|h|r|cFFFFFFFF[|r|cFFF0F000" .. name .. "|r|cFFFFFFFF]|r|h"
+         local displayName = Ambiguate(fullName, "short")
+         local hyperlinkName = "|Hplayer:" ..
+             fullName .. "|h|r|cFFFFFFFF[|r|cFFF0F000" .. displayName .. "|r|cFFFFFFFF]|r|h"
 
-            -- Default macros (for ranks other than Initiate/Member)
-            macroa = "/clap"
-            macrob = "\n/run C_Timer.After(0.1, function() print(\"No actions to preform\") end)"
+         macroa = "/clap"
+         macrob = "\n/run C_Timer.After(0.1, function() print(\"No actions to preform\") end)"
 
-            -- Apply `/gremove` only to Initiates (20+) and Members (28+)
-            if (rankName == "Initiate" and days >= 20) or (rankName == "Member" and days >= 28) then
-                macroa = "/gremove"
-                macrob = "\n/run C_Timer.After(0.1, OldGods_ShowInactiveInitiates)"
-            end
+         if rankName == "Initiate" and days >= threshold then
+            macroa = "/gremove"
+            macrob = "\n/run C_Timer.After(0.1, KMDA_Purge)"
+         end
 
-            -- Add all ranks to the table
-            if days >= threshold and days ~= 0 then
-                table.insert(inactiveInitiates, {
-                    name = name,
-                    hyperlinkName = hyperlinkName,
-                    rank = rankName,
-                    rankId = rankIndex,
-                    macro = macroa,
-                    macro_n = macrob,
-                    totalDaysOffline = days,
-                })
-            end
-        end
-    end
+         if days >= threshold and days ~= 0 then
+            table.insert(inactiveMembers, {
+               name = displayName,
+               fullName = fullName,
+               hyperlinkName = hyperlinkName,
+               rank = rankName,
+               rankId = rankIndex,
+               macro = macroa,
+               macro_n = macrob,
+               totalDaysOffline = days,
+            })
+         end
+      end
+   end
 
-    table.sort(inactiveInitiates, function(a, b)
-        if a.rankId ~= b.rankId then
-            return a.rankId > b.rankId
-        end
-        if a.totalDaysOffline ~= b.totalDaysOffline then
-            return a.totalDaysOffline < b.totalDaysOffline
-        end
-        return a.name < b.name
-    end)
+   table.sort(inactiveMembers, function(a, b)
+      if a.rankId ~= b.rankId then
+         return a.rankId > b.rankId
+      end
+      if a.totalDaysOffline ~= b.totalDaysOffline then
+         return a.totalDaysOffline < b.totalDaysOffline
+      end
+      return a.name < b.name
+   end)
 
-    -- Process the first inactive player into a macro
-    C_Timer.After(0.1, function()
-        if #inactiveInitiates > 0 then
-            local macro_Data = table.remove(inactiveInitiates, 1)
-            local TEMP_STRING = macro_Data.macro .. " " .. macro_Data.name .. macro_Data.macro_n
-            local chatFrameName = macro_Data.hyperlinkName
+   C_Timer.After(0.1, function()
+      if #inactiveMembers > 0 then
+         local macro_Data = table.remove(inactiveMembers, 1)
+         local TEMP_STRING = macro_Data.macro .. " " .. macro_Data.fullName .. macro_Data.macro_n
+         local chatFrameName = macro_Data.hyperlinkName
 
-            -- Macro details
-            local macroIDname = "A_OldGods_Tool"
-            local icon = 134238
-            local macroText = TEMP_STRING
-            local keyBind = "F5"
-            local macroIndex = GetMacroIndexByName(macroIDname)
+         local macroIDname = "A_KMDA_Tool"
+         local icon = 134238
+         local macroText = TEMP_STRING
+         local keyBind = "F5"
+         local macroIndex = GetMacroIndexByName(macroIDname)
 
-            -- Check if macro exists, else create/update it
-            if macroIndex == 0 then
-                C_Timer.After(0.1, function()
-                    if GetNumMacros() < MAX_ACCOUNT_MACROS then
-                        CreateMacro(macroIDname, icon, macroText, nil)
-                        -- **Ensure message is printed if `/gremove` is detected**
-                        if string.find(macroText, "/gremove") then
-                            print(
-                                "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created or Updated!")
-                            DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
-                                chatFrameName ..
-                                " staged for removal |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t")
-                            print("[OG]: Press " .. keyBind .. " for action on " .. chatFrameName)
-                            UIErrorsFrame:AddMessage(
-                                "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0,
-                                1.0,
-                                0.0, 1, 5)
-                        end
-                    else
-                        print(
-                            "|cFF0000FF<|rOldGods|cFF0000FF>|r |cFFC8C800ATTENTION|r - Maximum number of macros reached.|r")
-                        return
-                    end
-                end)
-            else
-                -- Update existing macro
-                EditMacro(macroIndex, macroIDname, icon, macroText)
-                -- **Ensure message is printed if `/gremove` is detected**
-                if string.find(macroText, "/gremove") then
-                    --PlaySoundFile("Interface\\AddOns\\OldGods\\Sounds\\unregistered\\mixkit-finished-alert5.mp3", "MASTER")
-                    print(
-                        "[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t Macro Created or Updated!")
-                    DEFAULT_CHAT_FRAME:AddMessage("[OG]: " ..
-                        chatFrameName ..
-                        " staged for removal |TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:16:16|t")
-                    print("[OG]: Press " .. keyBind .. " for action on " .. chatFrameName)
-                    UIErrorsFrame:AddMessage(
-                        "|T516767:32:32|t Secure Action Bound" .. "\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0,
-                        0.0, 1, 5)
-                end
-            end
-
-            -- Bind macro to key
-            C_Timer.After(0.2, function()
-                if keyBind and keyBind ~= "" and macroIndex > 0 then
-                    SetBindingMacro(keyBind, macroIndex)
-                    SaveBindings(GetCurrentBindingSet())
-                end
+         if macroIndex == 0 then
+            C_Timer.After(0.1, function()
+               if GetNumMacros() < MAX_ACCOUNT_MACROS then
+                  CreateMacro(macroIDname, icon, macroText, nil)
+                  if string.find(macroText, "/gremove") then
+                     print("[KMDA]: Macro Created or Updated!")
+                     DEFAULT_CHAT_FRAME:AddMessage("[KMDA]: " .. chatFrameName .. " staged for removal.")
+                     print("[KMDA]: Press " .. keyBind .. " for action on " .. chatFrameName)
+                     UIErrorsFrame:AddMessage(
+                        "|T516767:32:32|t Secure Action Bound\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0, 0.0, 1,
+                        5)
+                  end
+               else
+                  print("|cFF0000FF<|rKMDA|cFF0000FF>|r |cFFC8C800ATTENTION|r - Maximum number of macros reached.|r")
+                  return
+               end
             end)
-        end
-    end)
+         else
+            EditMacro(macroIndex, macroIDname, icon, macroText)
+            if string.find(macroText, "/gremove") then
+               print("[KMDA]: Macro Created or Updated!")
+               DEFAULT_CHAT_FRAME:AddMessage("[KMDA]: " .. chatFrameName .. " staged for removal.")
+               print("[KMDA]: Press " .. keyBind .. " for action on " .. chatFrameName)
+               UIErrorsFrame:AddMessage("|T516767:32:32|t Secure Action Bound\nPress [" .. keyBind .. "] to execute.",
+                  1.0, 1.0, 0.0, 1, 5)
+            end
+         end
 
-    return inactiveInitiates
+         C_Timer.After(0.2, function()
+            if keyBind and keyBind ~= "" and macroIndex > 0 then
+               SetBindingMacro(keyBind, macroIndex)
+               SaveBindings(GetCurrentBindingSet())
+            end
+         end)
+      end
+   end)
+
+   return inactiveMembers
 end
 
-local function CreateInactiveInitiatesFrame(parent)
-    -- Base frame
-    local frame = CreateFrame("Frame", "InactiveInitiatesFrame", parent, "BackdropTemplate")
-    frame:SetSize(420, 300)
-    frame:SetPoint("RIGHT", parent)
-    frame:SetFrameStrata("FULLSCREEN_DIALOG")
-    frame:SetFrameLevel(1)
-    frame:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true,
-        tileSize = 32,
-        edgeSize = 32,
-        insets = { left = 8, right = 8, top = 8, bottom = 8 },
-    })
-    frame:SetBackdropColor(0, 0, 0, 1)
-    frame:SetMovable(true)
-    frame:EnableMouse(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", frame.StartMoving)
-    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+local function CreatePurgeFrame(parent)
+   if purgeFrame then return purgeFrame, purgeScrollChild end
 
-    -- Title
-    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    title:SetPoint("TOP", 0, -10)
-    title:SetText("Offline/Inactive")
+   local frame = CreateFrame("Frame", "KMDAPurgeFrame", parent or UIParent, "BackdropTemplate")
+   frame:SetSize(420, 330)
+   frame:SetPoint("CENTER")
+   frame:SetFrameStrata("FULLSCREEN_DIALOG")
+   frame:SetFrameLevel(1)
+   frame:SetBackdrop({
+      bgFile = "Interface\\Buttons\\WHITE8x8",
+      edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+      tile = true,
+      tileSize = 32,
+      edgeSize = 32,
+      insets = { left = 8, right = 8, top = 8, bottom = 8 },
+   })
+   frame:SetBackdropColor(0, 0, 0, 1)
+   frame:SetMovable(true)
+   frame:EnableMouse(true)
+   frame:RegisterForDrag("LeftButton")
+   frame:SetScript("OnDragStart", frame.StartMoving)
+   frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 
-    -- Close Button
-    local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-    closeButton:SetPoint("TOPRIGHT", -5, -5)
+   local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+   title:SetPoint("TOP", 0, -10)
+   title:SetText("KMDA Purge")
 
-    local headers = {
-        { text = "Name",        width = 150, point = "TOPLEFT", offsetX = 10 },
-        { text = "Rank",        width = 100, point = "TOPLEFT", offsetX = 160 },
-        { text = "Last Online", width = 100, point = "TOPLEFT", offsetX = 270 },
-    }
+   local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+   closeButton:SetPoint("TOPRIGHT", -5, -5)
+   closeButton:SetScript("OnClick", function() frame:Hide() end)
 
-    for _, header in ipairs(headers) do
-        local headerText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        headerText:SetSize(header.width, 20)
-        headerText:SetPoint(header.point, frame, header.point, header.offsetX, -70)
-        headerText:SetText(header.text)
-    end
+   frame.statusText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+   frame.statusText:SetPoint("BOTTOM", 0, 15)
 
-    -- Scroll Frame
-    local scrollFrame = CreateFrame("ScrollFrame", "InactiveInitiatesScrollFrame", frame,
-        "UIPanelScrollFrameTemplate")
-    scrollFrame:SetSize(360, 195)
-    scrollFrame:SetPoint("TOP", 0, -90)
+   local headers = {
+      { text = "Name",        width = 150, point = "TOPLEFT", offsetX = 10 },
+      { text = "Rank",        width = 100, point = "TOPLEFT", offsetX = 160 },
+      { text = "Last Online", width = 100, point = "TOPLEFT", offsetX = 270 },
+   }
 
-    -- Scroll Child
-    local scrollChild = CreateFrame("Frame")
-    scrollFrame:SetScrollChild(scrollChild)
-    scrollChild:SetSize(scrollFrame:GetWidth(), 1)                                     -- Dynamic height based on content
-    local padding = 5                                                                  -- Padding between columns
-    local headerWidth = (scrollFrame:GetWidth() - (#headers - 1) * padding) / #headers -- Dynamic width calc
-    return frame, scrollChild, headerWidth
+   for _, header in ipairs(headers) do
+      local headerText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+      headerText:SetSize(header.width, 20)
+      headerText:SetPoint(header.point, frame, header.point, header.offsetX, -70)
+      headerText:SetText(header.text)
+   end
+
+   local scrollFrame = CreateFrame("ScrollFrame", "KMDAPurgeScrollFrame", frame, "UIPanelScrollFrameTemplate")
+   scrollFrame:SetSize(360, 195)
+   scrollFrame:SetPoint("TOP", 0, -90)
+
+   local scrollChild = CreateFrame("Frame")
+   scrollFrame:SetScrollChild(scrollChild)
+   scrollChild:SetSize(scrollFrame:GetWidth(), 1)
+
+   purgeFrame = frame
+   purgeScrollChild = scrollChild
+   return frame, scrollChild
 end
 
-local function PopulateInactiveInitiates(frame, scrollChild, data)
-    local padding = 5 -- Padding between columns
+local function PopulatePurgeList(frame, scrollChild, data)
+   local kids = { scrollChild:GetChildren() }
+   for _, child in ipairs(kids) do
+      child:Hide()
+      child:SetParent(nil)
+   end
 
-    -- Font metrics for calculating text width
-    local fontString = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+   local regions = { scrollChild:GetRegions() }
+   for _, region in ipairs(regions) do
+      region:Hide()
+      region:SetParent(nil)
+   end
 
-    -- Precompute maximum column widths
-    local maxNameWidth, maxRankWidth, maxLastOnlineWidth = 0, 0, 0
-    for _, entry in ipairs(data) do
-        -- Name width
-        fontString:SetText(entry.name)
-        maxNameWidth = math.max(maxNameWidth, fontString:GetStringWidth())
+   local padding = 5
+   local maxNameWidth = 150
 
-        -- Rank width
-        fontString:SetText(entry.rank)
-        maxRankWidth = math.max(maxRankWidth, fontString:GetStringWidth())
+   local rowHeight = 20
+   for i, entry in ipairs(data) do
+      local yOffset = -(i - 1) * rowHeight
 
-        -- Last Online width
-        fontString:SetText(entry.totalDaysOffline .. " days")
-        maxLastOnlineWidth = math.max(maxLastOnlineWidth, fontString:GetStringWidth() + 10)
-    end
+      local nameButton = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
+      nameButton:SetPoint("TOPLEFT", 0, yOffset)
+      nameButton:SetSize(maxNameWidth, rowHeight)
+      nameButton:GetFontString():SetWordWrap(false)
+      nameButton:SetNormalFontObject("GameFontNormal")
+      nameButton:SetHighlightFontObject("GameFontHighlight")
+      nameButton:SetText(entry.name)
+      nameButton:SetScript("OnClick", function()
+         PlaySound(124172)
+         UIErrorsFrame:AddMessage(
+         "|T516767:32:32:0|t Secure Actions Blocked\nRun Inactive search from Options or press F5", 1.0, 1.0, 0.0, 1,
+            6)
+      end)
 
-    -- Add padding to column widths
-    maxNameWidth = maxNameWidth + padding * 2
-    maxRankWidth = maxRankWidth + padding * 2
-    maxLastOnlineWidth = maxLastOnlineWidth + padding * 2
+      local rankText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      rankText:SetPoint("TOPLEFT", nameButton, "TOPRIGHT", padding, 0)
+      rankText:SetWidth(100)
+      rankText:SetJustifyH("LEFT")
+      rankText:SetText(entry.rank)
 
-    -- Populate rows
-    local rowHeight = 20
-    for i, entry in ipairs(data) do
-        local yOffset = -i * rowHeight
+      local lastOnlineText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      lastOnlineText:SetPoint("TOPLEFT", rankText, "TOPRIGHT", padding, 0)
+      lastOnlineText:SetWidth(100)
+      lastOnlineText:SetJustifyH("LEFT")
+      lastOnlineText:SetText(entry.totalDaysOffline .. " days")
+   end
 
-        -- Name Column as a clickable button
-        local nameButton = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
-        nameButton:SetPoint("TOPLEFT", 0, yOffset)
-        nameButton:SetSize(maxNameWidth, rowHeight)
-        nameButton:GetFontString():SetWordWrap(false)
-        nameButton:SetNormalFontObject("GameFontNormal")
-        nameButton:SetHighlightFontObject("GameFontHighlight")
-        nameButton:SetText(entry.name)
-        nameButton:SetScript("OnClick", function()
-            PlaySound(124172)
-
-            UIErrorsFrame:AddMessage(
-                "|T516767:32:32:0|t Secure Actions Blocked" .. "\n" .. "Run Inactive search from Options or press F5",
-                1.0, 1.0,
-                0.0, 1, 6)
-        end)
-
-        -- Optional: Add additional columns like Rank and Last Online
-        local rankText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        rankText:SetPoint("TOPLEFT", nameButton, "TOPRIGHT", padding, 0)
-        rankText:SetText(entry.rank)
-
-        local lastOnlineText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        lastOnlineText:SetPoint("TOPLEFT", rankText, "TOPRIGHT", padding, 0)
-        lastOnlineText:SetText(entry.totalDaysOffline .. " days")
-    end
-
-    scrollChild:SetHeight(#data * rowHeight)
+   scrollChild:SetHeight(#data * rowHeight)
 end
 
 local function CreateThresholdInputBox(frame, onUpdateCallback)
-    -- Create the input box
-    local inputBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
-    inputBox:SetSize(100, 25)
-    inputBox:SetPoint("TOP", frame, "TOP", 0, -40)
-    inputBox:SetFrameStrata("TOOLTIP")
-    inputBox:SetAutoFocus(false)
+   if frame.thresholdBox then return frame.thresholdBox end
 
-    -- Add a label
-    local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    label:SetPoint("LEFT", inputBox, "LEFT", -80, -3)
-    label:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Search:")
-    label:SetTextColor(.64, 0.33, 0.08, 1)
+   local inputBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
+   inputBox:SetSize(50, 25)
+   inputBox:SetPoint("TOP", frame, "TOP", 0, -40)
+   inputBox:SetFrameStrata("TOOLTIP")
+   inputBox:SetAutoFocus(false)
 
-    -- Set up the callback for when the user presses Enter
-    inputBox:SetScript("OnEnterPressed", function(self)
-        local text = self:GetText()
-        local value = tonumber(text)
-        print("|cFF3c3cA8Threshold updated to|r:", value)
+   local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+   label:SetPoint("RIGHT", inputBox, "LEFT", -10, 0)
+   label:SetText("Search Threshold:")
+   label:SetTextColor(.64, 0.33, 0.08, 1)
 
-        if value and value > 0 then
-            onUpdateCallback(value) -- Call the callback with the new threshold
-        else
-            print("Invalid input. Please enter a positive number.")
-        end
-        frame:Hide()
-        --self:ClearFocus() -- Remove focus after pressing Enter
-    end)
+   inputBox:SetScript("OnEnterPressed", function(self)
+      local text = self:GetText()
+      local value = tonumber(text)
+      print("|cFF3c3cA8Threshold updated to|r:", value)
 
-    inputBox:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(UIParent, "ANCHOR_BOTTOM")
-        GameTooltip:AddLine("Search")
-        GameTooltip:AddDoubleLine(
-            "|cFF00FF00Enter # (1 to 31)|r", "|cFFF0FF00offline|r days\n", 1, 1, 1, 1, 1, 1)
-        GameTooltip:Show()
-    end)
+      if value and value > 0 then
+         onUpdateCallback(value)
+      else
+         print("Invalid input. Please enter a positive number.")
+      end
+      self:ClearFocus()
+   end)
 
-    inputBox:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-
-    return inputBox
+   frame.thresholdBox = inputBox
+   return inputBox
 end
 
-local function closeFrame()
-    if frame and frame:IsShown() then
-        frame:Hide()
-    end
+local function CreateShowAllCheckbox(frame, onUpdateCallback)
+   if frame.showAllCheck then return frame.showAllCheck end
+
+   local check = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
+   check:SetSize(24, 24)
+   check:SetPoint("LEFT", frame.thresholdBox, "RIGHT", 10, 0)
+
+   check.text = check:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+   check.text:SetPoint("LEFT", check, "RIGHT", 0, 1)
+   check.text:SetText("Show All Ranks")
+
+   check:SetScript("OnClick", function(self)
+      onUpdateCallback(self:GetChecked())
+   end)
+
+   frame.showAllCheck = check
+   return check
 end
 
--- Initial call Global so Macro can call it
-function OldGods_ShowInactiveInitiates()
-    local threshold = 20 -- Default threshold
-    local data
-    closeFrame()
-
-    function RefreshFrame(newThreshold)
-        threshold = newThreshold
-        data = GetInactiveInitiates(threshold)
-
-        if #data == 0 then
-            print("No Guild members match " .. threshold .. " days offline.")
-        else
-            print("[OG]: |TInterface\\AddOns\\OldGods\\Textures\\Information.tga:16:16|t |cFF66a8bfFound|r: " ..
-                #data .. " |cFF66a8bfplayers " ..
-                "\n             that are > =|r " .. threshold)
-        end
-
-        frame, scrollChild = CreateInactiveInitiatesFrame()
-        PopulateInactiveInitiates(frame, scrollChild, data)
-        CreateThresholdInputBox(frame, function(newThreshold)
-            RefreshFrame(newThreshold)
-        end)
-    end
-
-    -- Initial population with default threshold
-    RefreshFrame(threshold)
+local function ClosePurgeFrame()
+   if purgeFrame and purgeFrame:IsShown() then
+      purgeFrame:Hide()
+   end
 end
 
---#endregion Inactive players
+function KMDA_Purge()
+   local threshold = 24 -- Default threshold
+   local showAll = false
+   local data
+   ClosePurgeFrame()
+
+   local function RefreshFrame()
+      data = GetInactiveMembers(threshold, showAll)
+
+      if #data == 0 then
+         print("No Guild members match " .. threshold .. " days offline.")
+      else
+         print("[KMDA]: |cFF66a8bfFound|r: " .. #data .. " |cFF66a8bfplayers >=|r " .. threshold .. " days offline.")
+      end
+
+      local frame, scrollChild = CreatePurgeFrame()
+
+      local initiateCount = 0
+      for _, member in ipairs(data) do
+         if member.rank == "Initiate" then
+            initiateCount = initiateCount + 1
+         end
+      end
+
+      if initiateCount == 0 then
+         frame.statusText:SetText("No Initiates to purge")
+         frame.statusText:SetTextColor(0, 1, 0)
+      else
+         frame.statusText:SetText(initiateCount .. " Initiates to purge")
+         frame.statusText:SetTextColor(1, 0, 0)
+      end
+
+      frame:Show()
+      PopulatePurgeList(frame, scrollChild, data)
+      local inputBox = CreateThresholdInputBox(frame, function(newThreshold)
+         threshold = newThreshold
+         RefreshFrame()
+      end)
+      inputBox:SetText(tostring(threshold))
+
+      local checkBox = CreateShowAllCheckbox(frame, function(isChecked)
+         showAll = isChecked
+         RefreshFrame()
+      end)
+      checkBox:SetChecked(showAll)
+   end
+
+   RefreshFrame()
+end
+--#endregion Purge
+
 
 --#region Notes
 local notesFrame -- Store the frame to avoid recreating it
@@ -4420,130 +4342,6 @@ local function KMDA_MemberSearch()
 end
 --#endregion MemberSearch
 
-
---#region create AfkMsgFrame
-local function CreateAfkMsgFrame(parent)
-    AfkMsgFrame = CreateFrame("Frame", "SearchFrame", UIParent, "BackdropTemplate")
-    AfkMsgFrame:SetSize(500, 340)
-    AfkMsgFrame:SetPoint("LEFT", parent)
-    AfkMsgFrame:SetFrameStrata("FULLSCREEN_DIALOG")
-    AfkMsgFrame:SetFrameLevel(1)
-    AfkMsgFrame:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true,
-        tileSize = 32,
-        edgeSize = 32,
-        insets = { left = 8, right = 8, top = 8, bottom = 8 },
-    })
-
-    AfkMsgFrame:SetBackdropColor(0, 0, 0, 1)
-    AfkMsgFrame:EnableMouse(true)
-    AfkMsgFrame:SetMovable(true)
-    AfkMsgFrame:RegisterForDrag("LeftButton")
-    AfkMsgFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    AfkMsgFrame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
-
-    -- Title bar
-    local title = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    title:SetPoint("TOP", 0, -10)
-    title:SetText("Auto AFK/In Combat Message")
-
-    -- Text lable for inputBoxT (triggerword)
-    local inputLabelT = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    inputLabelT:SetPoint("TOPLEFT", 95, -40)
-    inputLabelT:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Set trigger word:")
-    inputLabelT:SetTextColor(0.64, 0.33, 0.08, 1)
-
-    -- Create the input box for TriggerWord
-    local inputBoxT = CreateFrame("EditBox", "TriggerInputBox", AfkMsgFrame, "InputBoxTemplate")
-    inputBoxT:SetSize(200, 30)
-    inputBoxT:SetPoint("LEFT", inputLabelT, "RIGHT", 5, 0)
-    inputBoxT:SetFrameStrata("TOOLTIP")
-    inputBoxT:SetAutoFocus(false)
-
-    -- Text lable for inputBoxR (ReplyPhrase)
-    local inputLabelR = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    inputLabelR:SetPoint("TOPLEFT", 95, -100)
-    inputLabelR:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Auto Reply Text:")
-    inputLabelR:SetTextColor(0.64, 0.33, 0.08, 1)
-
-    -- Create the input box for users Reply
-    local inputBoxR = CreateFrame("EditBox", "TriggerInputBox", AfkMsgFrame, "InputBoxTemplate")
-    inputBoxR:SetSize(200, 200)
-    inputBoxR:SetPoint("LEFT", inputLabelR, "RIGHT", 5, 0)
-    inputBoxR:SetFrameStrata("TOOLTIP")
-    inputBoxR:SetAutoFocus(false)
-
-    -- inputBoxT (trigger) Scripting
-    inputBoxT:SetScript("OnEnterPressed", function(self)
-        local text = self:GetText():lower()
-        if text and text ~= "" then
-            OG_AfkMsg.trigger = text
-            print("[OG]: Trigger Word Saved -> " .. text)
-            local trigtext = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-            trigtext:SetPoint("TOP", 0, -200)
-            trigtext:SetText("Trigger Word: " .. "|cFF00FF00" .. OG_AfkMsg.trigger .. "|r\n")
-        end
-        self:ClearFocus()
-    end)
-
-    -- Tooltip when cursor enters inputBoxT
-    inputBoxT:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(AfkMsgFrame, "ANCHOR_TOP")
-        GameTooltip:AddLine("Auto Message: Trigger Word")
-        GameTooltip:AddDoubleLine(
-            "|cFF00FF00Set a Triggger Word", "|cFFF0FF00Press Enter to save|r\n", 1, 1, 1, 1, 1, 1)
-        GameTooltip:Show()
-    end)
-
-    -- Hide tooltip when cursor leaves inputBoxT
-    inputBoxT:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-
-    -- inputBoxR (user reply) Scripting
-    inputBoxR:SetScript("OnEnterPressed", function(self)
-        local text = self:GetText():lower()
-        if text and text ~= "" then
-            OG_AfkMsg.reply = text
-            print("[OG]: Auto Reply Set -> " .. text)
-            local rplytext = AfkMsgFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-            rplytext:SetPoint("TOP", 0, -225)
-            rplytext:SetText("Auto Reply: " .. "|cFF00FF00" .. OG_AfkMsg.reply .. "|r\n")
-        end
-        self:ClearFocus()
-    end)
-
-    -- Tooltip when cursor enters inputBoxT
-    inputBoxR:SetScript("OnEnter", function()
-        GameTooltip:SetOwner(AfkMsgFrame, "ANCHOR_CURSOR_RIGHT")
-        GameTooltip:AddLine("Auto Message: Reply")
-        GameTooltip:AddDoubleLine(
-            "|cFF00FF00Set Auto Reply when triggered|r", "|cFFF0FF00Press Enter to save|r\n", 1, 1, 1, 1, 1, 1)
-        GameTooltip:Show()
-    end)
-
-    -- Hide tooltip when cursor leaves inputBoxT
-    inputBoxR:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-
-    -- Close button
-    local closeButton = CreateFrame("Button", nil, AfkMsgFrame, "UIPanelCloseButton")
-    closeButton:SetPoint("TOPRIGHT", -5, -5)
-    closeButton:SetScript("OnClick", function()
-        AfkMsgFrame:Hide()
-    end)
-end
-
--- Main function to initiate AfkMsgFrame
-local function OldGods_AutoAfkMsg()
-    CreateAfkMsgFrame()
-    AfkMsgFrame:Show()
-end
---#endregion create AfkMsgFrame
-
 --#region Meta data graph
 local graphScrollFrame, graphContent
 
@@ -5014,13 +4812,123 @@ end
 
 --#endregion Meta data graph =)
 
---#region Fast Options Content Menu
+--#region Fast Options Menu
+local OG_FastOptionsMenu
 
+local function HideFastOptionsMenu()
+    if OG_FastOptionsMenu then
+        UIFrameFadeOut(OG_FastOptionsMenu, 0.3, OG_FastOptionsMenu:GetAlpha(), 0)
+    end
+end
+
+local function CreateFastMenuOption(parent, text, yOffset, onClick)
+    local button = CreateFrame("Button", nil, parent)
+    button:SetSize(parent:GetWidth() - 20, 20)
+    button:SetPoint("TOP", 0, yOffset)
+    button:SetText(text)
+
+    local fontString = button:GetFontString()
+    fontString:SetFontObject("GameFontNormal")
+
+    button:SetScript("OnEnter", function(self)
+        fontString:SetTextColor(0.5, 0.75, 1.0) -- Light Blue
+    end)
+
+    button:SetScript("OnLeave", function(self)
+        fontString:SetTextColor(1, 1, 1) -- White
+    end)
+
+    button:SetScript("OnMouseDown", function(self)
+        fontString:SetTextColor(0.8, 0.6, 1.0) -- Purple
+    end)
+
+    button:SetScript("OnMouseUp", function(self)
+        if self:IsMouseOver() then
+            fontString:SetTextColor(0.5, 0.75, 1.0)
+        else
+            fontString:SetTextColor(1, 1, 1)
+        end
+    end)
+
+    button:SetScript("OnClick", function()
+        onClick()
+        C_Timer.After(0.1, HideFastOptionsMenu)
+    end)
+
+    fontString:SetTextColor(1, 1, 1)
+
+    return button
+end
+
+local function CreateFastOptionsMenu()
+    if OG_FastOptionsMenu then return end
+
+    OG_FastOptionsMenu = CreateFrame("Frame", "OG_FastOptionsMenu", UIParent, "BackdropTemplate")
+    OG_FastOptionsMenu:SetFrameStrata("TOOLTIP")
+    OG_FastOptionsMenu:SetBackdrop({
+        bgFile = "Interface/DialogFrame/UI-DialogBox-Background-Dark",
+        edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    })
+    OG_FastOptionsMenu:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
+    OG_FastOptionsMenu:Hide()
+
+    OG_FastOptionsMenu.title = OG_FastOptionsMenu:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    local font, height, flags = OG_FastOptionsMenu.title:GetFont()
+    OG_FastOptionsMenu.title:SetFont(font, height + 2, flags)
+    OG_FastOptionsMenu.title:SetPoint("TOP", 0, -10)
+    OG_FastOptionsMenu.title:SetText("Fast Options")
+
+    OG_FastOptionsMenu:SetScript("OnLeave", function(self)
+        C_Timer.After(0.2, function()
+            if not self:IsMouseOver() and not GuildChatWindow.optionsButton:IsMouseOver() then
+                HideFastOptionsMenu()
+            end
+        end)
+    end)
+end
+
+local function ShowFastOptionsMenu(anchor)
+    CreateFastOptionsMenu()
+
+    if OG_FastOptionsMenu.options then
+        for _, option in ipairs(OG_FastOptionsMenu.options) do
+            option:Hide()
+        end
+    end
+    OG_FastOptionsMenu.options = {}
+
+    local yOffset = -35
+    local maxWidth = 150
+    for label, data in pairs(OG_Fast_Options) do
+        local option = CreateFastMenuOption(OG_FastOptionsMenu, label, yOffset, data.fastFunction)
+        table.insert(OG_FastOptionsMenu.options, option)
+        yOffset = yOffset - 20
+
+        local textWidth = option:GetFontString():GetStringWidth() + 30
+        if textWidth > maxWidth then
+            maxWidth = textWidth
+        end
+    end
+
+    local menuHeight = math.abs(yOffset) + 15
+    OG_FastOptionsMenu:SetSize(maxWidth, menuHeight)
+
+    for _, option in ipairs(OG_FastOptionsMenu.options) do
+        option:SetSize(maxWidth - 20, 20)
+    end
+
+    OG_FastOptionsMenu:ClearAllPoints()
+    OG_FastOptionsMenu:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", 0, 5)
+    OG_FastOptionsMenu:Raise()
+    UIFrameFadeIn(OG_FastOptionsMenu, 0.3, OG_FastOptionsMenu:GetAlpha(), 1)
+end
+--#endregion
+
+--#region Fast Options Content Menu
 local function toggle_ZoneSpam()
     zoneDataSpam = not zoneDataSpam
-    OG_Fast_Options["Toggle Zone Tracking"].icon = zoneDataSpam
-        and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t"
-        or "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t"
     local statetring = zoneDataSpam and "Zone Data On" or "Zone Data Off"
     print(statetring)
     if zoneDataSpam then
@@ -5038,34 +4946,16 @@ end
 OG_Fast_Options = {
     ["Member Search"] = {
         fastFunction = KMDA_MemberSearch,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\Search.tga:18:18|t ",
     },
-    --[[["Inactive Purge"] = {
-        fastFunction = OldGods_ShowInactiveInitiates,
-        icon = "|TInterface\\AddOns\\OldGods\\Textures\\gremove.tga:18:18|t "
-    },]] -- taking this out as its meant for officers
+    ["Note Pad"] = {
+        fastFunction = CreateNotesFrame,
+    },
     ["Toggle Zone Tracking"] = {
         fastFunction = toggle_ZoneSpam,
-        icon = zoneDataSpam and "|TInterface\\AddOns\\OldGods\\Textures\\toggleOff.tga:18:18|t " or
-            "|TInterface\\AddOns\\OldGods\\Textures\\toggleOn.tga:18:18|t "
     },
 }
-
-for _, button in ipairs(GuildChatWindow.CustomFastOptionsZone) do
-    if button:GetName() == "fastOptionsMenuZone" then
-        button:SetScript("OnEnter", function(self)
-            MenuUtil.CreateContextMenu(UIParent, function(region, fastOptionsMenu)
-                fastOptionsMenu:CreateTitle("Old Gods: Fast Options")
-                for bLable, bData in pairs(OG_Fast_Options) do
-                    fastOptionsMenu:CreateButton(bData.icon .. bLable, bData.fastFunction)
-                end
-            end)
-        end)
-    end
-end
-
-
 --#endregion Fast Options Content Menu
+
 --#endregion Content Frame Guild Functions
 
 --#region Content Frame optionsFrame.contentFrame
@@ -5404,7 +5294,7 @@ end
 
 --#region populate Guild settings
 local function dummyFunction()
-    print("YOU CLICKED A BUTTON")
+    print("More Functions coming in future updates!")
 end
 
 local function PopulateContentFrame_GuildSettings(optionsFrame)
@@ -5413,13 +5303,12 @@ local function PopulateContentFrame_GuildSettings(optionsFrame)
     local contentFrame = optionsFrame.contentFrame
 
     local guildOptions = {
-        { label = "Inactive Initiates", key = OldGods_ShowInactiveInitiates },
+        { label = "Purge Inactive",     key = KMDA_Purge },
         { label = "Member Search",      key = KMDA_MemberSearch },
-        { label = "Meta Data",          key = OldGods_MetaDataGraph },
-        { label = "Automated Busy MSG", key = OldGods_AutoAfkMsg },
-        { label = "x4",                 key = dummyFunction },
-        { label = "x5",                 key = dummyFunction },
-        { label = "x6",                 key = dummyFunction },
+        { label = "Activity Graph",     key = OldGods_MetaDataGraph },
+        { label = "Open Note Pad",      key = CreateNotesFrame },
+        { label = "Button 5 - nil",     key = dummyFunction },
+        { label = "Button 6 - nil",     key = dummyFunction },
     }
 
     for _, option in ipairs(guildOptions) do
@@ -5666,6 +5555,16 @@ for _, button in ipairs(GuildChatWindow.buttons) do
                 end
             end
         end)
+        button:SetScript("OnEnter", function(self)
+            ShowFastOptionsMenu(self)
+        end)
+        button:SetScript("OnLeave", function(self)
+            C_Timer.After(0.2, function()
+                if OG_FastOptionsMenu and not OG_FastOptionsMenu:IsMouseOver() then
+                    HideFastOptionsMenu()
+                end
+            end)
+        end)
     end
 end
 --endregion Init options Frame
@@ -5901,48 +5800,6 @@ OnChatMessageEventFrame:SetScript("OnEvent", function(self, event, ...)
     end
 end)
 --#endregion OnChatMessage ends here
-
---#region Auto Messaging: Event CHAT_MSG_GUILD
-local AfkMsg_lastSentTime = 0
-local AfkMsg_cooldown = 45
-
--- Function that sends the AFK message
-local function sendAutoMsg(sender)
-    local currentTime = GetTime()
-    local normalizedSender = Ambiguate(sender, "None")
-
-    -- Check if the cooldown has ended
-    if currentTime - AfkMsg_lastSentTime < AfkMsg_cooldown then
-        local alertSpamBLOCK = string.format("|cFF00FF00Spam prevented|r: triggered by %s", normalizedSender)
-        print(alertSpamBLOCK)
-        return -- exit if cooldown not ended
-    end
-
-    AfkMsg_lastSentTime = currentTime -- Reset the cooldown
-    -- use saved reply, fallback if missing
-    local reply = (OG_AfkMsg and OG_AfkMsg.reply) or "I'm AFK right now."
-    C_ChatInfo.SendChatMessage(reply, "GUILD")
-end
-
---onTriggerWord called on each CHAT_MSG_GUILD event
-local function onTriggerWord(self, event, message, sender)
-    --[[ Check if the player (me) is AFK or in combat
-    if not UnitIsAFK("player") and not InCombatLockdown() then
-        return --function stops if not afk or in combat
-    end
-    ]]
-
-    -- check against saved trigger word(s)
-    if OG_AfkMsg and OG_AfkMsg.trigger and message:lower():find(OG_AfkMsg.trigger:lower()) then
-        sendAutoMsg(sender)
-    end
-end
-
---event frame
-local AfkMsg_frame = CreateFrame("Frame")
---AfkMsg_frame:RegisterEvent("CHAT_MSG_GUILD")
----AfkMsg_frame:SetScript("OnEvent", onTriggerWord)
---#endregion AUTO MESSAGES ends here
 
 --#region reworked Help Window
 local jokedataFrame

@@ -1,10 +1,10 @@
 ## Interface: 120001
-## Version: 2.5.0a
+## Version: 2.5.1
 ## IconTexture: 514261
 ## Title: |cFF0000FF<|r|cFFFFFFFFOld Gods-Guild Chat|r|cFF0000FF>|r |cFFFFFF00by |cFFC79C6ELazyeyez|r
 ## Notes: Guild Interaction and Communication and much more 
 ## Author: Lazyeyez-Lightbringer
-## SavedVariables: OldGodsDB, OGsavedChat, OldGodsSavedColors, OldGods_UserThemes, OldGods_LastThemeName, OldGods_LastFontName, OldGodsGuildActivity, OG_TrackGuildRoster, OG_EncryptedNotes, OG_AfkMsg, OldGods_BadMailDB, OldGods_AutoReturnEnabled, KMDA_SavedNotes
+## SavedVariables: OldGodsDB, OGsavedChat, OldGodsSavedColors, OldGods_UserThemes, OldGods_LastThemeName, OldGods_LastFontName, OldGodsGuildActivity, OG_TrackGuildRoster, OG_EncryptedNotes, OldGods_BadMailDB, OldGods_AutoReturnEnabled, KMDA_SavedNotes
 
 OldGods.lua
 core/Emoji.lua

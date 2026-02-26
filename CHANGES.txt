@@ -1,3 +1,9 @@
+### OldGods-2.5.1
+
+Reworked fast options menu, changed it from hovering region to hover the options button
+fades in and out smoothly - Purge function updated - Notes added to Guild Options and Fast Options
+menu.
+
 ### OldGods-2.5.0a
 
 Massive overhaul of the Member Search, removed modmenu hooks amd had to remove icons
