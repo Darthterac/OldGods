@@ -4818,6 +4818,11 @@ local OG_FastOptionsMenu
 local function HideFastOptionsMenu()
     if OG_FastOptionsMenu then
         UIFrameFadeOut(OG_FastOptionsMenu, 0.3, OG_FastOptionsMenu:GetAlpha(), 0)
+        if OG_FastOptionsMenu.fadeInfo then
+            OG_FastOptionsMenu.fadeInfo.finishedFunc = function()
+                OG_FastOptionsMenu:Hide()
+            end
+        end
     end
 end
 
