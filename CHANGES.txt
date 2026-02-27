@@ -1,7 +1,7 @@
-### OldGods-2.5.1
+### OldGods-2.5.2
 
-emergency path, name conflict with blizzards main menu Options button UPDATE IMMEDIATELY
-
+im a noob it was click thru not name collision -  had hovered the option button and the 
+fade out did not had  a f:Hide() after fade out ended lol shut up =)
 
 ### OldGods-2.5.1
 

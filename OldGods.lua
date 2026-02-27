@@ -1,7 +1,7 @@
---OGGC v2.5.1b
-local KMDAver = "2.5.1b"
+--OGGC v2.5.2
+local KMDAver = "2.5.2"
 
---[[ Emergency patch - Accidently had the optionsButton Name Conflict with blizzard Menu Options button ]]
+--[[ im a noob it was click thru not name collision -  hand hovered the option button and the fade out did not had  a f:Hide() after fade out ended lol shut up =) ]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
