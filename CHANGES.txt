@@ -1,3 +1,19 @@
+### OldGods-2.5.3
+
+     * Added XORCipher encryptions option to Notes! 
+     * Reworked the Player Management Frame to deal with depriciated API 
+       ( regarding setting public and officer notes )
+       Public note is now just a fontstring of the public note
+       To include users who are not officers I removed the officer note function
+       and added "Open Notes" which will open the note with players name and realm
+       as the note title so everyone can now keep a large note per player, or anything
+       really in game. (I have plans to make this like a nice text editor - in time)
+     * Member Search updates include new calculated Offline times showing Year Month Day Hour 
+       now no more rolling over at 30 days ;o 
+       changed the notification to a nice grey blue "Logged Recently!" when searching for 
+       members who have been offline less then 1 hour 
+
+
 ### OldGods-2.5.2
 
 im a noob it was click thru not name collision -  had hovered the option button and the 

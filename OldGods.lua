@@ -1,7 +1,19 @@
---OGGC v2.5.2
-local KMDAver = "2.5.2"
+--OGGC v2.5.3
+local KMDAver = "2.5.3"
 
---[[ im a noob it was click thru not name collision -  hand hovered the option button and the fade out did not had  a f:Hide() after fade out ended lol shut up =) ]]
+--[[ * Added XORCipher encryptions option to Notes! 
+     * Reworked the Player Management Frame to deal with depriciated API 
+       ( regarding setting public and officer notes )
+       Public note is now just a fontstring of the public note
+       To include users who are not officers I removed the officer note function
+       and added "Open Notes" which will open the note with players name and realm
+       as the note title so everyone can now keep a large note per player, or anything
+       really in game. (I have plans to make this like a nice text editor - in time)
+     * Member Search updates include new calculated Offline times showing Year Month Day Hour 
+       now no more rolling over at 30 days ;o 
+       changed the notification to a nice grey blue "Logged Recently!" when searching for 
+       members who have been offline less then 1 hour 
+]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -1007,191 +1019,191 @@ OG_Fonts = {
 --#region Jokes Quotes Guild Tables - Accents
 
 local tableAccents = {
-   ["À"] = "A",
-   ["Á"] = "A",
-   ["Â"] = "A",
-   ["Ã"] = "A",
-   ["Ä"] = "A",
-   ["Å"] = "A",
-   ["Æ"] = "AE",
-   ["Ç"] = "C",
-   ["È"] = "E",
-   ["É"] = "E",
-   ["Ê"] = "E",
-   ["Ë"] = "E",
-   ["Ì"] = "I",
-   ["Í"] = "I",
-   ["Î"] = "I",
-   ["Ï"] = "I",
-   ["Ð"] = "D",
-   ["Ñ"] = "N",
-   ["Ò"] = "O",
-   ["Ó"] = "O",
-   ["Ô"] = "O",
-   ["Õ"] = "O",
-   ["Ö"] = "O",
-   ["Ø"] = "O",
-   ["Ù"] = "U",
-   ["Ú"] = "U",
-   ["Û"] = "U",
-   ["Ü"] = "U",
-   ["Ý"] = "Y",
-   ["Þ"] = "P",
-   ["ß"] = "ss",
-   ["à"] = "a",
-   ["á"] = "a",
-   ["â"] = "a",
-   ["ã"] = "a",
-   ["ä"] = "a",
-   ["å"] = "a",
-   ["æ"] = "ae",
-   ["ç"] = "c",
-   ["è"] = "e",
-   ["é"] = "e",
-   ["ê"] = "e",
-   ["ë"] = "e",
-   ["ì"] = "i",
-   ["í"] = "i",
-   ["î"] = "i",
-   ["ï"] = "i",
-   ["ð"] = "d",
-   ["ñ"] = "n",
-   ["ò"] = "o",
-   ["ó"] = "o",
-   ["ô"] = "o",
-   ["õ"] = "o",
-   ["ö"] = "o",
-   ["ø"] = "o",
-   ["ù"] = "u",
-   ["ú"] = "u",
-   ["û"] = "u",
-   ["ü"] = "u",
-   ["ý"] = "y",
-   ["þ"] = "p",
-   ["ÿ"] = "y",
-   ["Ā"] = "A",
-   ["Ă"] = "A",
-   ["Ą"] = "A",
-   ["Ć"] = "C",
-   ["Ĉ"] = "C",
-   ["Ċ"] = "C",
-   ["Č"] = "C",
-   ["Ď"] = "D",
-   ["Đ"] = "D",
-   ["Ē"] = "E",
-   ["Ĕ"] = "E",
-   ["Ė"] = "E",
-   ["Ę"] = "E",
-   ["Ě"] = "E",
-   ["Ĝ"] = "G",
-   ["Ğ"] = "G",
-   ["Ġ"] = "G",
-   ["Ģ"] = "G",
-   ["Ĥ"] = "H",
-   ["Ħ"] = "H",
-   ["Ĩ"] = "I",
-   ["Ī"] = "I",
-   ["Ĭ"] = "I",
-   ["Į"] = "I",
-   ["İ"] = "I",
-   ["Ĳ"] = "IJ",
-   ["Ĵ"] = "J",
-   ["Ķ"] = "K",
-   ["Ĺ"] = "L",
-   ["Ļ"] = "L",
-   ["Ľ"] = "L",
-   ["Ŀ"] = "L",
-   ["Ł"] = "L",
-   ["Ń"] = "N",
-   ["Ņ"] = "N",
-   ["Ň"] = "N",
-   ["Ŋ"] = "N",
-   ["Ō"] = "O",
-   ["Ŏ"] = "O",
-   ["Ő"] = "O",
-   ["Ŕ"] = "R",
-   ["Ŗ"] = "R",
-   ["Ř"] = "R",
-   ["Ś"] = "S",
-   ["Ŝ"] = "S",
-   ["Ş"] = "S",
-   ["Š"] = "S",
-   ["Ţ"] = "T",
-   ["Ť"] = "T",
-   ["Ŧ"] = "T",
-   ["Ũ"] = "U",
-   ["Ū"] = "U",
-   ["Ŭ"] = "U",
-   ["Ů"] = "U",
-   ["Ű"] = "U",
-   ["Ų"] = "U",
-   ["Ŵ"] = "W",
-   ["Ŷ"] = "Y",
-   ["Ÿ"] = "Y",
-   ["Ź"] = "Z",
-   ["Ż"] = "Z",
-   ["Ž"] = "Z",
-   ["ā"] = "a",
-   ["ă"] = "a",
-   ["ą"] = "a",
-   ["ć"] = "c",
-   ["ĉ"] = "c",
-   ["ċ"] = "c",
-   ["č"] = "c",
-   ["ď"] = "d",
-   ["đ"] = "d",
-   ["ē"] = "e",
-   ["ĕ"] = "e",
-   ["ė"] = "e",
-   ["ę"] = "e",
-   ["ě"] = "e",
-   ["ĝ"] = "g",
-   ["ğ"] = "g",
-   ["ġ"] = "g",
-   ["ģ"] = "g",
-   ["ĥ"] = "h",
-   ["ħ"] = "h",
-   ["ĩ"] = "i",
-   ["ī"] = "i",
-   ["ĭ"] = "i",
-   ["į"] = "i",
-   ["ı"] = "i",
-   ["ĳ"] = "ij",
-   ["ĵ"] = "j",
-   ["ķ"] = "k",
-   ["ĺ"] = "l",
-   ["ļ"] = "l",
-   ["ľ"] = "l",
-   ["ŀ"] = "l",
-   ["ł"] = "l",
-   ["ń"] = "n",
-   ["ņ"] = "n",
-   ["ň"] = "n",
-   ["ŋ"] = "n",
-   ["ō"] = "o",
-   ["ŏ"] = "o",
-   ["ő"] = "o",
-   ["ŕ"] = "r",
-   ["ŗ"] = "r",
-   ["ř"] = "r",
-   ["ś"] = "s",
-   ["ŝ"] = "s",
-   ["ş"] = "s",
-   ["š"] = "s",
-   ["ţ"] = "t",
-   ["ť"] = "t",
-   ["ŧ"] = "t",
-   ["ũ"] = "u",
-   ["ū"] = "u",
-   ["ŭ"] = "u",
-   ["ů"] = "u",
-   ["ű"] = "u",
-   ["ų"] = "u",
-   ["ŵ"] = "w",
-   ["ŷ"] = "y",
-   ["ź"] = "z",
-   ["ż"] = "z",
-   ["ž"] = "z",
+    ["À"] = "A",
+    ["Á"] = "A",
+    ["Â"] = "A",
+    ["Ã"] = "A",
+    ["Ä"] = "A",
+    ["Å"] = "A",
+    ["Æ"] = "AE",
+    ["Ç"] = "C",
+    ["È"] = "E",
+    ["É"] = "E",
+    ["Ê"] = "E",
+    ["Ë"] = "E",
+    ["Ì"] = "I",
+    ["Í"] = "I",
+    ["Î"] = "I",
+    ["Ï"] = "I",
+    ["Ð"] = "D",
+    ["Ñ"] = "N",
+    ["Ò"] = "O",
+    ["Ó"] = "O",
+    ["Ô"] = "O",
+    ["Õ"] = "O",
+    ["Ö"] = "O",
+    ["Ø"] = "O",
+    ["Ù"] = "U",
+    ["Ú"] = "U",
+    ["Û"] = "U",
+    ["Ü"] = "U",
+    ["Ý"] = "Y",
+    ["Þ"] = "P",
+    ["ß"] = "ss",
+    ["à"] = "a",
+    ["á"] = "a",
+    ["â"] = "a",
+    ["ã"] = "a",
+    ["ä"] = "a",
+    ["å"] = "a",
+    ["æ"] = "ae",
+    ["ç"] = "c",
+    ["è"] = "e",
+    ["é"] = "e",
+    ["ê"] = "e",
+    ["ë"] = "e",
+    ["ì"] = "i",
+    ["í"] = "i",
+    ["î"] = "i",
+    ["ï"] = "i",
+    ["ð"] = "d",
+    ["ñ"] = "n",
+    ["ò"] = "o",
+    ["ó"] = "o",
+    ["ô"] = "o",
+    ["õ"] = "o",
+    ["ö"] = "o",
+    ["ø"] = "o",
+    ["ù"] = "u",
+    ["ú"] = "u",
+    ["û"] = "u",
+    ["ü"] = "u",
+    ["ý"] = "y",
+    ["þ"] = "p",
+    ["ÿ"] = "y",
+    ["Ā"] = "A",
+    ["Ă"] = "A",
+    ["Ą"] = "A",
+    ["Ć"] = "C",
+    ["Ĉ"] = "C",
+    ["Ċ"] = "C",
+    ["Č"] = "C",
+    ["Ď"] = "D",
+    ["Đ"] = "D",
+    ["Ē"] = "E",
+    ["Ĕ"] = "E",
+    ["Ė"] = "E",
+    ["Ę"] = "E",
+    ["Ě"] = "E",
+    ["Ĝ"] = "G",
+    ["Ğ"] = "G",
+    ["Ġ"] = "G",
+    ["Ģ"] = "G",
+    ["Ĥ"] = "H",
+    ["Ħ"] = "H",
+    ["Ĩ"] = "I",
+    ["Ī"] = "I",
+    ["Ĭ"] = "I",
+    ["Į"] = "I",
+    ["İ"] = "I",
+    ["Ĳ"] = "IJ",
+    ["Ĵ"] = "J",
+    ["Ķ"] = "K",
+    ["Ĺ"] = "L",
+    ["Ļ"] = "L",
+    ["Ľ"] = "L",
+    ["Ŀ"] = "L",
+    ["Ł"] = "L",
+    ["Ń"] = "N",
+    ["Ņ"] = "N",
+    ["Ň"] = "N",
+    ["Ŋ"] = "N",
+    ["Ō"] = "O",
+    ["Ŏ"] = "O",
+    ["Ő"] = "O",
+    ["Ŕ"] = "R",
+    ["Ŗ"] = "R",
+    ["Ř"] = "R",
+    ["Ś"] = "S",
+    ["Ŝ"] = "S",
+    ["Ş"] = "S",
+    ["Š"] = "S",
+    ["Ţ"] = "T",
+    ["Ť"] = "T",
+    ["Ŧ"] = "T",
+    ["Ũ"] = "U",
+    ["Ū"] = "U",
+    ["Ŭ"] = "U",
+    ["Ů"] = "U",
+    ["Ű"] = "U",
+    ["Ų"] = "U",
+    ["Ŵ"] = "W",
+    ["Ŷ"] = "Y",
+    ["Ÿ"] = "Y",
+    ["Ź"] = "Z",
+    ["Ż"] = "Z",
+    ["Ž"] = "Z",
+    ["ā"] = "a",
+    ["ă"] = "a",
+    ["ą"] = "a",
+    ["ć"] = "c",
+    ["ĉ"] = "c",
+    ["ċ"] = "c",
+    ["č"] = "c",
+    ["ď"] = "d",
+    ["đ"] = "d",
+    ["ē"] = "e",
+    ["ĕ"] = "e",
+    ["ė"] = "e",
+    ["ę"] = "e",
+    ["ě"] = "e",
+    ["ĝ"] = "g",
+    ["ğ"] = "g",
+    ["ġ"] = "g",
+    ["ģ"] = "g",
+    ["ĥ"] = "h",
+    ["ħ"] = "h",
+    ["ĩ"] = "i",
+    ["ī"] = "i",
+    ["ĭ"] = "i",
+    ["į"] = "i",
+    ["ı"] = "i",
+    ["ĳ"] = "ij",
+    ["ĵ"] = "j",
+    ["ķ"] = "k",
+    ["ĺ"] = "l",
+    ["ļ"] = "l",
+    ["ľ"] = "l",
+    ["ŀ"] = "l",
+    ["ł"] = "l",
+    ["ń"] = "n",
+    ["ņ"] = "n",
+    ["ň"] = "n",
+    ["ŋ"] = "n",
+    ["ō"] = "o",
+    ["ŏ"] = "o",
+    ["ő"] = "o",
+    ["ŕ"] = "r",
+    ["ŗ"] = "r",
+    ["ř"] = "r",
+    ["ś"] = "s",
+    ["ŝ"] = "s",
+    ["ş"] = "s",
+    ["š"] = "s",
+    ["ţ"] = "t",
+    ["ť"] = "t",
+    ["ŧ"] = "t",
+    ["ũ"] = "u",
+    ["ū"] = "u",
+    ["ŭ"] = "u",
+    ["ů"] = "u",
+    ["ű"] = "u",
+    ["ų"] = "u",
+    ["ŵ"] = "w",
+    ["ŷ"] = "y",
+    ["ź"] = "z",
+    ["ż"] = "z",
+    ["ž"] = "z",
 }
 
 local JokeData = { "Why cant you trust an atom? Because they make up literally everything.",
@@ -1444,6 +1456,57 @@ local function sendRandomJokeToGuild()
         print(string.format("Line %d from JokeData table was sent.", lineNumber))
     else
         print("Error: No line found.")
+    end
+end
+
+-- Function to send a random line from QuoteData table
+local function sendRandQuote()
+    local maxIndex = #QuoteData
+    if maxIndex == 0 then
+        print("Error: No quotes available.")
+        return
+    end
+
+    local qlineNumber = math.random(1, maxIndex)
+    local qline = QuoteData[qlineNumber]
+    if qline then
+        C_ChatInfo.SendChatMessage(qline, "GUILD")
+        print(string.format("Line %d from QuoteData table", qlineNumber))
+    else
+        print("Error: No line found.")
+    end
+end
+
+-- Function to send specific line number from JokeData table
+local function sendSpecificLineToGuild(lineNumber)
+    local line = JokeData[lineNumber]
+    if line then
+        C_ChatInfo.SendChatMessage(line, "GUILD")
+        print(string.format("Line %d from JokeData table was sent.", lineNumber))
+    else
+        print("Invalid line number.")
+    end
+end
+
+-- Function to send specific line number from QuoteData table
+local function sendSpecificQuoteLineToGuild(qlineNumber)
+    local qline = QuoteData[qlineNumber]
+    if qline then
+        C_ChatInfo.SendChatMessage(qline, "GUILD")
+        print(string.format("Line %d from QuoteData table was sent.", qlineNumber))
+    else
+        print("Invalid line number.")
+    end
+end
+
+-- Function to send specific line number from GuildData table
+local function sendSpecificOGLineToGuild(glineNumber)
+    local gline = GuildData[glineNumber]
+    if gline then
+        C_ChatInfo.SendChatMessage(gline, "GUILD")
+        print(string.format("Line %d from GuildData table was sent.", glineNumber))
+    else
+        print("Invalid line number.")
     end
 end
 
@@ -2363,7 +2426,7 @@ local function CreateGuildChatWindow(title)
     KMDA_optionsButton:SetHighlightFontObject("GameFontHighlight")
     KMDA_optionsButton:EnableMouse(true)
     KMDA_optionsButton:SetPushedTexture(5926319)
- 
+
     GuildChatWindow.KMDA_optionsButton = KMDA_optionsButton
     GuildChatWindow.buttons = { copyButton, SaveClearButton, KMDA_optionsButton, toggleButton }
 
@@ -2585,7 +2648,6 @@ local function CacheGuildRoster()
     isUpdatingRoster = false
 end
 
-
 local function CheckGuildRosterChanges()
     if not OG_TrackGuildRoster then
         CacheGuildRoster()
@@ -2654,230 +2716,12 @@ local function CheckGuildRosterChanges()
     C_Timer.After(10.1, CacheGuildRoster)
 end
 
--- ***WARNING*** CALLING THIS FUNCTION CAUSES GAME CRASHES - USE WITH CAUTION BE SURE RANK IS OFFICER OR ABOVE
--- IM LEAVING IT HERE BECAUSE IT CAN BE USEFUL TO FILL IN THE NOTES FOR MISSING GUILD MEMBERS BUT ITS DANGEROUS
-local function PopulateEmptyGuildNotes()
-    for i = 1, GetNumGuildMembers() do
-        local name, _, _, _, _, _, playerNote, officerNote = GetGuildRosterInfo(i)
-        if name then
-            local shortName = Ambiguate(name, "guild")
-            -- Update player note if empty
-            if playerNote == "" or not playerNote then
-                GuildRosterSetPublicNote(i, shortName .. " - main")
-            end
-            -- Update officer note if empty
-            if officerNote == "" or not officerNote then
-                local currentDate = "Joined: " .. tostring(date("%m/%d/%y"))
-                GuildRosterSetOfficerNote(i, currentDate)
-            end
-        end
-    end
-end
-
-
 rosterChanges:SetScript("OnEvent", function(self, event)
     if event == "GUILD_ROSTER_UPDATE" then
         CheckGuildRosterChanges()
-        --[[ --*WARNING* Dont forget to comment this out after use known to crash game
-        PopulateEmptyGuildNotes()
-        ]]
     end
 end)
 --#endregion Cache Roster Track Changes
-
---#region Encryption By ChatGPT https://openai.com/index/introducing-chatgpt-pro/
-local userKey = nil       -- Temporary encryption key (deleted on close)
-local currentPlayer = nil -- Tracks which player’s note is open
-
--- XOR Encryption Function
-local function XORCipher(input, key)
-    local result = {}
-    for i = 1, #input do
-        local byte = input:byte(i)
-        local keyByte = key:byte(((i - 1) % #key) + 1) -- Cycle through key bytes
-        table.insert(result, string.char(bit.bxor(byte, keyByte)))
-    end
-    return table.concat(result)
-end
-
--- Prompt User for Encryption Key
-local function PromptUserForKey(callback)
-    local KeyFrame = CreateFrame("Frame", "OG_EncryptionFrame", UIParent, "BackdropTemplate")
-    KeyFrame:SetSize(250, 80)
-    KeyFrame:SetPoint("CENTER")
-    KeyFrame:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background" })
-
-    local KeyInput = CreateFrame("EditBox", "OG_KeyInput", KeyFrame, "InputBoxTemplate")
-    KeyInput:SetSize(200, 30)
-    KeyInput:SetPoint("TOP", KeyFrame, "TOP", 0, -10)
-    KeyInput:SetAutoFocus(false)
-
-    local SetKeyButton = CreateFrame("Button", "OG_SetKeyButton", KeyFrame, "UIPanelButtonTemplate")
-    SetKeyButton:SetSize(80, 25)
-    SetKeyButton:SetPoint("BOTTOM", KeyFrame, "BOTTOM", 0, 10)
-    SetKeyButton:SetText("Set Key")
-
-    SetKeyButton:SetScript("OnClick", function()
-        local key = KeyInput:GetText()
-        if key and #key >= 6 then
-            userKey = key
-            print("|cFF00FF00[OldGods]|r Encryption Key Set!")
-            KeyFrame:Hide()
-
-            -- Run the callback function after the key is set
-            if callback then
-                callback()
-            end
-        else
-            print("|cFFFF0000[OldGods]|r Key must be at least 6 characters.")
-        end
-    end)
-
-    KeyFrame:Show() -- Make sure it's actually visible!
-end
-
--- Save Encrypted Note
-local function SaveEncryptedNote()
-    if not userKey then
-        print(CreateAtlasMarkup("Ping_Chat_Warning", 18, 18),
-            "Create a password to continue\n This is not saved and if lost or forgotten\n you will not be able to access or edit this note.\n Write it down, you can use the same password for many notes.")
-        PromptUserForKey(function()
-            SaveEncryptedNote() -- Retry saving after key is set
-        end)
-        return
-    end
-    if not currentPlayer then
-        print("|cFFFF0000[OldGods]|r No player selected!")
-        return
-    end
-
-    local note = EncryptedPlayerNotpad.editBox:GetText()
-    if note and note ~= "" then
-        OG_EncryptedNotes[currentPlayer] = XORCipher(note, userKey)
-        print(CreateAtlasMarkup("UI-CharacterCreate-PadLock", 19, 28),
-            "Note " .. currentPlayer .. " has been encrypted and saved")
-    else
-        print("|cFFFF0000[OldGods]|r Cannot save an empty note!")
-    end
-end
-
--- Load and Decrypt Note
-local function LoadDecryptedNote()
-    if not currentPlayer then
-        print("|cFFFF0000[OldGods]|r No player selected!")
-        return ""
-    end
-
-    local encryptedNote = OG_EncryptedNotes[currentPlayer]
-    if not encryptedNote then
-        print("|cFFFF0000[OldGods]|r No note found for " .. currentPlayer)
-        return ""
-    end
-
-    -- If userKey is missing, prompt for it first
-    if not userKey then
-        print(CreateAtlasMarkup("Ping_Chat_Warning", 18, 18),
-            "Create a password to continue\n This is not saved and if lost or forgotten\n you will not be able to access or edit this note.\n Write it down, you can use the same password for many notes.")
-        PromptUserForKey(function()
-            -- Once key is entered, retry loading the note
-            EncryptedPlayerNotpad.editBox:SetText(LoadDecryptedNote())
-        end)
-        return ""
-    end
-
-    -- Decrypt the note
-    return XORCipher(encryptedNote, userKey)
-end
-
--- Create Encrypted Notepad UI
-local function CreateEncryptedPlayerNotepad()
-    local frame = CreateFrame("Frame", "EncryptedPlayerNotpad", UIParent, "BasicFrameTemplateWithInset")
-    frame:SetSize(430, 300)
-    frame:SetPoint("LEFT", UIParent, "LEFT", 0, 200)
-    frame:SetMovable(true)
-    frame:EnableMouse(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", frame.StartMoving)
-    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-
-    -- Title
-    frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-    frame.title:SetPoint("TOP", frame, "TOP", 0, -5)
-    frame.title:SetText("Encrypted Notepad")
-
-    -- Scrollable Edit Box
-    local scrollFrame = CreateFrame("ScrollFrame", nil, frame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetSize(365, 210)
-    scrollFrame:SetPoint("TOP", frame, "TOP", 0, -30)
-
-    local editBox = CreateFrame("EditBox", nil, scrollFrame)
-    editBox:SetMultiLine(true)
-    editBox:SetFontObject(GameFontHighlightLarge)
-    editBox:SetTextInsets(1, 1, 1, 1)
-    editBox:SetWidth(360)
-    editBox:SetHeight(205)
-    editBox:SetAutoFocus(true)
-    scrollFrame:SetScrollChild(editBox)
-
-    -- Save Note Button
-    local saveButton = CreateFrame("Button", nil, frame, "GameMenuButtonTemplate")
-    saveButton:SetSize(120, 30)
-    saveButton:SetPoint("BOTTOM", frame, "BOTTOM", 0, 10)
-    saveButton:SetText("Save Note")
-    saveButton:SetScript("OnClick", SaveEncryptedNote)
-
-    -- Close Button
-    local closeButton = CreateFrame("Button", nil, frame, "GameMenuButtonTemplate")
-    closeButton:SetSize(120, 30)
-    closeButton:SetPoint("BOTTOMRIGHT", frame, "BOTTOM", 205, 10)
-    closeButton:SetText("Close")
-    closeButton:SetScript("OnClick", function()
-        frame:Hide()
-        userKey = nil -- Clear key on close for security
-        EncryptedPlayerNotpad.editBox:SetText("")
-        print("|cFFFF0000[OldGods]|r Encryption key removed from memory.")
-    end)
-
-    frame.editBox = editBox
-    return frame
-end
-
--- Open Encrypted Notepad for a Player
-local function OpenEncryptedNotepad(playerName)
-    if not EncryptedPlayerNotpad then
-        EncryptedPlayerNotpad = CreateEncryptedPlayerNotepad()
-    end
-
-    currentPlayer = playerName
-    EncryptedPlayerNotpad.title:SetText("Note: " .. playerName)
-
-    -- Ensure key is set before attempting to decrypt
-    if not userKey then
-        print(CreateAtlasMarkup("Ping_Chat_Warning", 18, 18),
-            "Enter the password for this note.\nPasswords are not saved, you will not be able to access or edit this note without it.\n Write the password down, you can use the same password for different notes, the password is used as the encryption key.")
-        PromptUserForKey(function()
-            -- Retry loading note after key is set
-            EncryptedPlayerNotpad.editBox:SetText(LoadDecryptedNote())
-        end)
-    else
-        -- If key is already set, load note immediately
-        EncryptedPlayerNotpad.editBox:SetText(LoadDecryptedNote())
-    end
-
-    EncryptedPlayerNotpad:Show()
-end
-
--- Slash Command to Open Notepad (This is undocumented but functional I still have more to do be its a known function)
-SLASH_OGNOTE1 = "/ognote"
-SlashCmdList["OGNOTE"] = function(msg)
-    local playerName = msg:match("^(%S+)")
-    if playerName then
-        OpenEncryptedNotepad(playerName)
-    else
-        print("|cFFFF0000[OldGods]|r Usage: /ognote <playerName>")
-    end
-end
---#endregion
 
 --#region Grief Mail
 local gMailframe = CreateFrame("Frame", "OldGodsMailFrame", UIParent, "BasicFrameTemplateWithInset")
@@ -3145,8 +2989,6 @@ gMailframe:SetScript("OnEvent", function(self, event, ...)
 end)
 --#endregion Grief Mail
 
---#region Options UI and Funtions
-
 --#region Content Frame Guild Functions
 
 
@@ -3155,462 +2997,611 @@ local purgeFrame, purgeScrollChild
 local inactiveMembers = {}
 
 local function GetInactiveMembers(threshold, showAllRanks)
-   if type(inactiveMembers) == "table" and #inactiveMembers > 0 then
-      wipe(inactiveMembers)
-   end
+    if type(inactiveMembers) == "table" and #inactiveMembers > 0 then
+        wipe(inactiveMembers)
+    end
 
-   local numGuildMembers = GetNumGuildMembers()
-   for i = 1, numGuildMembers do
-      local fullName, rankName, rankIndex = GetGuildRosterInfo(i)
+    local numGuildMembers = GetNumGuildMembers()
+    for i = 1, numGuildMembers do
+        local fullName, rankName, rankIndex = GetGuildRosterInfo(i)
 
-      if showAllRanks or rankName == "Initiate" then
-         local _, _, days = GetGuildRosterLastOnline(i)
-         days = days or 0
-         local macroa, macrob
+        if showAllRanks or rankName == "Initiate" then
+            local _, _, days = GetGuildRosterLastOnline(i)
+            days = days or 0
+            local macroa, macrob
 
-         local displayName = Ambiguate(fullName, "short")
-         local hyperlinkName = "|Hplayer:" ..
-             fullName .. "|h|r|cFFFFFFFF[|r|cFFF0F000" .. displayName .. "|r|cFFFFFFFF]|r|h"
+            local displayName = Ambiguate(fullName, "short")
+            local hyperlinkName = "|Hplayer:" ..
+                fullName .. "|h|r|cFFFFFFFF[|r|cFFF0F000" .. displayName .. "|r|cFFFFFFFF]|r|h"
 
-         macroa = "/clap"
-         macrob = "\n/run C_Timer.After(0.1, function() print(\"No actions to preform\") end)"
+            macroa = "/clap"
+            macrob = "\n/run C_Timer.After(0.1, function() print(\"No actions to preform\") end)"
 
-         if rankName == "Initiate" and days >= threshold then
-            macroa = "/gremove"
-            macrob = "\n/run C_Timer.After(0.1, KMDA_Purge)"
-         end
+            if rankName == "Initiate" and days >= threshold then
+                macroa = "/gremove"
+                macrob = "\n/run C_Timer.After(0.1, KMDA_Purge)"
+            end
 
-         if days >= threshold and days ~= 0 then
-            table.insert(inactiveMembers, {
-               name = displayName,
-               fullName = fullName,
-               hyperlinkName = hyperlinkName,
-               rank = rankName,
-               rankId = rankIndex,
-               macro = macroa,
-               macro_n = macrob,
-               totalDaysOffline = days,
-            })
-         end
-      end
-   end
+            if days >= threshold and days ~= 0 then
+                table.insert(inactiveMembers, {
+                    name = displayName,
+                    fullName = fullName,
+                    hyperlinkName = hyperlinkName,
+                    rank = rankName,
+                    rankId = rankIndex,
+                    macro = macroa,
+                    macro_n = macrob,
+                    totalDaysOffline = days,
+                })
+            end
+        end
+    end
 
-   table.sort(inactiveMembers, function(a, b)
-      if a.rankId ~= b.rankId then
-         return a.rankId > b.rankId
-      end
-      if a.totalDaysOffline ~= b.totalDaysOffline then
-         return a.totalDaysOffline < b.totalDaysOffline
-      end
-      return a.name < b.name
-   end)
+    table.sort(inactiveMembers, function(a, b)
+        if a.rankId ~= b.rankId then
+            return a.rankId > b.rankId
+        end
+        if a.totalDaysOffline ~= b.totalDaysOffline then
+            return a.totalDaysOffline < b.totalDaysOffline
+        end
+        return a.name < b.name
+    end)
 
-   C_Timer.After(0.1, function()
-      if #inactiveMembers > 0 then
-         local macro_Data = table.remove(inactiveMembers, 1)
-         local TEMP_STRING = macro_Data.macro .. " " .. macro_Data.fullName .. macro_Data.macro_n
-         local chatFrameName = macro_Data.hyperlinkName
+    C_Timer.After(0.1, function()
+        if #inactiveMembers > 0 then
+            local macro_Data = table.remove(inactiveMembers, 1)
+            local TEMP_STRING = macro_Data.macro .. " " .. macro_Data.fullName .. macro_Data.macro_n
+            local chatFrameName = macro_Data.hyperlinkName
 
-         local macroIDname = "A_KMDA_Tool"
-         local icon = 134238
-         local macroText = TEMP_STRING
-         local keyBind = "F5"
-         local macroIndex = GetMacroIndexByName(macroIDname)
+            local macroIDname = "A_KMDA_Tool"
+            local icon = 134238
+            local macroText = TEMP_STRING
+            local keyBind = "F5"
+            local macroIndex = GetMacroIndexByName(macroIDname)
 
-         if macroIndex == 0 then
-            C_Timer.After(0.1, function()
-               if GetNumMacros() < MAX_ACCOUNT_MACROS then
-                  CreateMacro(macroIDname, icon, macroText, nil)
-                  if string.find(macroText, "/gremove") then
-                     print("[KMDA]: Macro Created or Updated!")
-                     DEFAULT_CHAT_FRAME:AddMessage("[KMDA]: " .. chatFrameName .. " staged for removal.")
-                     print("[KMDA]: Press " .. keyBind .. " for action on " .. chatFrameName)
-                     UIErrorsFrame:AddMessage(
-                        "|T516767:32:32|t Secure Action Bound\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0, 0.0, 1,
-                        5)
-                  end
-               else
-                  print("|cFF0000FF<|rKMDA|cFF0000FF>|r |cFFC8C800ATTENTION|r - Maximum number of macros reached.|r")
-                  return
-               end
+            if macroIndex == 0 then
+                C_Timer.After(0.1, function()
+                    if GetNumMacros() < MAX_ACCOUNT_MACROS then
+                        CreateMacro(macroIDname, icon, macroText, nil)
+                        if string.find(macroText, "/gremove") then
+                            print("[KMDA]: Macro Created or Updated!")
+                            DEFAULT_CHAT_FRAME:AddMessage("[KMDA]: " .. chatFrameName .. " staged for removal.")
+                            print("[KMDA]: Press " .. keyBind .. " for action on " .. chatFrameName)
+                            UIErrorsFrame:AddMessage(
+                                "|T516767:32:32|t Secure Action Bound\nPress [" .. keyBind .. "] to execute.", 1.0, 1.0,
+                                0.0, 1,
+                                5)
+                        end
+                    else
+                        print(
+                            "|cFF0000FF<|rKMDA|cFF0000FF>|r |cFFC8C800ATTENTION|r - Maximum number of macros reached.|r")
+                        return
+                    end
+                end)
+            else
+                EditMacro(macroIndex, macroIDname, icon, macroText)
+                if string.find(macroText, "/gremove") then
+                    print("[KMDA]: Macro Created or Updated!")
+                    DEFAULT_CHAT_FRAME:AddMessage("[KMDA]: " .. chatFrameName .. " staged for removal.")
+                    print("[KMDA]: Press " .. keyBind .. " for action on " .. chatFrameName)
+                    UIErrorsFrame:AddMessage(
+                        "|T516767:32:32|t Secure Action Bound\nPress [" .. keyBind .. "] to execute.",
+                        1.0, 1.0, 0.0, 1, 5)
+                end
+            end
+
+            C_Timer.After(0.2, function()
+                if keyBind and keyBind ~= "" and macroIndex > 0 then
+                    SetBindingMacro(keyBind, macroIndex)
+                    SaveBindings(GetCurrentBindingSet())
+                end
             end)
-         else
-            EditMacro(macroIndex, macroIDname, icon, macroText)
-            if string.find(macroText, "/gremove") then
-               print("[KMDA]: Macro Created or Updated!")
-               DEFAULT_CHAT_FRAME:AddMessage("[KMDA]: " .. chatFrameName .. " staged for removal.")
-               print("[KMDA]: Press " .. keyBind .. " for action on " .. chatFrameName)
-               UIErrorsFrame:AddMessage("|T516767:32:32|t Secure Action Bound\nPress [" .. keyBind .. "] to execute.",
-                  1.0, 1.0, 0.0, 1, 5)
-            end
-         end
+        end
+    end)
 
-         C_Timer.After(0.2, function()
-            if keyBind and keyBind ~= "" and macroIndex > 0 then
-               SetBindingMacro(keyBind, macroIndex)
-               SaveBindings(GetCurrentBindingSet())
-            end
-         end)
-      end
-   end)
-
-   return inactiveMembers
+    return inactiveMembers
 end
 
 local function CreatePurgeFrame(parent)
-   if purgeFrame then return purgeFrame, purgeScrollChild end
+    if purgeFrame then return purgeFrame, purgeScrollChild end
 
-   local frame = CreateFrame("Frame", "KMDAPurgeFrame", parent or UIParent, "BackdropTemplate")
-   frame:SetSize(420, 330)
-   frame:SetPoint("CENTER")
-   frame:SetFrameStrata("FULLSCREEN_DIALOG")
-   frame:SetFrameLevel(1)
-   frame:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8x8",
-      edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-      tile = true,
-      tileSize = 32,
-      edgeSize = 32,
-      insets = { left = 8, right = 8, top = 8, bottom = 8 },
-   })
-   frame:SetBackdropColor(0, 0, 0, 1)
-   frame:SetMovable(true)
-   frame:EnableMouse(true)
-   frame:RegisterForDrag("LeftButton")
-   frame:SetScript("OnDragStart", frame.StartMoving)
-   frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
+    local frame = CreateFrame("Frame", "KMDAPurgeFrame", parent or UIParent, "BackdropTemplate")
+    frame:SetSize(420, 330)
+    frame:SetPoint("CENTER")
+    frame:SetFrameStrata("FULLSCREEN_DIALOG")
+    frame:SetFrameLevel(1)
+    frame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = { left = 8, right = 8, top = 8, bottom = 8 },
+    })
+    frame:SetBackdropColor(0, 0, 0, 1)
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnDragStart", frame.StartMoving)
+    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 
-   local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-   title:SetPoint("TOP", 0, -10)
-   title:SetText("KMDA Purge")
+    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    title:SetPoint("TOP", 0, -10)
+    title:SetText("KMDA Purge")
 
-   local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-   closeButton:SetPoint("TOPRIGHT", -5, -5)
-   closeButton:SetScript("OnClick", function() frame:Hide() end)
+    local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+    closeButton:SetPoint("TOPRIGHT", -5, -5)
+    closeButton:SetScript("OnClick", function() frame:Hide() end)
 
-   frame.statusText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-   frame.statusText:SetPoint("BOTTOM", 0, 15)
+    frame.statusText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    frame.statusText:SetPoint("BOTTOM", 0, 15)
 
-   local headers = {
-      { text = "Name",        width = 150, point = "TOPLEFT", offsetX = 10 },
-      { text = "Rank",        width = 100, point = "TOPLEFT", offsetX = 160 },
-      { text = "Last Online", width = 100, point = "TOPLEFT", offsetX = 270 },
-   }
+    local headers = {
+        { text = "Name",        width = 150, point = "TOPLEFT", offsetX = 10 },
+        { text = "Rank",        width = 100, point = "TOPLEFT", offsetX = 160 },
+        { text = "Last Online", width = 100, point = "TOPLEFT", offsetX = 270 },
+    }
 
-   for _, header in ipairs(headers) do
-      local headerText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-      headerText:SetSize(header.width, 20)
-      headerText:SetPoint(header.point, frame, header.point, header.offsetX, -70)
-      headerText:SetText(header.text)
-   end
+    for _, header in ipairs(headers) do
+        local headerText = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        headerText:SetSize(header.width, 20)
+        headerText:SetPoint(header.point, frame, header.point, header.offsetX, -70)
+        headerText:SetText(header.text)
+    end
 
-   local scrollFrame = CreateFrame("ScrollFrame", "KMDAPurgeScrollFrame", frame, "UIPanelScrollFrameTemplate")
-   scrollFrame:SetSize(360, 195)
-   scrollFrame:SetPoint("TOP", 0, -90)
+    local scrollFrame = CreateFrame("ScrollFrame", "KMDAPurgeScrollFrame", frame, "UIPanelScrollFrameTemplate")
+    scrollFrame:SetSize(360, 195)
+    scrollFrame:SetPoint("TOP", 0, -90)
 
-   local scrollChild = CreateFrame("Frame")
-   scrollFrame:SetScrollChild(scrollChild)
-   scrollChild:SetSize(scrollFrame:GetWidth(), 1)
+    local scrollChild = CreateFrame("Frame")
+    scrollFrame:SetScrollChild(scrollChild)
+    scrollChild:SetSize(scrollFrame:GetWidth(), 1)
 
-   purgeFrame = frame
-   purgeScrollChild = scrollChild
-   return frame, scrollChild
+    purgeFrame = frame
+    purgeScrollChild = scrollChild
+    return frame, scrollChild
 end
 
 local function PopulatePurgeList(frame, scrollChild, data)
-   local kids = { scrollChild:GetChildren() }
-   for _, child in ipairs(kids) do
-      child:Hide()
-      child:SetParent(nil)
-   end
+    local kids = { scrollChild:GetChildren() }
+    for _, child in ipairs(kids) do
+        child:Hide()
+        child:SetParent(nil)
+    end
 
-   local regions = { scrollChild:GetRegions() }
-   for _, region in ipairs(regions) do
-      region:Hide()
-      region:SetParent(nil)
-   end
+    local regions = { scrollChild:GetRegions() }
+    for _, region in ipairs(regions) do
+        region:Hide()
+        region:SetParent(nil)
+    end
 
-   local padding = 5
-   local maxNameWidth = 150
+    local padding = 5
+    local maxNameWidth = 150
 
-   local rowHeight = 20
-   for i, entry in ipairs(data) do
-      local yOffset = -(i - 1) * rowHeight
+    local rowHeight = 20
+    for i, entry in ipairs(data) do
+        local yOffset = -(i - 1) * rowHeight
 
-      local nameButton = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
-      nameButton:SetPoint("TOPLEFT", 0, yOffset)
-      nameButton:SetSize(maxNameWidth, rowHeight)
-      nameButton:GetFontString():SetWordWrap(false)
-      nameButton:SetNormalFontObject("GameFontNormal")
-      nameButton:SetHighlightFontObject("GameFontHighlight")
-      nameButton:SetText(entry.name)
-      nameButton:SetScript("OnClick", function()
-         PlaySound(124172)
-         UIErrorsFrame:AddMessage(
-         "|T516767:32:32:0|t Secure Actions Blocked\nRun Inactive search from Options or press F5", 1.0, 1.0, 0.0, 1,
-            6)
-      end)
+        local nameButton = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
+        nameButton:SetPoint("TOPLEFT", 0, yOffset)
+        nameButton:SetSize(maxNameWidth, rowHeight)
+        nameButton:GetFontString():SetWordWrap(false)
+        nameButton:SetNormalFontObject("GameFontNormal")
+        nameButton:SetHighlightFontObject("GameFontHighlight")
+        nameButton:SetText(entry.name)
+        nameButton:SetScript("OnClick", function()
+            PlaySound(124172)
+            UIErrorsFrame:AddMessage(
+                "|T516767:32:32:0|t Secure Actions Blocked\nRun Inactive search from Options or press F5", 1.0, 1.0, 0.0,
+                1,
+                6)
+        end)
 
-      local rankText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-      rankText:SetPoint("TOPLEFT", nameButton, "TOPRIGHT", padding, 0)
-      rankText:SetWidth(100)
-      rankText:SetJustifyH("LEFT")
-      rankText:SetText(entry.rank)
+        local rankText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        rankText:SetPoint("TOPLEFT", nameButton, "TOPRIGHT", padding, 0)
+        rankText:SetWidth(100)
+        rankText:SetJustifyH("LEFT")
+        rankText:SetText(entry.rank)
 
-      local lastOnlineText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-      lastOnlineText:SetPoint("TOPLEFT", rankText, "TOPRIGHT", padding, 0)
-      lastOnlineText:SetWidth(100)
-      lastOnlineText:SetJustifyH("LEFT")
-      lastOnlineText:SetText(entry.totalDaysOffline .. " days")
-   end
+        local lastOnlineText = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        lastOnlineText:SetPoint("TOPLEFT", rankText, "TOPRIGHT", padding, 0)
+        lastOnlineText:SetWidth(100)
+        lastOnlineText:SetJustifyH("LEFT")
+        lastOnlineText:SetText(entry.totalDaysOffline .. " days")
+    end
 
-   scrollChild:SetHeight(#data * rowHeight)
+    scrollChild:SetHeight(#data * rowHeight)
 end
 
 local function CreateThresholdInputBox(frame, onUpdateCallback)
-   if frame.thresholdBox then return frame.thresholdBox end
+    if frame.thresholdBox then return frame.thresholdBox end
 
-   local inputBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
-   inputBox:SetSize(50, 25)
-   inputBox:SetPoint("TOP", frame, "TOP", 0, -40)
-   inputBox:SetFrameStrata("TOOLTIP")
-   inputBox:SetAutoFocus(false)
+    local inputBox = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
+    inputBox:SetSize(50, 25)
+    inputBox:SetPoint("TOP", frame, "TOP", 0, -40)
+    inputBox:SetFrameStrata("TOOLTIP")
+    inputBox:SetAutoFocus(false)
 
-   local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-   label:SetPoint("RIGHT", inputBox, "LEFT", -10, 0)
-   label:SetText("Search Threshold:")
-   label:SetTextColor(.64, 0.33, 0.08, 1)
+    local label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    label:SetPoint("RIGHT", inputBox, "LEFT", -10, 0)
+    label:SetText("Search Threshold:")
+    label:SetTextColor(.64, 0.33, 0.08, 1)
 
-   inputBox:SetScript("OnEnterPressed", function(self)
-      local text = self:GetText()
-      local value = tonumber(text)
-      print("|cFF3c3cA8Threshold updated to|r:", value)
+    inputBox:SetScript("OnEnterPressed", function(self)
+        local text = self:GetText()
+        local value = tonumber(text)
+        print("|cFF3c3cA8Threshold updated to|r:", value)
 
-      if value and value > 0 then
-         onUpdateCallback(value)
-      else
-         print("Invalid input. Please enter a positive number.")
-      end
-      self:ClearFocus()
-   end)
+        if value and value > 0 then
+            onUpdateCallback(value)
+        else
+            print("Invalid input. Please enter a positive number.")
+        end
+        self:ClearFocus()
+    end)
 
-   frame.thresholdBox = inputBox
-   return inputBox
+    frame.thresholdBox = inputBox
+    return inputBox
 end
 
 local function CreateShowAllCheckbox(frame, onUpdateCallback)
-   if frame.showAllCheck then return frame.showAllCheck end
+    if frame.showAllCheck then return frame.showAllCheck end
 
-   local check = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
-   check:SetSize(24, 24)
-   check:SetPoint("LEFT", frame.thresholdBox, "RIGHT", 10, 0)
+    local check = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
+    check:SetSize(24, 24)
+    check:SetPoint("LEFT", frame.thresholdBox, "RIGHT", 10, 0)
 
-   check.text = check:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-   check.text:SetPoint("LEFT", check, "RIGHT", 0, 1)
-   check.text:SetText("Show All Ranks")
+    check.text = check:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    check.text:SetPoint("LEFT", check, "RIGHT", 0, 1)
+    check.text:SetText("Show All Ranks")
 
-   check:SetScript("OnClick", function(self)
-      onUpdateCallback(self:GetChecked())
-   end)
+    check:SetScript("OnClick", function(self)
+        onUpdateCallback(self:GetChecked())
+    end)
 
-   frame.showAllCheck = check
-   return check
+    frame.showAllCheck = check
+    return check
 end
 
 local function ClosePurgeFrame()
-   if purgeFrame and purgeFrame:IsShown() then
-      purgeFrame:Hide()
-   end
+    if purgeFrame and purgeFrame:IsShown() then
+        purgeFrame:Hide()
+    end
 end
 
 function KMDA_Purge()
-   local threshold = 24 -- Default threshold
-   local showAll = false
-   local data
-   ClosePurgeFrame()
+    local threshold = 24 -- Default threshold
+    local showAll = false
+    local data
+    ClosePurgeFrame()
 
-   local function RefreshFrame()
-      data = GetInactiveMembers(threshold, showAll)
+    local function RefreshFrame()
+        data = GetInactiveMembers(threshold, showAll)
 
-      if #data == 0 then
-         print("No Guild members match " .. threshold .. " days offline.")
-      else
-         print("[KMDA]: |cFF66a8bfFound|r: " .. #data .. " |cFF66a8bfplayers >=|r " .. threshold .. " days offline.")
-      end
+        if #data == 0 then
+            print("No Guild members match " .. threshold .. " days offline.")
+        else
+            print("[KMDA]: |cFF66a8bfFound|r: " .. #data .. " |cFF66a8bfplayers >=|r " .. threshold .. " days offline.")
+        end
 
-      local frame, scrollChild = CreatePurgeFrame()
+        local frame, scrollChild = CreatePurgeFrame()
 
-      local initiateCount = 0
-      for _, member in ipairs(data) do
-         if member.rank == "Initiate" then
-            initiateCount = initiateCount + 1
-         end
-      end
+        local initiateCount = 0
+        for _, member in ipairs(data) do
+            if member.rank == "Initiate" then
+                initiateCount = initiateCount + 1
+            end
+        end
 
-      if initiateCount == 0 then
-         frame.statusText:SetText("No Initiates to purge")
-         frame.statusText:SetTextColor(0, 1, 0)
-      else
-         frame.statusText:SetText(initiateCount .. " Initiates to purge")
-         frame.statusText:SetTextColor(1, 0, 0)
-      end
+        if initiateCount == 0 then
+            frame.statusText:SetText("No Initiates to purge")
+            frame.statusText:SetTextColor(0, 1, 0)
+        else
+            frame.statusText:SetText(initiateCount .. " Initiates to purge")
+            frame.statusText:SetTextColor(1, 0, 0)
+        end
 
-      frame:Show()
-      PopulatePurgeList(frame, scrollChild, data)
-      local inputBox = CreateThresholdInputBox(frame, function(newThreshold)
-         threshold = newThreshold
-         RefreshFrame()
-      end)
-      inputBox:SetText(tostring(threshold))
+        frame:Show()
+        PopulatePurgeList(frame, scrollChild, data)
+        local inputBox = CreateThresholdInputBox(frame, function(newThreshold)
+            threshold = newThreshold
+            RefreshFrame()
+        end)
+        inputBox:SetText(tostring(threshold))
 
-      local checkBox = CreateShowAllCheckbox(frame, function(isChecked)
-         showAll = isChecked
-         RefreshFrame()
-      end)
-      checkBox:SetChecked(showAll)
-   end
+        local checkBox = CreateShowAllCheckbox(frame, function(isChecked)
+            showAll = isChecked
+            RefreshFrame()
+        end)
+        checkBox:SetChecked(showAll)
+    end
 
-   RefreshFrame()
+    RefreshFrame()
 end
---#endregion Purge
 
+--#endregion Purge
 
 --#region Notes
 local notesFrame -- Store the frame to avoid recreating it
+local keyFrame   -- For encryption/decryption key entry
+
+-- XOR Encryption Function
+local function XORCipher(input, key)
+    local result = {}
+    for i = 1, #input do
+        local byte = input:byte(i)
+        local keyByte = key:byte(((i - 1) % #key) + 1) -- Cycle through key bytes
+        table.insert(result, string.char(bit.bxor(byte, keyByte)))
+    end
+    return table.concat(result)
+end
 
 local function KMDA_NewNote()
-   if notesFrame then
-      notesFrame.titleBox:SetText("")
-      notesFrame.editBox:SetText("")
-      notesFrame.selectedNote = nil
-      notesFrame.editBox:SetFocus()
-   end
+    if notesFrame then
+        notesFrame.titleBox:SetText("")
+        notesFrame.editBox:SetText("")
+        notesFrame.selectedNote = nil
+        notesFrame.editBox:SetFocus()
+    end
+end
+
+-- Note Management Functions
+local function KMDA_EncryptAndSaveNote(title, content, key)
+    if not title or title == "" or not content or content == "" or not key or key == "" then
+        print("KMDA: Title, content, and key cannot be empty for encryption.")
+        return
+    end
+    OG_EncryptedNotes[title] = XORCipher(content, key)
+    if KMDA_SavedNotes[title] then
+        KMDA_SavedNotes[title] = nil
+    end
+    print("KMDA: Note '" .. title .. "' has been encrypted and saved.")
+    KMDA_NewNote()
+end
+
+local function KMDA_DecryptAndOpenNote(title, key)
+    if not title or not OG_EncryptedNotes[title] then
+        print("KMDA: No encrypted note found with that title.")
+        return
+    end
+    if not key or key == "" then
+        print("KMDA: Key cannot be empty.")
+        return
+    end
+    local decryptedContent = XORCipher(OG_EncryptedNotes[title], key)
+    notesFrame.titleBox:SetText(title)
+    notesFrame.editBox:SetText(decryptedContent)
+    notesFrame.selectedNote = title
+end
+
+-- Key Frame UI
+local function KMDA_CreateKeyFrame()
+    if keyFrame then return end
+    keyFrame = CreateFrame("Frame", "KMDA_NoteKeyFrame", UIParent, "BasicFrameTemplateWithInset")
+    keyFrame:SetSize(300, 150)
+    keyFrame:SetPoint("CENTER")
+    keyFrame:SetMovable(true)
+    keyFrame:EnableMouse(true)
+    keyFrame:RegisterForDrag("LeftButton")
+    keyFrame:SetScript("OnDragStart", keyFrame.StartMoving)
+    keyFrame:SetScript("OnDragStop", keyFrame.StopMovingOrSizing)
+    keyFrame:SetFrameStrata("DIALOG")
+
+    keyFrame.title = keyFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    keyFrame.title:SetPoint("CENTER", keyFrame.TitleBg, "CENTER", 0, 0)
+
+    keyFrame.noteTitle = keyFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    keyFrame.noteTitle:SetPoint("TOP", keyFrame.title, "BOTTOM", 0, -10)
+    keyFrame.noteTitle:SetWidth(keyFrame:GetWidth() - 20)
+    keyFrame.noteTitle:SetJustifyH("CENTER")
+
+    local keyInput = CreateFrame("EditBox", nil, keyFrame, "InputBoxTemplate")
+    keyInput:SetSize(128, 30)
+    keyInput:SetPoint("TOP", keyFrame.noteTitle, "BOTTOM", 0, -5)
+    keyInput:SetAutoFocus(true)
+    keyFrame.keyInput = keyInput
+
+    local actionBtn = CreateFrame("Button", nil, keyFrame, "GameMenuButtonTemplate")
+    actionBtn:SetSize(100, 30)
+    actionBtn:SetPoint("BOTTOMLEFT", keyFrame, "BOTTOMLEFT", 20, 10)
+    keyFrame.actionBtn = actionBtn
+
+    local cancelBtn = CreateFrame("Button", nil, keyFrame, "GameMenuButtonTemplate")
+    cancelBtn:SetSize(100, 30)
+    cancelBtn:SetPoint("BOTTOMRIGHT", keyFrame, "BOTTOMRIGHT", -20, 10)
+    cancelBtn:SetText("Cancel")
+    cancelBtn:SetScript("OnClick", function() keyFrame:Hide() end)
+
+    keyFrame:SetScript("OnHide", function(self)
+        self.keyInput:SetText("")
+        self.currentTitle = nil
+    end)
+end
+
+local function KMDA_ShowDecryptKeyFrame(noteTitle)
+    KMDA_CreateKeyFrame()
+    keyFrame.currentTitle = noteTitle
+    keyFrame.noteTitle:SetText(noteTitle)
+    keyFrame.title:SetText("Enter Key to Decrypt")
+    keyFrame.actionBtn:SetText("Decrypt")
+    keyFrame.actionBtn:SetScript("OnClick", function()
+        local key = keyFrame.keyInput:GetText()
+        if key and key ~= "" then
+            KMDA_DecryptAndOpenNote(noteTitle, key)
+            keyFrame:Hide()
+        else
+            print("KMDA: Please enter a key.")
+        end
+    end)
+    keyFrame:Show()
+end
+
+local function KMDA_ShowEncryptKeyFrame(noteTitle)
+    KMDA_CreateKeyFrame()
+    keyFrame.currentTitle = noteTitle
+    keyFrame.noteTitle:SetText(noteTitle)
+    keyFrame.title:SetText("Create or Enter Key")
+    keyFrame.actionBtn:SetText("Encrypt")
+    keyFrame.actionBtn:SetScript("OnClick", function()
+        local key = keyFrame.keyInput:GetText()
+        local content = notesFrame.editBox:GetText()
+        if key and #key >= 6 then
+            KMDA_EncryptAndSaveNote(noteTitle, content, key)
+            keyFrame:Hide()
+        else
+            print("KMDA: Key must be at least 6 characters long.")
+        end
+    end)
+    keyFrame:Show()
 end
 
 local function KMDA_OpenSavedNote(title)
-   if notesFrame and KMDA_SavedNotes and KMDA_SavedNotes[title] then
-      notesFrame.titleBox:SetText(title)
-      notesFrame.editBox:SetText(KMDA_SavedNotes[title])
-      notesFrame.selectedNote = title
-   end
+    if notesFrame and KMDA_SavedNotes and KMDA_SavedNotes[title] then
+        notesFrame.titleBox:SetText(title)
+        notesFrame.editBox:SetText(KMDA_SavedNotes[title])
+        notesFrame.selectedNote = title
+    end
 end
 
 local function CreateNotesFrame()
-   -- Initialize SavedVariables if they don't exist
-   if not KMDA_SavedNotes then KMDA_SavedNotes = {} end
+    if not KMDA_SavedNotes then KMDA_SavedNotes = {} end
+    if not OG_EncryptedNotes then OG_EncryptedNotes = {} end
 
-   if not notesFrame then
-      notesFrame = CreateFrame("Frame", "KMDANotesFrame", UIParent, "BasicFrameTemplateWithInset")
-      notesFrame:SetSize(800, 400)
-      notesFrame:SetPoint("CENTER")
-      notesFrame:SetMovable(true)
-      notesFrame:EnableMouse(true)
-      notesFrame:RegisterForDrag("LeftButton")
-      notesFrame:SetScript("OnDragStart", notesFrame.StartMoving)
-      notesFrame:SetScript("OnDragStop", notesFrame.StopMovingOrSizing)
+    if not notesFrame then
+        notesFrame = CreateFrame("Frame", "KMDANotesFrame", UIParent, "BasicFrameTemplateWithInset")
+        notesFrame:SetSize(800, 400)
+        notesFrame:SetPoint("CENTER")
+        notesFrame:SetMovable(true)
+        notesFrame:EnableMouse(true)
+        notesFrame:RegisterForDrag("LeftButton")
+        notesFrame:SetScript("OnDragStart", notesFrame.StartMoving)
+        notesFrame:SetScript("OnDragStop", notesFrame.StopMovingOrSizing)
 
-      notesFrame.title = notesFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-      notesFrame.title:SetPoint("CENTER", notesFrame.TitleBg, "CENTER", 0, 0)
-      notesFrame.title:SetText("KMDA Notes")
+        notesFrame.title = notesFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        notesFrame.title:SetPoint("CENTER", notesFrame.TitleBg, "CENTER", 0, 0)
+        notesFrame.title:SetText("KMDA Notes")
 
-      local dropdown = CreateFrame("DropdownButton", "KMDANotesDropdown", notesFrame, "WowStyle1DropdownTemplate")
-      dropdown:SetPoint("TOPLEFT", 20, -40)
-      dropdown:SetWidth(200)
-      dropdown:SetDefaultText("Select an Option")
+        local dropdown = CreateFrame("DropdownButton", "KMDANotesDropdown", notesFrame, "WowStyle1DropdownTemplate")
+        dropdown:SetPoint("TOPLEFT", 20, -40)
+        dropdown:SetWidth(200)
+        dropdown:SetDefaultText("Select an Option")
 
-      dropdown:SetupMenu(function(self, rootDescription)
-         rootDescription:CreateButton("1.) Create New Note", KMDA_NewNote)
+        dropdown:SetupMenu(function(self, rootDescription)
+            rootDescription:CreateButton("1.) Create New Note", KMDA_NewNote)
+            local savedMenu = rootDescription:CreateButton("2.) Open Note")
+            local allTitles = {}
+            for title in pairs(KMDA_SavedNotes) do
+                table.insert(allTitles, { title = title, encrypted = false })
+            end
+            for title in pairs(OG_EncryptedNotes) do
+                table.insert(allTitles, { title = title, encrypted = true })
+            end
+            table.sort(allTitles, function(a, b) return a.title < b.title end)
+            if #allTitles == 0 then
+                savedMenu:CreateTitle("No saved notes.")
+            else
+                for _, noteInfo in ipairs(allTitles) do
+                    local buttonText = noteInfo.title
+                    local onClickFunc
+                    if noteInfo.encrypted then
+                        buttonText = "|TInterface\\CharacterFrame\\UI-Character-Tab-LOCKED:16:16:0:0|t " ..
+                            noteInfo.title
+                        onClickFunc = function() KMDA_ShowDecryptKeyFrame(noteInfo.title) end
+                    else
+                        onClickFunc = function() KMDA_OpenSavedNote(noteInfo.title) end
+                    end
+                    savedMenu:CreateButton(buttonText, onClickFunc)
+                end
+            end
+        end)
 
-         local savedMenu = rootDescription:CreateButton("2.) Open Saved Note")
-         local sortedTitles = {}
-         for title in pairs(KMDA_SavedNotes) do
-            table.insert(sortedTitles, title)
-         end
-         table.sort(sortedTitles)
-         for _, title in ipairs(sortedTitles) do
-            savedMenu:CreateButton(title, function() KMDA_OpenSavedNote(title) end)
-         end
-      end)
+        local titleBox = CreateFrame("EditBox", nil, notesFrame, "InputBoxTemplate")
+        titleBox:SetSize(300, 30)
+        titleBox:SetPoint("LEFT", dropdown, "RIGHT", 20, 0)
+        titleBox:SetAutoFocus(false)
+        notesFrame.titleBox = titleBox
 
-      -- Title Input Box (Right of Dropdown)
-      local titleBox = CreateFrame("EditBox", nil, notesFrame, "InputBoxTemplate")
-      titleBox:SetSize(300, 30)
-      titleBox:SetPoint("LEFT", dropdown, "RIGHT", 20, 0)
-      titleBox:SetAutoFocus(false)
-      notesFrame.titleBox = titleBox
+        local titleLabel = titleBox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        titleLabel:SetPoint("BOTTOMLEFT", titleBox, "TOPLEFT", 0, 2)
+        titleLabel:SetText("Note Title:")
 
-      local titleLabel = titleBox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-      titleLabel:SetPoint("BOTTOMLEFT", titleBox, "TOPLEFT", 0, 2)
-      titleLabel:SetText("Note Title:")
+        local scrollFrame = CreateFrame("ScrollFrame", nil, notesFrame, "UIPanelScrollFrameTemplate, BackdropTemplate")
+        scrollFrame:SetPoint("TOPLEFT", dropdown, "BOTTOMLEFT", 0, -20)
+        scrollFrame:SetPoint("BOTTOMRIGHT", notesFrame, "BOTTOMRIGHT", -30, 50)
+        scrollFrame:SetBackdrop({
+            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+            tile = true,
+            tileSize = 16,
+            edgeSize = 16,
+            insets = { left = 3, right = 3, top = 3, bottom = 3 }
+        })
+        scrollFrame:SetBackdropColor(0, 0, 0, 0.5)
+        scrollFrame:SetBackdropBorderColor(0.8, 0.8, 0.8, 1)
 
-      -- Multi-line Edit Box with ScrollFrame
-      local scrollFrame = CreateFrame("ScrollFrame", nil, notesFrame, "UIPanelScrollFrameTemplate, BackdropTemplate")
-      scrollFrame:SetPoint("TOPLEFT", dropdown, "BOTTOMLEFT", 0, -20)
-      scrollFrame:SetPoint("BOTTOMRIGHT", notesFrame, "BOTTOMRIGHT", -30, 50) -- Padding for buttons
+        local editBox = CreateFrame("EditBox", nil, scrollFrame)
+        editBox:SetMultiLine(true)
+        editBox:SetFontObject(ChatFontNormal)
+        editBox:SetWidth(730)
+        editBox:SetTextInsets(5, 5, 5, 5)
+        editBox:SetAutoFocus(false)
+        scrollFrame:SetScrollChild(editBox)
+        notesFrame.editBox = editBox
 
-      scrollFrame:SetBackdrop({
-         bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-         tile = true,
-         tileSize = 16,
-         edgeSize = 16,
-         insets = { left = 3, right = 3, top = 3, bottom = 3 }
-      })
-      scrollFrame:SetBackdropColor(0, 0, 0, 0.5)
-      scrollFrame:SetBackdropBorderColor(0.8, 0.8, 0.8, 1)
+        scrollFrame:SetScript("OnMouseDown", function() editBox:SetFocus() end)
 
-      local editBox = CreateFrame("EditBox", nil, scrollFrame)
-      editBox:SetMultiLine(true)
-      editBox:SetFontObject(ChatFontNormal)
-      editBox:SetWidth(730)
-      editBox:SetTextInsets(5, 5, 5, 5)
-      editBox:SetAutoFocus(false)
-      scrollFrame:SetScrollChild(editBox)
-      notesFrame.editBox = editBox
+        local btnSave = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+        btnSave:SetSize(100, 30)
+        btnSave:SetPoint("BOTTOMLEFT", 20, 10)
+        btnSave:SetText("Save Note")
+        btnSave:SetScript("OnClick", function()
+            local title = titleBox:GetText()
+            if title and title ~= "" then
+                KMDA_SavedNotes[title] = editBox:GetText()
+                notesFrame.selectedNote = title
+                print("KMDA: Note '" .. title .. "' saved.")
+            else
+                print("KMDA: Please enter a title.")
+            end
+        end)
 
-      -- Click scrollframe to focus editbox
-      scrollFrame:SetScript("OnMouseDown", function() editBox:SetFocus() end)
+        local btnEdit = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+        btnEdit:SetSize(100, 30)
+        btnEdit:SetPoint("LEFT", btnSave, "RIGHT", 10, 0)
+        btnEdit:SetText("Edit Note")
+        btnEdit:SetScript("OnClick", function() editBox:SetFocus() end)
 
-      -- Buttons
-      local btnSave = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
-      btnSave:SetSize(100, 30)
-      btnSave:SetPoint("BOTTOMLEFT", 20, 10)
-      btnSave:SetText("Save Note")
-      btnSave:SetScript("OnClick", function()
-         local title = titleBox:GetText()
-         if title and title ~= "" then
-            KMDA_SavedNotes[title] = editBox:GetText()
-            notesFrame.selectedNote = title
-            print("KMDA: Note '" .. title .. "' saved.")
-         else
-            print("KMDA: Please enter a title.")
-         end
-      end)
+        local btnDelete = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+        btnDelete:SetSize(100, 30)
+        btnDelete:SetPoint("LEFT", btnEdit, "RIGHT", 10, 0)
+        btnDelete:SetText("Delete Note")
+        btnDelete:SetScript("OnClick", function()
+            local title = titleBox:GetText()
+            if title and (KMDA_SavedNotes[title] or OG_EncryptedNotes[title]) then
+                KMDA_SavedNotes[title] = nil
+                OG_EncryptedNotes[title] = nil
+                KMDA_NewNote()
+                print("KMDA: Note '" .. title .. "' deleted.")
+            end
+        end)
 
-      local btnEdit = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
-      btnEdit:SetSize(100, 30)
-      btnEdit:SetPoint("LEFT", btnSave, "RIGHT", 10, 0)
-      btnEdit:SetText("Edit Note")
-      btnEdit:SetScript("OnClick", function() editBox:SetFocus() end)
+        local btnEncrypt = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+        btnEncrypt:SetSize(100, 30)
+        btnEncrypt:SetPoint("LEFT", btnDelete, "RIGHT", 10, 0)
+        btnEncrypt:SetText("Encrypt Note")
+        btnEncrypt:SetScript("OnClick", function()
+            local title = notesFrame.titleBox:GetText()
+            local content = notesFrame.editBox:GetText()
+            if title and title ~= "" and content and content ~= "" then
+                KMDA_ShowEncryptKeyFrame(title)
+            else
+                print("KMDA: Note must have a title and content to be encrypted.")
+            end
+        end)
 
-      local btnDelete = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
-      btnDelete:SetSize(100, 30)
-      btnDelete:SetPoint("LEFT", btnEdit, "RIGHT", 10, 0)
-      btnDelete:SetText("Delete Note")
-      btnDelete:SetScript("OnClick", function()
-         local title = titleBox:GetText()
-         if title and KMDA_SavedNotes[title] then
-            KMDA_SavedNotes[title] = nil
-            KMDA_NewNote()
-            print("KMDA: Note '" .. title .. "' deleted.")
-         end
-      end)
-
-      notesFrame.CloseButton:SetScript("OnClick", function()
-         notesFrame:Hide()
-      end)
-   end
-   notesFrame:Show()
+        notesFrame.CloseButton:SetScript("OnClick", function() notesFrame:Hide() end)
+    end
+    notesFrame:Show()
 end
 --#endregion Notes
 
@@ -3679,7 +3670,8 @@ local function UrlFriendlyRealmName(realm) -- Function to format the return of r
     realm = realm:gsub("\'", "")                             -- 3. Strip the hyphen returning url syntax       | "Kel'Thuzud" to "KelThuzud"          |
     realm = realm:gsub("%s+", "-")                           -- 4. GetRealmName() edgecase " " becomes -       | "Moon Guard" to "Moon-Gaurd"         |
 
-    return realm -- 5. return the formated string like a boss, get a beer, do more tests dont push on a friday :}
+    return
+        realm -- 5. return the formated string like a boss, get a beer, do more tests dont push on a friday :}
 end
 
 local function ModMenu_GetArmoryLink(playerFullName)
@@ -3699,646 +3691,697 @@ local function ModMenu_GetArmoryLink(playerFullName)
 end
 --#endregion MemberSearch RightClick Functions
 
-
---#region MemberSearch
+--#region Member Search - Player Management
 local guildRosterCache = {}
 local searchFrame, scrollFrame, SR_scrollChild
+local KMDARightClickMenu
 local playerManagementFrame
 
-local function stripChars(str)
-   if not str then return "" end
-   local normalisedString = str:gsub("[%z\1-\127\194-\244][\128-\191]*", tableAccents)
-   return string.lower(normalisedString)
-end
 
+--#region Player Management Frame
 local function SetupMacroAndBind(action, player)
-   if InCombatLockdown() then
-      print("KMDA: Cannot update macros/bindings in combat.")
-      return
-   end
+    if InCombatLockdown() then
+        print("KMDA: Cannot update macros/bindings in combat.")
+        return
+    end
 
-   local macroName = "KMDA_Action"
-   local macroIndex = GetMacroIndexByName(macroName)
-   local command = (action == "promote" and "/gpromote " or "/gdemote ") .. player
+    local macroName = "KMDA_Action"
+    local macroIndex = GetMacroIndexByName(macroName)
+    local command = (action == "promote" and "/gpromote " or "/gdemote ") .. player
 
-   if macroIndex == 0 then
-      local numAccountMacros, numCharacterMacros = GetNumMacros()
-      if numAccountMacros >= 120 then
-         print("KMDA: General macro slots are full. Please delete one to use this feature.")
-         return
-      end
-      macroIndex = CreateMacro(macroName, "INV_MISC_QUESTIONMARK", command, nil)
-   else
-      EditMacro(macroIndex, macroName, "INV_MISC_QUESTIONMARK", command)
-   end
+    if macroIndex == 0 then
+        local numAccountMacros, numCharacterMacros = GetNumMacros()
+        if numAccountMacros >= 120 then
+            print("KMDA: General macro slots are full. Please delete one to use this feature.")
+            return
+        end
+        macroIndex = CreateMacro(macroName, "INV_MISC_QUESTIONMARK", command, nil)
+    else
+        EditMacro(macroIndex, macroName, "INV_MISC_QUESTIONMARK", command)
+    end
 
-   local key = playerManagementFrame.selectedKey or "F5"
-   SetBindingMacro(key, macroIndex)
+    local key = playerManagementFrame.selectedKey or "F5"
+    SetBindingMacro(key, macroIndex)
 
-   PlaySound(SOUNDKIT.READY_CHECK)
-   print("KMDA: Action Ready! Press " ..
-      key .. " to " .. (action == "promote" and "Promote" or "Demote") .. " " .. player)
+    PlaySound(SOUNDKIT.READY_CHECK)
+    print("KMDA: Action Ready! Press " ..
+        key .. " to " .. (action == "promote" and "Promote" or "Demote") .. " " .. player)
 end
 
--- Refresh the guild roster cache
-local function RefreshGuildRosterCache()
-   wipe(guildRosterCache) -- Clear old data
-   for i = 1, GetNumGuildMembers() do
-      local name, rank, _, _, class, _, _, _, online, _, _, _, _, _ = GetGuildRosterInfo(i)
-      local _, _, day, hour = GetGuildRosterLastOnline(i)
-      local hyperlinkName = "|Hplayer:" .. name .. "|h[" .. name .. "]|h"
-      local day = day and day or 0
-      local hour = hour and hour or 0
-
-      table.insert(guildRosterCache, {
-         linkName       = hyperlinkName,
-         name           = name,
-         normalizedName = stripChars(name),
-         rank           = rank,
-         class          = class,
-         online         = online,
-         day            = day,
-         hour           = hour,
-         lastOnline     = day .. " D " .. hour .. " Hr",
-      })
-   end
-
-   table.sort(guildRosterCache, function(a, b)
-      -- 1) If both members share the same "online" status:
-      if a.online == b.online then
-         if a.online == true then
-            -- Both are online - sort by name
-            return a.name < b.name
-         else
-            -- Both are offline, compare day/hour
-            -- We want "least time offline" first, so smaller days come first.
-            if a.day == b.day then
-               -- Same day, compare hours
-               return a.hour < b.hour
-            else
-               -- Compare days
-               return a.day < b.day
-            end
-         end
-      else
-         -- 2) One is online, the other is offline. Online goes first:
-         return a.online
-      end
-   end)
-end
-
--- Clear previous search results
-local function ClearSearchResults()
-   for _, child in ipairs({ SR_scrollChild:GetChildren() }) do
-      child:Hide()
-      child:SetParent(nil) -- Prevent lingering references
-   end
-end
-
--- Create Player Management Frame
 local function CreatePlayerManagementFrame()
-   if playerManagementFrame then return end
+    if playerManagementFrame then return end
 
-   playerManagementFrame = CreateFrame("Frame", "KMDAPlayerManagementFrame", UIParent, "BackdropTemplate")
-   playerManagementFrame:SetSize(300, 320)
-   playerManagementFrame:SetFrameStrata("TOOLTIP")
-   playerManagementFrame:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8x8",
-      edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-      tile = true,
-      tileSize = 32,
-      edgeSize = 32,
-      insets = { left = 8, right = 8, top = 8, bottom = 8 },
-   })
-   playerManagementFrame:SetBackdropColor(0, 0, 0, 0.9)
-   playerManagementFrame:EnableMouse(true)
-   playerManagementFrame:SetClampedToScreen(true)
+    playerManagementFrame = CreateFrame("Frame", "KMDAPlayerManagementFrame", UIParent, "BackdropTemplate")
+    playerManagementFrame:SetSize(300, 320)
+    playerManagementFrame:SetFrameStrata("TOOLTIP")
+    playerManagementFrame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = { left = 8, right = 8, top = 8, bottom = 8 },
+    })
+    playerManagementFrame:SetBackdropColor(0, 0, 0, 0.9)
+    playerManagementFrame:EnableMouse(true)
+    playerManagementFrame:SetClampedToScreen(true)
 
-   -- Title
-   playerManagementFrame.title = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-   playerManagementFrame.title:SetPoint("TOP", 0, -15)
-   playerManagementFrame.title:SetText("Player Management")
+    -- Title
+    playerManagementFrame.title = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    playerManagementFrame.title:SetPoint("TOP", 0, -15)
+    playerManagementFrame.title:SetText("Player Management")
 
-   -- Player Name
-   playerManagementFrame.playerName = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-   playerManagementFrame.playerName:SetPoint("TOP", playerManagementFrame.title, "BOTTOM", 0, -10)
-   playerManagementFrame.playerName:SetFont("Fonts\\FRIZQT__.TTF", 19)
+    -- Player Name
+    playerManagementFrame.playerName = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    playerManagementFrame.playerName:SetPoint("TOP", playerManagementFrame.title, "BOTTOM", 0, -10)
+    playerManagementFrame.playerName:SetFont("Fonts\\FRIZQT__.TTF", 19)
 
-   -- Level and Rank
-   playerManagementFrame.levelRank = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-   playerManagementFrame.levelRank:SetFont("Fonts\\FRIZQT__.TTF", 16)
-   playerManagementFrame.levelRank:SetTextColor(1, 1, 0) -- Yellow
-   playerManagementFrame.levelRank:SetPoint("TOP", playerManagementFrame.playerName, "BOTTOM", 0, -5)
+    -- Level and Rank
+    playerManagementFrame.levelRank = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    playerManagementFrame.levelRank:SetFont("Fonts\\FRIZQT__.TTF", 16)
+    playerManagementFrame.levelRank:SetTextColor(1, 1, 0) -- Yellow
+    playerManagementFrame.levelRank:SetPoint("TOP", playerManagementFrame.playerName, "BOTTOM", 0, -5)
 
-   -- Keybind Display
-   playerManagementFrame.keybindDisplay = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-   playerManagementFrame.keybindDisplay:SetFont("Fonts\\FRIZQT__.TTF", 14)
-   playerManagementFrame.keybindDisplay:SetTextColor(0.6, 0.8, 1) -- Light Blue
-   playerManagementFrame.keybindDisplay:SetPoint("RIGHT", playerManagementFrame, "RIGHT", -20, 0)
-   playerManagementFrame.keybindDisplay:SetPoint("TOP", playerManagementFrame.levelRank, "BOTTOM", 0, -10)
-   playerManagementFrame.keybindDisplay:SetHeight(25)
+    -- Keybind Display
+    playerManagementFrame.keybindDisplay = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    playerManagementFrame.keybindDisplay:SetFont("Fonts\\FRIZQT__.TTF", 14)
+    playerManagementFrame.keybindDisplay:SetTextColor(0.6, 0.8, 1) -- Light Blue
+    playerManagementFrame.keybindDisplay:SetPoint("RIGHT", playerManagementFrame, "RIGHT", -20, 0)
+    playerManagementFrame.keybindDisplay:SetPoint("TOP", playerManagementFrame.levelRank, "BOTTOM", 0, -10)
+    playerManagementFrame.keybindDisplay:SetHeight(25)
 
-   -- Key Selection Dropdown
-   playerManagementFrame.selectedKey = "F5"
-   local keyDropdown = CreateFrame("DropdownButton", nil, playerManagementFrame, "WowStyle1DropdownTemplate")
-   keyDropdown:SetPoint("TOP", playerManagementFrame.levelRank, "BOTTOM", 0, -12)
-   keyDropdown:SetPoint("RIGHT", playerManagementFrame.keybindDisplay, "LEFT", -5, 0)
-   keyDropdown:SetWidth(120)
-   keyDropdown:SetDefaultText("Bind: F5")
-   playerManagementFrame.keybindDisplay:SetText(playerManagementFrame.selectedKey)
+    -- Key Selection Dropdown
+    playerManagementFrame.selectedKey = "F5"
+    local keyDropdown = CreateFrame("DropdownButton", nil, playerManagementFrame, "WowStyle1DropdownTemplate")
+    keyDropdown:SetPoint("TOP", playerManagementFrame.levelRank, "BOTTOM", 0, -12)
+    keyDropdown:SetPoint("RIGHT", playerManagementFrame.keybindDisplay, "LEFT", -5, 0)
+    keyDropdown:SetWidth(120)
+    keyDropdown:SetDefaultText("Bind: F5")
+    playerManagementFrame.keybindDisplay:SetText(playerManagementFrame.selectedKey)
 
-   -- Status Display
-   playerManagementFrame.statusDisplay = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-   playerManagementFrame.statusDisplay:SetPoint("LEFT", playerManagementFrame, "LEFT", 20, 0)
-   playerManagementFrame.statusDisplay:SetPoint("TOP", keyDropdown, "TOP", 0, 0)
-   playerManagementFrame.statusDisplay:SetPoint("BOTTOM", keyDropdown, "BOTTOM", 0, 0)
-   playerManagementFrame.statusDisplay:SetJustifyH("LEFT")
+    -- Status Display
+    playerManagementFrame.statusDisplay = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    playerManagementFrame.statusDisplay:SetPoint("LEFT", playerManagementFrame, "LEFT", 20, 0)
+    playerManagementFrame.statusDisplay:SetPoint("TOP", keyDropdown, "TOP", 0, 0)
+    playerManagementFrame.statusDisplay:SetPoint("BOTTOM", keyDropdown, "BOTTOM", 0, 0)
+    playerManagementFrame.statusDisplay:SetJustifyH("LEFT")
 
-   keyDropdown:SetupMenu(function(self, rootDescription)
-      for _, key in ipairs({ "F5", "F6", "F7", "F8" }) do
-         rootDescription:CreateButton(key, function()
-            playerManagementFrame.selectedKey = key
-            keyDropdown:SetText("Bind: " .. key)
-            if playerManagementFrame.keybindDisplay then
-               playerManagementFrame.keybindDisplay:SetText(key)
+    keyDropdown:SetupMenu(function(self, rootDescription)
+        for _, key in ipairs({ "F5", "F6", "F7", "F8" }) do
+            rootDescription:CreateButton(key, function()
+                playerManagementFrame.selectedKey = key
+                keyDropdown:SetText("Bind: " .. key)
+                if playerManagementFrame.keybindDisplay then
+                    playerManagementFrame.keybindDisplay:SetText(key)
+                end
+            end)
+        end
+    end)
+
+    -- Promote Button
+    playerManagementFrame.promoteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
+    playerManagementFrame.promoteBtn:SetSize(100, 25)
+    playerManagementFrame.promoteBtn:SetPoint("TOP", keyDropdown, "BOTTOM", 0, -10)
+    playerManagementFrame.promoteBtn:SetText("Promote")
+    playerManagementFrame.promoteBtn:SetScript("OnClick", function()
+        if playerManagementFrame.selectedPlayer then
+            SetupMacroAndBind("promote", playerManagementFrame.selectedPlayer)
+        end
+    end)
+
+    -- Whisper Button
+    playerManagementFrame.whisperBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
+    playerManagementFrame.whisperBtn:SetSize(100, 25)
+    playerManagementFrame.whisperBtn:SetPoint("RIGHT", playerManagementFrame.promoteBtn, "LEFT", -10, 0)
+    playerManagementFrame.whisperBtn:SetText("Whisper")
+    playerManagementFrame.whisperBtn:SetScript("OnClick", function()
+        if playerManagementFrame.selectedPlayer then
+            ChatFrame_OpenChat("/w " .. playerManagementFrame.selectedPlayer .. " ")
+        end
+    end)
+
+    -- Demote Button
+    playerManagementFrame.demoteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
+    playerManagementFrame.demoteBtn:SetSize(100, 25)
+    playerManagementFrame.demoteBtn:SetPoint("TOP", playerManagementFrame.promoteBtn, "BOTTOM", 0, -5)
+    playerManagementFrame.demoteBtn:SetText("Demote")
+    playerManagementFrame.demoteBtn:SetScript("OnClick", function()
+        if playerManagementFrame.selectedPlayer then
+            SetupMacroAndBind("demote", playerManagementFrame.selectedPlayer)
+        end
+    end)
+
+    -- Invite Button
+    playerManagementFrame.inviteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
+    playerManagementFrame.inviteBtn:SetSize(100, 25)
+    playerManagementFrame.inviteBtn:SetPoint("RIGHT", playerManagementFrame.demoteBtn, "LEFT", -10, 0)
+    playerManagementFrame.inviteBtn:SetText("Invite")
+    playerManagementFrame.inviteBtn:SetScript("OnClick", function()
+        if playerManagementFrame.selectedPlayer then
+            C_PartyInfo.InviteUnit(playerManagementFrame.selectedPlayer)
+        end
+    end)
+
+    -- Public Note Label
+    local publicNoteLabel = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    publicNoteLabel:SetPoint("TOPLEFT", playerManagementFrame.inviteBtn, "BOTTOMLEFT", -20, -15)
+    publicNoteLabel:SetText("Public Note:")
+
+    -- Public Note Display
+    local publicNoteText = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    publicNoteText:SetPoint("TOPLEFT", publicNoteLabel, "BOTTOMLEFT", 0, -5)
+    publicNoteText:SetWidth(220)
+    publicNoteText:SetJustifyH("LEFT")
+    publicNoteText:SetTextColor(1, 1, 1)
+
+    playerManagementFrame.publicNoteText = publicNoteText
+
+    -- Detailed Notes Label
+    local detailedNotesLabel = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightCenter")
+    detailedNotesLabel:SetPoint("TOPLEFT", publicNoteText, "BOTTOMLEFT", 0, -15)
+    detailedNotesLabel:SetText("Create/Edit Player Notes:")
+
+    -- Open Notes Button
+    local detailedNotesBtn = CreateFrame("Button", nil, playerManagementFrame, "UIPanelButtonTemplate")
+    detailedNotesBtn:SetSize(150, 25)
+    detailedNotesBtn:SetPoint("TOPLEFT", detailedNotesLabel, "BOTTOMLEFT", 0, -5)
+    detailedNotesBtn:SetText("Open Notes")
+    
+    local time = 0
+    detailedNotesBtn:SetScript("OnEnter", function(self)
+        self:SetScript("OnUpdate", function(self, elapsed)
+            time = (time + elapsed) % 100
+            detailedNotesLabel:SetRotation(math.sin(time * 1.8) * math.rad(5))
+        end)
+    end)
+
+    detailedNotesBtn:SetScript("OnLeave", function(self)
+        self:SetScript("OnUpdate", nil)
+        detailedNotesLabel:SetRotation(0)
+    end)
+
+    detailedNotesBtn:SetScript("OnClick", function()
+        local playerName = playerManagementFrame.selectedPlayer
+        if not playerName then return end
+
+        CreateNotesFrame()
+
+        if KMDA_SavedNotes and KMDA_SavedNotes[playerName] then
+            KMDA_OpenSavedNote(playerName)
+        else
+            KMDA_NewNote()
+            if notesFrame and notesFrame.titleBox then
+                notesFrame.titleBox:SetText(playerName)
+                notesFrame.editBox:SetFocus()
             end
-         end)
-      end
-   end)
+        end
+    end)
 
-   -- Promote Button
-   playerManagementFrame.promoteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
-   playerManagementFrame.promoteBtn:SetSize(100, 25)
-   playerManagementFrame.promoteBtn:SetPoint("TOP", keyDropdown, "BOTTOM", 0, -10)
-   playerManagementFrame.promoteBtn:SetText("Promote")
-   playerManagementFrame.promoteBtn:SetScript("OnClick", function()
-      if playerManagementFrame.selectedPlayer then
-         SetupMacroAndBind("promote", playerManagementFrame.selectedPlayer)
-      end
-   end)
-
-   -- Whisper Button
-   playerManagementFrame.whisperBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
-   playerManagementFrame.whisperBtn:SetSize(100, 25)
-   playerManagementFrame.whisperBtn:SetPoint("RIGHT", playerManagementFrame.promoteBtn, "LEFT", -10, 0)
-   playerManagementFrame.whisperBtn:SetText("Whisper")
-   playerManagementFrame.whisperBtn:SetScript("OnClick", function()
-      if playerManagementFrame.selectedPlayer then
-         ChatFrame_OpenChat("/w " .. playerManagementFrame.selectedPlayer .. " ")
-      end
-   end)
-
-   -- Demote Button
-   playerManagementFrame.demoteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
-   playerManagementFrame.demoteBtn:SetSize(100, 25)
-   playerManagementFrame.demoteBtn:SetPoint("TOP", playerManagementFrame.promoteBtn, "BOTTOM", 0, -5)
-   playerManagementFrame.demoteBtn:SetText("Demote")
-   playerManagementFrame.demoteBtn:SetScript("OnClick", function()
-      if playerManagementFrame.selectedPlayer then
-         SetupMacroAndBind("demote", playerManagementFrame.selectedPlayer)
-      end
-   end)
-
-   -- Invite Button
-   playerManagementFrame.inviteBtn = CreateFrame("Button", nil, playerManagementFrame, "GameMenuButtonTemplate")
-   playerManagementFrame.inviteBtn:SetSize(100, 25)
-   playerManagementFrame.inviteBtn:SetPoint("RIGHT", playerManagementFrame.demoteBtn, "LEFT", -10, 0)
-   playerManagementFrame.inviteBtn:SetText("Invite")
-   playerManagementFrame.inviteBtn:SetScript("OnClick", function()
-      if playerManagementFrame.selectedPlayer then
-         C_PartyInfo.InviteUnit(playerManagementFrame.selectedPlayer)
-      end
-   end)
-
-   -- Player Note Label
-   local pNoteLabel = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-   pNoteLabel:SetPoint("TOPLEFT", playerManagementFrame.inviteBtn, "BOTTOMLEFT", -20, -15)
-   pNoteLabel:SetText("Player Note:")
-
-   -- Player Note EditBox
-   local pNoteBox = CreateFrame("EditBox", nil, playerManagementFrame, "InputBoxTemplate")
-   pNoteBox:SetSize(220, 30)
-   pNoteBox:SetPoint("TOPLEFT", pNoteLabel, "BOTTOMLEFT", 0, -5)
-   pNoteBox:SetAutoFocus(false)
-   playerManagementFrame.pNoteBox = pNoteBox
-
-   pNoteBox:SetScript("OnEnterPressed", function(self)
-      local index = playerManagementFrame.selectedIndex
-      if index then
-         GuildRosterSetPublicNote(index, self:GetText())
-         print("KMDA: Player note updated.")
-      end
-      self:ClearFocus()
-   end)
-
-   -- Officer Note Label
-   local oNoteLabel = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-   oNoteLabel:SetPoint("TOPLEFT", pNoteBox, "BOTTOMLEFT", 0, -10)
-   oNoteLabel:SetText("Officer Note:")
-
-   -- Officer Note EditBox
-   local oNoteBox = CreateFrame("EditBox", nil, playerManagementFrame, "InputBoxTemplate")
-   oNoteBox:SetSize(220, 30)
-   oNoteBox:SetPoint("TOPLEFT", oNoteLabel, "BOTTOMLEFT", 0, -5)
-   oNoteBox:SetAutoFocus(false)
-   playerManagementFrame.oNoteBox = oNoteBox
-
-   oNoteBox:SetScript("OnEnterPressed", function(self)
-      local index = playerManagementFrame.selectedIndex
-      if index then
-         GuildRosterSetOfficerNote(index, self:GetText())
-         print("KMDA: Officer note updated.")
-      end
-      self:ClearFocus()
-   end)
-
-   -- Close Button
-   local closeButton = CreateFrame("Button", nil, playerManagementFrame, "UIPanelCloseButton")
-   closeButton:SetPoint("TOPRIGHT", -5, -5)
-   closeButton:SetScript("OnClick", function()
-      playerManagementFrame:Hide()
-   end)
+    -- Close Button
+    local closeButton = CreateFrame("Button", nil, playerManagementFrame, "UIPanelCloseButton")
+    closeButton:SetPoint("TOPRIGHT", -5, -5)
+    closeButton:SetScript("OnClick", function()
+        playerManagementFrame:Hide()
+    end)
 end
 
---#region MemberSearch RightClick Menu 
-local KMDARightClickMenu
+local function ShowPlayerManagementFrame(name, online)
+    CreatePlayerManagementFrame()
+    playerManagementFrame.selectedPlayer = name
 
+    -- Find member index and notes
+    local index, note, officerNote, class, level, rank, years, months, days, hours, guid
+    for i = 1, GetNumGuildMembers() do
+        local n, r, _, l, c, _, nNote, oNote, _, _, _, _, _, _, _, _, playerGUID = GetGuildRosterInfo(i)
+        if n == name then
+            index = i
+            note = nNote
+            officerNote = oNote
+            class = c
+            level = l
+            rank = r
+            guid = playerGUID
+            years, months, days, hours = GetGuildRosterLastOnline(i)
+            break
+        end
+    end
+
+    if class then
+        local color = GetClassColor(class)
+        playerManagementFrame.playerName:SetText("|cFF" .. color .. name .. "|r")
+    else
+        playerManagementFrame.playerName:SetText(name)
+        if online then
+            playerManagementFrame.playerName:SetTextColor(0, 1, 0) -- Green
+        else
+            playerManagementFrame.playerName:SetTextColor(1, 1, 0) -- Yellow
+        end
+    end
+
+    if level and rank then
+        local rankColor = GetRankColor(rank)
+        playerManagementFrame.levelRank:SetText("Level: " .. level .. "   Rank: |cFF" .. rankColor .. rank .. "|r")
+    else
+        playerManagementFrame.levelRank:SetText("")
+    end
+
+    if online then
+        playerManagementFrame.statusDisplay:SetText("  Online Now!")
+        playerManagementFrame.statusDisplay:SetTextColor(0, 1, 0) -- Green
+    else
+        local totalDays = (years or 0) * 365 + (months or 0) * 30 + (days or 0)
+        if totalDays > 0 then
+            playerManagementFrame.statusDisplay:SetText("Offline " .. totalDays .. " days")
+        else
+            playerManagementFrame.statusDisplay:SetText("Offline " .. (hours or 0) .. " hours")
+        end
+        playerManagementFrame.statusDisplay:SetTextColor(1, 0.15, 0.15, 0.85)
+    end
+
+    playerManagementFrame.selectedIndex = index
+    playerManagementFrame.selectedGUID = guid
+    playerManagementFrame.publicNoteText:SetText(note or "None")
+
+    playerManagementFrame:ClearAllPoints()
+    if searchFrame and searchFrame:IsShown() then
+        playerManagementFrame:SetPoint("LEFT", searchFrame, "RIGHT", 0, 0)
+    else
+        playerManagementFrame:SetPoint("CENTER")
+    end
+    playerManagementFrame:Show()
+end
+--#ndregion Create Player Management Frame
+
+-- helper to hide RightClick menu
 local function HideRightClickMenu()
-   if KMDARightClickMenu then
-      KMDARightClickMenu:Hide()
-   end
+    if KMDARightClickMenu then
+        KMDARightClickMenu:Hide()
+    end
 end
 
 -- Helper to create styled, clickable text lines in our menu
 local function CreateMenuOption(parent, text, yOffset, onClick)
-   local button = CreateFrame("Button", nil, parent)
-   button:SetSize(parent:GetWidth() - 20, 20)
-   button:SetPoint("TOP", 0, yOffset)
-   button:SetText(text)
+    local button = CreateFrame("Button", nil, parent)
+    button:SetSize(parent:GetWidth() - 20, 20)
+    button:SetPoint("TOP", 0, yOffset)
+    button:SetText(text)
 
-   local fontString = button:GetFontString()
-   fontString:SetFontObject("GameFontNormal")
+    local fontString = button:GetFontString()
+    fontString:SetFontObject("GameFontNormal")
 
-   button:SetScript("OnEnter", function(self)
-      fontString:SetTextColor(0.5, 0.75, 1.0) -- Light Blue
-   end)
+    button:SetScript("OnEnter", function(self)
+        fontString:SetTextColor(0.5, 0.75, 1.0) -- Light Blue
+    end)
 
-   button:SetScript("OnLeave", function(self)
-      fontString:SetTextColor(1, 1, 1) -- White
-   end)
+    button:SetScript("OnLeave", function(self)
+        fontString:SetTextColor(1, 1, 1) -- White
+    end)
 
-   button:SetScript("OnMouseDown", function(self)
-      fontString:SetTextColor(0.8, 0.6, 1.0) -- Purple
-   end)
+    button:SetScript("OnMouseDown", function(self)
+        fontString:SetTextColor(0.8, 0.6, 1.0) -- Purple
+    end)
 
-   button:SetScript("OnMouseUp", function(self)
-      -- Revert to hover color if still hovering
-      if self:IsMouseOver() then
-         fontString:SetTextColor(0.5, 0.75, 1.0) -- Light Blue
-      else
-         fontString:SetTextColor(1, 1, 1) -- White
-      end
-   end)
+    button:SetScript("OnMouseUp", function(self)
+        -- Revert to hover color if still hovering
+        if self:IsMouseOver() then
+            fontString:SetTextColor(0.5, 0.75, 1.0) -- Light Blue
+        else
+            fontString:SetTextColor(1, 1, 1)        -- White
+        end
+    end)
 
-   button:SetScript("OnClick", function()
-      onClick()
-      C_Timer.After(0.5, HideRightClickMenu)
-   end)
+    button:SetScript("OnClick", function()
+        onClick()
+        C_Timer.After(0.5, HideRightClickMenu)
+    end)
 
-   -- Set initial state
-   fontString:SetTextColor(1, 1, 1) -- White
+    -- Set initial state
+    fontString:SetTextColor(1, 1, 1) -- White
 
-   return button
+    return button
 end
 
 --right click menu functions
 local function CreateRightClickMenu()
-   if KMDARightClickMenu then return end
+    if KMDARightClickMenu then return end
 
-   KMDARightClickMenu = CreateFrame("Frame", "KMDARightClickMenu", UIParent, "BackdropTemplate")
-   KMDARightClickMenu:SetFrameStrata("TOOLTIP")
-   KMDARightClickMenu:SetSize(150, 125)
-   KMDARightClickMenu:SetBackdrop({
-      bgFile = "Interface/DialogFrame/UI-DialogBox-Background-Dark",
-      edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-      tile = true, tileSize = 16, edgeSize = 16,
-      insets = { left = 4, right = 4, top = 4, bottom = 4 }
-   })
-   KMDARightClickMenu:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
-   KMDARightClickMenu:Hide()
+    KMDARightClickMenu = CreateFrame("Frame", "KMDARightClickMenu", UIParent, "BackdropTemplate")
+    KMDARightClickMenu:SetFrameStrata("TOOLTIP")
+    KMDARightClickMenu:SetSize(150, 125)
+    KMDARightClickMenu:SetBackdrop({
+        bgFile = "Interface/DialogFrame/UI-DialogBox-Background-Dark",
+        edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+        tile = true,
+        tileSize = 16,
+        edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    })
+    KMDARightClickMenu:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
+    KMDARightClickMenu:Hide()
 
-   -- Title for player name
-   KMDARightClickMenu.title = KMDARightClickMenu:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   local font, height, flags = KMDARightClickMenu.title:GetFont()
-   KMDARightClickMenu.title:SetFont(font, height + 2, flags)
-   KMDARightClickMenu.title:SetPoint("TOP", 0, -10)
+    -- Title for player name
+    KMDARightClickMenu.title = KMDARightClickMenu:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    local font, height, flags = KMDARightClickMenu.title:GetFont()
+    KMDARightClickMenu.title:SetFont(font, height + 2, flags)
+    KMDARightClickMenu.title:SetPoint("TOP", 0, -10)
 
-   -- Invite Option
-   KMDARightClickMenu.invite = CreateMenuOption(KMDARightClickMenu, "Invite", -35, function()
-      if KMDARightClickMenu.playerName then
-         C_PartyInfo.InviteUnit(KMDARightClickMenu.playerName)
-      end
-   end)
+    -- Invite Option
+    KMDARightClickMenu.invite = CreateMenuOption(KMDARightClickMenu, "Invite", -35, function()
+        if KMDARightClickMenu.playerName then
+            C_PartyInfo.InviteUnit(KMDARightClickMenu.playerName)
+        end
+    end)
 
-   -- Whisper Option
-   KMDARightClickMenu.whisper = CreateMenuOption(KMDARightClickMenu, "Whisper", -55, function()
-      if KMDARightClickMenu.playerName then
-         ChatFrame_OpenChat("/w " .. KMDARightClickMenu.playerName .. " ")
-      end
-   end)
+    -- Whisper Option
+    KMDARightClickMenu.whisper = CreateMenuOption(KMDARightClickMenu, "Whisper", -55, function()
+        if KMDARightClickMenu.playerName then
+            ChatFrame_OpenChat("/w " .. KMDARightClickMenu.playerName .. " ")
+        end
+    end)
 
-   -- Notes Option
-   KMDARightClickMenu.notes = CreateMenuOption(KMDARightClickMenu, "Notes", -75, function()
-      if KMDARightClickMenu.playerName then
-         CreateNotesFrame()
-         local playerName = KMDARightClickMenu.playerName
-         if KMDA_SavedNotes and KMDA_SavedNotes[playerName] then
-            KMDA_OpenSavedNote(playerName)
-         else
-            KMDA_NewNote() -- Clears fields
-            if notesFrame and notesFrame.titleBox then
-               notesFrame.titleBox:SetText(playerName) -- Set title for new note
-               notesFrame.editBox:SetFocus()
+    -- Notes Option
+    KMDARightClickMenu.notes = CreateMenuOption(KMDARightClickMenu, "Notes", -75, function()
+        if KMDARightClickMenu.playerName then
+            CreateNotesFrame()
+            local playerName = KMDARightClickMenu.playerName
+            if KMDA_SavedNotes and KMDA_SavedNotes[playerName] then
+                KMDA_OpenSavedNote(playerName)
+            else
+                KMDA_NewNote()                              -- Clears fields
+                if notesFrame and notesFrame.titleBox then
+                    notesFrame.titleBox:SetText(playerName) -- Set title for new note
+                    notesFrame.editBox:SetFocus()
+                end
             end
-         end
-      end
-   end)
+        end
+    end)
 
-   --ModMenu_GetArmoryLink
-   KMDARightClickMenu.armoryLink = CreateMenuOption(KMDARightClickMenu, "Armory Link", -95, function()
-      if KMDARightClickMenu.playerName then
-         ModMenu_GetArmoryLink(KMDARightClickMenu.playerName)
-      end
-   end)
+    --ModMenu_GetArmoryLink
+    KMDARightClickMenu.armoryLink = CreateMenuOption(KMDARightClickMenu, "Armory Link", -95, function()
+        if KMDARightClickMenu.playerName then
+            ModMenu_GetArmoryLink(KMDARightClickMenu.playerName)
+        end
+    end)
 
 
-   -- Hide if the mouse leaves the menu area
-   KMDARightClickMenu:SetScript("OnLeave", function(self)
-      C_Timer.After(0.1, function()
-         if not self:IsMouseOver() then
-            self:Hide()
-         end
-      end)
-   end)
+    -- Hide if the mouse leaves the menu area
+    KMDARightClickMenu:SetScript("OnLeave", function(self)
+        C_Timer.After(0.1, function()
+            if not self:IsMouseOver() then
+                self:Hide()
+            end
+        end)
+    end)
 end
 
 local function ShowRightClickMenu(name, class)
-   CreateRightClickMenu() -- Ensure it's created
+    CreateRightClickMenu()                     -- Ensure it's created
 
-   KMDARightClickMenu.playerName = name -- Keep full name for functions
-   local color = GetClassColor(class or "")
-   local shortName = Ambiguate(name, "short") -- Use short name for display
-   KMDARightClickMenu.title:SetText("|cFF" .. color .. shortName .. "|r")
+    KMDARightClickMenu.playerName = name       -- Keep full name for functions
+    local color = GetClassColor(class or "")
+    local shortName = Ambiguate(name, "short") -- Use short name for display
+    KMDARightClickMenu.title:SetText("|cFF" .. color .. shortName .. "|r")
 
-   KMDARightClickMenu:ClearAllPoints()
-   local uiScale = UIParent:GetEffectiveScale()
-   local x, y = GetCursorPosition()
-   KMDARightClickMenu:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x / uiScale, y / uiScale)
-   KMDARightClickMenu:Raise()
-   KMDARightClickMenu:Show()
+    KMDARightClickMenu:ClearAllPoints()
+    local uiScale = UIParent:GetEffectiveScale()
+    local x, y = GetCursorPosition()
+    KMDARightClickMenu:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x / uiScale, y / uiScale)
+    KMDARightClickMenu:Raise()
+    KMDARightClickMenu:Show()
 end
 --#endregion MemberSearch RightClick Menu
 
-local function ShowPlayerManagementFrame(name, online)
-   CreatePlayerManagementFrame()
-   playerManagementFrame.selectedPlayer = name
-
-   -- Find member index and notes
-   local index, note, officerNote, class, level, rank, years, months, days, hours
-   for i = 1, GetNumGuildMembers() do
-      local n, r, _, l, c, _, nNote, oNote = GetGuildRosterInfo(i)
-      if n == name then
-         index = i
-         note = nNote
-         officerNote = oNote
-         class = c
-         level = l
-         rank = r
-         years, months, days, hours = GetGuildRosterLastOnline(i)
-         break
-      end
-   end
-
-   if class then
-      local color = GetClassColor(class)
-      playerManagementFrame.playerName:SetText("|cFF" .. color .. name .. "|r")
-   else
-      playerManagementFrame.playerName:SetText(name)
-      if online then
-         playerManagementFrame.playerName:SetTextColor(0, 1, 0) -- Green
-      else
-         playerManagementFrame.playerName:SetTextColor(1, 1, 0) -- Yellow
-      end
-   end
-
-   if level and rank then
-      local rankColor = GetRankColor(rank)
-      playerManagementFrame.levelRank:SetText("Level: " .. level .. "   Rank: |cFF" .. rankColor .. rank .. "|r")
-   else
-      playerManagementFrame.levelRank:SetText("")
-   end
-
-   if online then
-      playerManagementFrame.statusDisplay:SetText("  Online Now!")
-      playerManagementFrame.statusDisplay:SetTextColor(0, 1, 0) -- Green
-   else
-      local totalDays = (years or 0) * 365 + (months or 0) * 30 + (days or 0)
-      if totalDays > 0 then
-         playerManagementFrame.statusDisplay:SetText("Offline " .. totalDays .. " days")
-      else
-         playerManagementFrame.statusDisplay:SetText("Offline " .. hours .. " hours")
-      end
-      playerManagementFrame.statusDisplay:SetTextColor(1, 0.15, 0.15, 0.85)
-   end
-
-   playerManagementFrame.selectedIndex = index
-   playerManagementFrame.pNoteBox:SetText(note or "")
-   playerManagementFrame.oNoteBox:SetText(officerNote or "")
-   playerManagementFrame.pNoteBox:SetCursorPosition(0)
-   playerManagementFrame.oNoteBox:SetCursorPosition(0)
-
-   playerManagementFrame:ClearAllPoints()
-   if searchFrame and searchFrame:IsShown() then
-      playerManagementFrame:SetPoint("LEFT", searchFrame, "RIGHT", 0, 0)
-   else
-      playerManagementFrame:SetPoint("CENTER")
-   end
-   playerManagementFrame:Show()
+-- Normalize Search Input and Results
+local function stripChars(str)
+    if not str then return "" end
+    local normalisedString = str:gsub("[%z\1-\127\194-\244][\128-\191]*", tableAccents)
+    return string.lower(normalisedString)
 end
 
--- Dynamic search matching players with accented names usiing normal ascii search input
+-- Refresh the Guild Roster Search Table
+local function RefreshGuildRosterCache()
+    wipe(guildRosterCache) -- Clear old data
+    for i = 1, GetNumGuildMembers() do
+        local name, rank, _, _, class, _, _, _, online, _, _, _, _, _ = GetGuildRosterInfo(i)
+        local hyperlinkName = "|Hplayer:" .. name .. "|h[" .. name .. "]|h"
+
+        local year, month, day, hour = GetGuildRosterLastOnline(i)
+        year = year and year or 0
+        month = month and month or 0
+        day = day and day or 0
+        hour = hour and hour or 0
+        local offlineHours = year * 8760 + month * 720 + day * 24 + hour
+
+        table.insert(guildRosterCache, {
+            linkName       = hyperlinkName,
+            name           = name,
+            normalizedName = stripChars(name),
+            rank           = rank,
+            class          = class,
+            online         = online,
+            year           = year,
+            month          = month,
+            day            = day,
+            hour           = hour,
+            lastOnline     = year .. "y " .. month .. "m " .. day .. "d " .. hour .. "h"
+        })
+    end
+
+    table.sort(guildRosterCache, function(a, b)
+        -- Online players first
+        if a.online ~= b.online then
+            return a.online
+        end
+
+        -- If both are online → sort by name
+        if a.online then
+            return a.name < b.name
+        end
+
+        -- Both offline → compare last online time
+        if a.year ~= b.year then
+            return a.year < b.year
+        end
+
+        if a.month ~= b.month then
+            return a.month < b.month
+        end
+
+        if a.day ~= b.day then
+            return a.day < b.day
+        end
+
+        if a.hour ~= b.hour then
+            return a.hour < b.hour
+        end
+
+        -- final fallback
+        return a.name < b.name
+    end)
+end
+
+-- Clear Previous Search Results
+local function ClearSearchResults()
+    for _, child in ipairs({ SR_scrollChild:GetChildren() }) do
+        child:Hide()
+        child:SetParent(nil) -- Prevent lingering references
+    end
+end
+
+-- helper function thanks Nyx
+local function FormatOfflineTime(lastOnline)
+    -- Expecting lastOnline like: "0y 0m 0d 0h"
+    local y, m, d, h = lastOnline:match("(%d+)y%s+(%d+)m%s+(%d+)d%s+(%d+)h")
+
+    y = tonumber(y) or 0
+    m = tonumber(m) or 0
+    d = tonumber(d) or 0
+    h = tonumber(h) or 0
+
+    -- Recently condition
+    if y == 0 and m == 0 and d == 0 and h == 0 then
+        return "|cff6fa8dcLogged Recently!|r"
+    end
+
+    return string.format("|cffff0000Offline|r %dy %dm %dd %dh", y, m, d, h)
+end
+
+-- Member Searcch Results Population
 local function UpdateSearchResults(searchText)
-   ClearSearchResults() -- Remove old results
-   
-   local offsetY = 10
-   local rowHeight = 20
+    ClearSearchResults() -- Remove old results
+    local offsetY = 10
+    local rowHeight = 20
 
-   for _, member in ipairs(guildRosterCache) do
-      --local normalizedMemberName = stripChars(member.name) removed after refactoring
-      local playerName = member.name
-      local status = member.online and "|cff00ff00Online|r" or
-          string.format("|cffff0000Offline|r (%s)", member.lastOnline)
+    for _, member in ipairs(guildRosterCache) do
+        --local normalizedMemberName = stripChars(member.name) removed after refactoring
+        local playerName = member.name
+        local status
 
-      -- Compare normalized strings
-      if member.normalizedName:find(searchText, 1, true) then
-         -- Create a new row for each matching result
-         local row = CreateFrame("Frame", nil, SR_scrollChild)
-         row:SetSize(440, rowHeight)
-         row:SetPoint("TOPLEFT", SR_scrollChild, "TOPLEFT", 0, -offsetY)
+        if member.online then
+            status = "|cff00ff00Online|r"
+        else
+            status = FormatOfflineTime(member.lastOnline)
+        end
 
-         ----------------------------------------------------------
-         -- 1) Name Column
-         ----------------------------------------------------------
-         local nameCol = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-         nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
-         nameCol:SetSize(190, rowHeight)
-         nameCol:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-         nameCol:SetText(playerName)
-         nameCol:SetNormalFontObject("GameFontNormal")
-         nameCol:SetHighlightFontObject("GameFontHighlight")
+        -- Compare normalized strings
+        if member.normalizedName:find(searchText, 1, true) then
+            --Create a new row for each matching result
+            local row = CreateFrame("Frame", nil, SR_scrollChild)
+            row:SetSize(440, rowHeight)
+            row:SetPoint("TOPLEFT", SR_scrollChild, "TOPLEFT", 0, -offsetY)
 
-         nameCol:SetScript("OnClick", function(self, button)
-            if button == "RightButton" then
-               ShowRightClickMenu(member.name, member.class)
-            elseif button == "LeftButton" then
-               ShowPlayerManagementFrame(member.name, member.online)
-            end
-         end)
+            ----------------------------------------------------------
+            -- 1) Name Column
+            ----------------------------------------------------------
+            local nameCol = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+            nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
+            nameCol:SetSize(190, rowHeight)
+            nameCol:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+            nameCol:SetText(playerName)
+            nameCol:SetNormalFontObject("GameFontNormal")
+            nameCol:SetHighlightFontObject("GameFontHighlight")
 
-         ----------------------------------------------------------
-         -- 2) Rank Column
-         ----------------------------------------------------------
-         local rankCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-         -- Position it to the right of the name column, with a small gap
-         rankCol:SetPoint("LEFT", nameCol, "RIGHT", 10, 0)
-         rankCol:SetWidth(85)
-         rankCol:SetJustifyH("LEFT")
-         rankCol:SetText(member.rank)
+            nameCol:SetScript("OnClick", function(self, button)
+                if button == "RightButton" then
+                    ShowRightClickMenu(member.name, member.class)
+                elseif button == "LeftButton" then
+                    ShowPlayerManagementFrame(member.name, member.online)
+                end
+            end)
 
-         ----------------------------------------------------------
-         -- 3) Status Column
-         ----------------------------------------------------------
-         local statusCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-         -- Again position it to the right, with a small gap
-         statusCol:SetPoint("LEFT", rankCol, "RIGHT", 10, 0)
-         statusCol:SetWidth(180)
-         statusCol:SetJustifyH("LEFT")
-         statusCol:SetText(status)
+            ----------------------------------------------------------
+            -- 2) Rank Column
+            ----------------------------------------------------------
+            local rankCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            -- Position it to the right of the name column, with a small gap
+            rankCol:SetPoint("LEFT", nameCol, "RIGHT", 10, 0)
+            rankCol:SetWidth(85)
+            rankCol:SetJustifyH("LEFT")
+            rankCol:SetText(member.rank)
 
-         -- Increase the offset so the next row appears below
-         offsetY = offsetY + rowHeight
-      end
-   end
+            ----------------------------------------------------------
+            -- 3) Status Column
+            ----------------------------------------------------------
+            local statusCol = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            -- Again position it to the right, with a small gap
+            statusCol:SetPoint("LEFT", rankCol, "RIGHT", 10, 0)
+            statusCol:SetWidth(195)
+            statusCol:SetJustifyH("LEFT")
+            statusCol:SetText(status)
 
+            -- Increase the offset so the next row appears below
+            offsetY = offsetY + rowHeight
+        end
+    end
 
-   -- Adjust scroll child height so it can accommodate all rows
-   SR_scrollChild:SetSize(440, math.max(offsetY, scrollFrame:GetHeight()))
+    -- Adjust scroll child height so it can accommodate all rows
+    SR_scrollChild:SetSize(440, math.max(offsetY, scrollFrame:GetHeight()))
 end
 
 -- Create the search frame (only once)
 local function CreateSearchFrame()
-   if searchFrame then return end -- Reuse the frame if it already exists
+    if searchFrame then return end -- Reuse the frame if it already exists
 
-   searchFrame = CreateFrame("Frame", "KMDA_SearchFrame", UIParent, "BackdropTemplate")
-   searchFrame:SetSize(500, 340)
-   searchFrame:SetPoint("CENTER")
-   searchFrame:SetFrameStrata("FULLSCREEN_DIALOG")
-   searchFrame:SetFrameLevel(1)
-   searchFrame:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8x8",
-      edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-      tile = true,
-      tileSize = 32,
-      edgeSize = 32,
-      insets = { left = 8, right = 8, top = 8, bottom = 8 },
-   })
-   searchFrame:SetBackdropColor(0, 0, 0, 1)
-   searchFrame:EnableMouse(true)
-   searchFrame:SetMovable(true)
-   searchFrame:RegisterForDrag("LeftButton")
-   searchFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
-   searchFrame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
+    searchFrame = CreateFrame("Frame", "KMDA_SearchFrame", UIParent, "BackdropTemplate")
+    searchFrame:SetSize(500, 340)
+    searchFrame:SetPoint("CENTER")
+    searchFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+    searchFrame:SetFrameLevel(1)
+    searchFrame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8x8",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = { left = 8, right = 8, top = 8, bottom = 8 },
+    })
+    searchFrame:SetBackdropColor(0, 0, 0, 1)
+    searchFrame:EnableMouse(true)
+    searchFrame:SetMovable(true)
+    searchFrame:RegisterForDrag("LeftButton")
+    searchFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+    searchFrame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 
-   searchFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
-   searchFrame:SetScript("OnEvent", function(self, event)
-      if event == "GUILD_ROSTER_UPDATE" and self:IsVisible() then
-         RefreshGuildRosterCache()
-         local inputBox = _G["KMDA_SearchInputBox"]
-         local searchText = inputBox and stripChars(inputBox:GetText()) or ""
-         UpdateSearchResults(searchText)
-      end
-   end)
+    searchFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+    searchFrame:SetScript("OnEvent", function(self, event)
+        if event == "GUILD_ROSTER_UPDATE" and self:IsVisible() then
+            RefreshGuildRosterCache()
+            local inputBox = _G["KMDA_SearchInputBox"]
+            local searchText = inputBox and stripChars(inputBox:GetText()) or ""
+            UpdateSearchResults(searchText)
+        end
+    end)
 
-   -- Title bar
-   local title = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
-   title:SetPoint("TOP", 0, -10)
-   title:SetText("Member Search")
+    -- Title bar
+    local title = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+    title:SetPoint("TOP", 0, -10)
+    title:SetText("Member Search")
 
-   -- Input box label
-   local inputLabel = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLeftOrange")
-   inputLabel:SetPoint("TOPLEFT", 95, -40)
-   inputLabel:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Search:")
+    -- Input box label
+    local inputLabel = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLeftOrange")
+    inputLabel:SetPoint("TOPLEFT", 95, -40)
+    inputLabel:SetText(CreateAtlasMarkup("communities-icon-searchmagnifyingglass", 24, 24) .. " Search:")
 
-   -- Input box for search
-   local inputBox = CreateFrame("EditBox", "KMDA_SearchInputBox", searchFrame, "InputBoxTemplate")
-   inputBox:SetSize(200, 30)
-   inputBox:SetPoint("LEFT", inputLabel, "RIGHT", 5, 0)
-   inputBox:SetAutoFocus(false)
-   inputBox:SetScript("OnTextChanged", function(self)
-      local searchTextGet = self:GetText()
-      --local searchText = string.lower(searchTextGet) removed after refactor
-      local searchText = stripChars(searchTextGet) -- Normalize search input too
-      UpdateSearchResults(searchText)
-   end)
+    -- Input box for search
+    local inputBox = CreateFrame("EditBox", "KMDA_SearchInputBox", searchFrame, "InputBoxTemplate")
+    inputBox:SetSize(200, 30)
+    inputBox:SetPoint("LEFT", inputLabel, "RIGHT", 5, 0)
+    inputBox:SetAutoFocus(false)
+    inputBox:SetScript("OnTextChanged", function(self)
+        local searchTextGet = self:GetText()
+        --local searchText = string.lower(searchTextGet) removed after refactor
+        local searchText = stripChars(searchTextGet) -- Normalize search input too
+        UpdateSearchResults(searchText)
+    end)
 
-   -- Refresh Search Button
-   local refreshButton = CreateFrame("Button", nil, searchFrame, "UIPanelButtonTemplate")
-   refreshButton:SetSize(60, 22)
-   refreshButton:SetPoint("LEFT", inputBox, "RIGHT", 5, 0)
-   refreshButton:SetText("Refresh")
-   refreshButton:SetScript("OnClick", function()
-      C_GuildInfo.GuildRoster()
-      inputBox:SetText("")
-      inputBox:ClearFocus()
-   end)
+    -- Refresh Search Button
+    local refreshButton = CreateFrame("Button", nil, searchFrame, "UIPanelButtonTemplate")
+    refreshButton:SetSize(60, 22)
+    refreshButton:SetPoint("LEFT", inputBox, "RIGHT", 5, 0)
+    refreshButton:SetText("Refresh")
+    refreshButton:SetScript("OnClick", function()
+        C_GuildInfo.GuildRoster()
+        inputBox:SetText("")
+        inputBox:ClearFocus()
+    end)
 
-   -- Close button
-   local closeButton = CreateFrame("Button", nil, searchFrame, "UIPanelCloseButton")
-   closeButton:SetPoint("TOPRIGHT", -5, -5)
-   closeButton:SetScript("OnClick", function()
-      searchFrame:Hide()
-   end)
+    -- Close button
+    local closeButton = CreateFrame("Button", nil, searchFrame, "UIPanelCloseButton")
+    closeButton:SetPoint("TOPRIGHT", -5, -5)
+    closeButton:SetScript("OnClick", function()
+        searchFrame:Hide()
+    end)
 
-   -- Headers for columns
-   local headers = {
-      { text = "Name",   width = 150, point = "TOPLEFT", offsetX = 10 },
-      { text = "Rank",   width = 100, point = "TOPLEFT", offsetX = 160 },
-      { text = "Status", width = 100, point = "TOPLEFT", offsetX = 270 },
-   }
+    -- Headers for columns
+    local headers = {
+        { text = "Name",   width = 150, point = "TOPLEFT", offsetX = 10 },
+        { text = "Rank",   width = 100, point = "TOPLEFT", offsetX = 160 },
+        { text = "Status", width = 100, point = "TOPLEFT", offsetX = 270 },
+    }
 
-   for _, header in ipairs(headers) do
-      local headerText = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-      headerText:SetSize(header.width, 20)
-      headerText:SetPoint(header.point, searchFrame, header.point, header.offsetX, -60)
-      headerText:SetText(header.text)
-   end
+    for _, header in ipairs(headers) do
+        local headerText = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        headerText:SetSize(header.width, 20)
+        headerText:SetPoint(header.point, searchFrame, header.point, header.offsetX, -60)
+        headerText:SetText(header.text)
+    end
 
-   -- Scrollable list for results
-   scrollFrame = CreateFrame("ScrollFrame", "KMDA_SearchResultsScrollFrame", searchFrame, "UIPanelScrollFrameTemplate")
-   scrollFrame:SetSize(searchFrame:GetWidth() - 40, searchFrame:GetHeight() - 90)
-   scrollFrame:SetPoint("BOTTOM", 0, 10)
+    -- Scrollable list for results
+    scrollFrame = CreateFrame("ScrollFrame", "KMDA_SearchResultsScrollFrame", searchFrame, "UIPanelScrollFrameTemplate")
+    scrollFrame:SetSize(searchFrame:GetWidth() - 40, searchFrame:GetHeight() - 90)
+    scrollFrame:SetPoint("BOTTOM", 0, 10)
 
-   SR_scrollChild = CreateFrame("Frame", nil, scrollFrame)
-   scrollFrame:SetScrollChild(SR_scrollChild)
-   return SR_scrollChild
+    SR_scrollChild = CreateFrame("Frame", nil, scrollFrame)
+    scrollFrame:SetScrollChild(SR_scrollChild)
+    return SR_scrollChild
 end
 
--- Main function to initiate member search
+-- Main function to initiate and refresh member search
 local function KMDA_MemberSearch()
-   C_GuildInfo.GuildRoster() -- Trigger GUILD_ROSTER_UPDATE
-   RefreshGuildRosterCache() -- Update cache
-   CreateSearchFrame()
-   searchFrame:Show()
+    C_GuildInfo.GuildRoster() -- Trigger GUILD_ROSTER_UPDATE
+    RefreshGuildRosterCache() -- Update cache
+    CreateSearchFrame()
+    searchFrame:Show()
 end
 --#endregion MemberSearch
 
@@ -4873,7 +4916,9 @@ local function CreateFastOptionsMenu()
     OG_FastOptionsMenu:SetBackdrop({
         bgFile = "Interface/DialogFrame/UI-DialogBox-Background-Dark",
         edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-        tile = true, tileSize = 16, edgeSize = 16,
+        tile = true,
+        tileSize = 16,
+        edgeSize = 16,
         insets = { left = 4, right = 4, top = 4, bottom = 4 }
     })
     OG_FastOptionsMenu:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
@@ -5249,7 +5294,7 @@ local function PopulateContentFrame_GeneralSettings(optionsFrame)
     themeDropdown:SetDefaultText("Select Theme")
     themeDropdown:SetupMenu(function(self, rootDescription)
         for themeName, themeData in pairs(OG_Themes) do
-            rootDescription:CreateButton(themeName, function(data) --themeData.dropDownIcon .. 
+            rootDescription:CreateButton(themeName, function(data) --themeData.dropDownIcon ..
                 ApplyTheme(GuildChatWindow, themeData, themeName)
                 print("Selected Theme:", themeName)
             end)
@@ -5308,12 +5353,12 @@ local function PopulateContentFrame_GuildSettings(optionsFrame)
     local contentFrame = optionsFrame.contentFrame
 
     local guildOptions = {
-        { label = "Purge Inactive",     key = KMDA_Purge },
-        { label = "Member Search",      key = KMDA_MemberSearch },
-        { label = "Activity Graph",     key = OldGods_MetaDataGraph },
-        { label = "Open Note Pad",      key = CreateNotesFrame },
-        { label = "Button 5 - nil",     key = dummyFunction },
-        { label = "Button 6 - nil",     key = dummyFunction },
+        { label = "Purge Inactive", key = KMDA_Purge },
+        { label = "Member Search",  key = KMDA_MemberSearch },
+        { label = "Activity Graph", key = OldGods_MetaDataGraph },
+        { label = "Open Note Pad",  key = CreateNotesFrame },
+        { label = "Button 5 - nil", key = dummyFunction },
+        { label = "Button 6 - nil", key = dummyFunction },
     }
 
     for _, option in ipairs(guildOptions) do
@@ -5917,74 +5962,7 @@ quotedataFrame = createDataWindow(QuoteData, "Quotes Index", OG_ShowHelpdataFram
 helpdataFrame = createDataWindow(helpData, "Old Gods - Help", OG_ShowJokedataFrame)
 --#endregion reworked Help Window
 
---#region Slash Command called functions
-local function sendSpecificLineToGuild(lineNumber)
-    local line = JokeData[lineNumber]
-    if line then
-        C_ChatInfo.SendChatMessage(line, "GUILD")
-    else
-        print("Invalid line number.")
-    end
-end
-
--- Function to send specific line number from QuoteData table
-local function sendSpecificQuoteLineToGuild(qlineNumber)
-    local qline = QuoteData[qlineNumber]
-    if qline then
-        C_ChatInfo.SendChatMessage(qline, "GUILD")
-    else
-        print("Invalid line number.")
-    end
-end
-
--- Function to send specific line number from GuildData table
-local function sendSpecificOGLineToGuild(glineNumber)
-    local gline = GuildData[glineNumber]
-    if gline then
-        C_ChatInfo.SendChatMessage(gline, "GUILD")
-        print(string.format("Line %d from GuildData table was sent.", glineNumber))
-    else
-        print("Invalid line number.")
-    end
-end
-
--- Function to send a random line from JokeData table
-local function sendRandomJokeToGuild()
-    local maxIndex = #JokeData
-    if maxIndex == 0 then
-        print("Error: No jokes available.")
-        return
-    end
-
-    local lineNumber = math.random(1, maxIndex)
-    local line = JokeData[lineNumber]
-    if line then
-        C_ChatInfo.SendChatMessage(line, "GUILD")
-        print(string.format("Line %d from JokeData table was sent.", lineNumber))
-    else
-        print("Error: No line found.")
-    end
-end
-
--- Function to send a random line from QuoteData table
-local function sendRandQuote()
-    local maxIndex = #QuoteData
-    if maxIndex == 0 then
-        print("Error: No quotes available.")
-        return
-    end
-
-    local qlineNumber = math.random(1, maxIndex)
-    local qline = QuoteData[qlineNumber]
-    if qline then
-        C_ChatInfo.SendChatMessage(qline, "GUILD")
-        print(string.format("Line %d from QuoteData table", qlineNumber))
-    else
-        print("Error: No line found.")
-    end
-end
-
--- Slash command handler for specific and random lines
+--#region Slash Commands
 SLASH_OG1 = "/OG"
 SlashCmdList["OG"] = function(msg)
     -- Trim whitespace from input and convert to lowercase
@@ -6015,9 +5993,7 @@ SlashCmdList["OGQ"] = function(msg)
         print("Type /OGHELP for tips and more details.")
     end
 end
---#endregion Slash called Functions ends
 
---#region Slash Commands
 -- Slash command toggles the "Chat History" window
 SLASH_CHATHISTORY1 = "/OGCH"
 SlashCmdList["CHATHISTORY"] = function()
