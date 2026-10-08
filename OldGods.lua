@@ -3367,7 +3367,7 @@ function KMDA_Purge()
 end
 --#endregion Purge
 
---#region New Notes
+--#region New Notes Search
 local notesFrame
 local keyFrame
 local searchFrame
