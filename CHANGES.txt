@@ -1,3 +1,8 @@
+### oldgods—lol pastebin
+
+# bookmarklet ok [hint]  javascript:
+
+(function(){function formatSeconds(sec){if(!sec)return'0m';const h=Math.floor(sec/3600);const m=Math.floor((sec%3600)/60);return h>0?`${h}h ${m}m`:`${m}m`;}function formatDate(isoStr){if(!isoStr)return'N/A';return new Date(isoStr).toLocaleString();}document.querySelectorAll('a.character-name').forEach(el=>{if(el.dataset.customDataInjected)return;const userCard=el.getAttribute('data-user-card');if(!userCard)return;el.dataset.customDataInjected='pending';fetch(`https://us.forums.blizzard.com/en/wow/u/${userCard}.json`).then(res=>res.json()).then(data=>{const profile=data.user||data;const lastSeen=formatDate(profile.last_seen_at);const lastPost=formatDate(profile.last_posted_at);const readTime=formatSeconds(profile.recent_time_read);let maxTrust=profile.trust_level||0;if(profile.groups&&Array.isArray(profile.groups)){profile.groups.forEach(g=>{const gName=typeof g==='string'?g:(g.name||'');const match=gName.match(/trust_level_(\d+)/);if(match){const lvl=parseInt(match[1],10);if(lvl>maxTrust)maxTrust=lvl;}});}const container=document.createElement('div');container.style.fontSize='11px';container.style.color='#38bdf8';container.style.marginTop='4px';container.style.lineHeight='1.2';container.innerHTML=`<div><strong>[ID: ${userCard}]</strong></div><div>last seen: ${lastSeen}</div><div>last post: ${lastPost}</div><div>read time: ${readTime}</div><div>trust level: ${maxTrust}</div>`;el.parentNode.appendChild(container);el.dataset.customDataInjected='true';}).catch(err=>console.error("Fetch error:",err));});})();
 ### OldGods-2.5.3
 
      * Added XORCipher encryptions option to Notes! 

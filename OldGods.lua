@@ -1,19 +1,7 @@
---OGGC v2.5.3
-local KMDAver = "2.5.3"
+--OGGC v3.0.0
+local KMDAver = "3.0.0"
 
---[[ * Added XORCipher encryptions option to Notes! 
-     * Reworked the Player Management Frame to deal with depriciated API 
-       ( regarding setting public and officer notes )
-       Public note is now just a fontstring of the public note
-       To include users who are not officers I removed the officer note function
-       and added "Open Notes" which will open the note with players name and realm
-       as the note title so everyone can now keep a large note per player, or anything
-       really in game. (I have plans to make this like a nice text editor - in time)
-     * Member Search updates include new calculated Offline times showing Year Month Day Hour 
-       now no more rolling over at 30 days ;o 
-       changed the notification to a nice grey blue "Logged Recently!" when searching for 
-       members who have been offline less then 1 hour 
-]]
+--[[ Emojis gutted requested ]]
 
 --#region Global savedvariables
 OldGodsDB = OldGodsDB or {}
@@ -1265,6 +1253,67 @@ local JokeData = { "Why cant you trust an atom? Because they make up literally e
     "Dad: What is the difference between a piano, a tuna, and a pot of glue? Me: I don't know. Dad: You can tuna piano but you can't piano a tuna. Me: What about the pot of glue? Dad: I knew you'd get stuck on that.",
 }
 
+local chuckNorrisJokes = {
+    "Chuck Norris counted to infinity... twice.",
+    "Chuck Norris can produce fire by rubbing two ice cubes together.",
+    "When Chuck Norris does pushups, he isn't lifting himself up, he's pushing the Earth down.",
+    "Chuck Norris does not dial the wrong number. You answered the wrong phone.",
+    "Chuck Norris can slam a revolving door.",
+    "Chuck Norris can binary search an unsorted array.",
+    "Chuck Norris can create a table that contains 100 jokes in 0.0001 seconds.",
+    "Chuck Norris has already been to Mars; that’s why there are no signs of life.",
+    "Chuck Norris doesn’t need to use recursion, he just tells the function to call itself.",
+    "The 10 commandments were actually a list of 10 things Chuck Norris didn't do.",
+    "Chuck Norris eats lightning and craps thunder.",
+    "Chuck Norris can speak Braille.",
+    "When Chuck Norris enters a room, he doesn't turn the lights on, he turns the dark off.",
+    "Chuck Norris once kicked a horse in the chin. Its descendants are known today as giraffes.",
+    "Chuck Norris is the reason Waldo is hiding.",
+    "Chuck Norris is so fast, he can run around the world and punch himself in the back of the head.",
+    "Chuck Norris can drown a fish.",
+    "Chuck Norris doesn’t use a computer; he just tells the computer what to do.",
+    "If you have five dollars and Chuck Norris has five dollars, Chuck Norris has more money than you.",
+    "Chuck Norris can parallel park a train.",
+    "Chuck Norris is the only man to ever beat a brick wall in a game of tennis.",
+    "When Chuck Norris plays Monopoly, it affects the actual world economy.",
+    "Chuck Norris can make onions cry.",
+    "Chuck Norris drives an ice-cream truck covered in human skulls.",
+    "Chuck Norris’s keyboard has no backspace key. He never makes mistakes.",
+    "Chuck Norris can divide by zero.",
+    "Chuck Norris doesn’t wear a watch; he decides what time it is.",
+    "Chuck Norris can win a game of Connect Four in only three moves.",
+    "Chuck Norris is 1/8th Cherokee. This has nothing to do with ancestry, the man ate a Cherokee Indian.",
+    "Chuck Norris’s tears cure cancer. Too bad he has never cried.",
+    "Chuck Norris doesn’t catch colds. Colds catch Chuck Norris.",
+    "Chuck Norris can jump-start a car with his tongue.",
+    "Chuck Norris once visited the Virgin Islands. They are now just The Islands.",
+    "Chuck Norris can build a snowman out of rain.",
+    "Chuck Norris’s house has no doors, only walls he walks through.",
+    "Chuck Norris doesn’t sleep; he waits.",
+    "Chuck Norris is the only person who can unzip a ZIP file using his teeth.",
+    "Chuck Norris can play the violin with a piano.",
+    "Chuck Norris can sneeze with his eyes open.",
+    "Chuck Norris once arm-wrestled Superman. The loser had to wear his underwear on the outside.",
+    "Chuck Norris is allowed to talk about Fight Club.",
+    "Chuck Norris doesn't read books. He stares them down until he gets the information.",
+    "Chuck Norris can kick you so hard your ancestors will feel it.",
+    "Chuck Norris can write a program that crashes the compiler.",
+    "Chuck Norris is faster than the speed of light.",
+    "Chuck Norris can make a fire out of wet wood.",
+    "Chuck Norris can teach a fish to fly.",
+    "Chuck Norris can set ants on fire with a magnifying glass. At night.",
+    "Chuck Norris does not fight, he only eliminates.",
+    "Chuck Norris can touch MC Hammer.",
+    "Chuck Norris can kill two stones with one bird.",
+    "Chuck Norris has a gun, but he prefers to use his legs.",
+    "Chuck Norris can make a square circle.",
+    "Chuck Norris can use a fork to eat soup.",
+    "Chuck Norris doesn't need a parachute to skydive.",
+    "Chuck Norris once threw a grenade and killed 50 people, then the grenade exploded.",
+    "Chuck Norris can whistle with his nose.",
+    "Chuck Norris can break a diamond with his bare hands.",
+    "Chuck Norris can read a book in a second by just smelling it."}
+
 local QuoteData = {
     "02:19:47:[Mamakitty]: I have one.  I don't know who said this, but my dad always told me \"You want to make God laugh, tell him your plans\"",
     "The customer is always right, in matters of taste - Harry Gordon Selfridge",
@@ -1400,11 +1449,11 @@ local CLASS_COLORS = {
 }
 
 local RANK_COLORS = {
-    ["GM"] = "FFA800",      -- Legendary (orange)
-    ["Officer"] = "A335EE", -- Epic (purple)
-    ["Veteran"] = "17a69a", -- LUX LOVE YOU BUDDY (turquoise) lux's favorite color!
-    ["Member"] = "0070DD",  -- Rare (blue)
-    ["Initiate"] = "1EFF00" -- Uncommon (green)
+    ["GM"] = "FFA800",
+    ["Officer"] = "A335EE",
+    ["Veteran"] = "17a69a",
+    ["Member"] = "0070DD",
+    ["Initiate"] = "1EFF00"
 }
 
 
@@ -1443,17 +1492,17 @@ end
 
 -- Function to send a random line from JokeData table
 local function sendRandomJokeToGuild()
-    local maxIndex = #JokeData
+    local maxIndex = #chuckNorrisJokes --#JokeData
     if maxIndex == 0 then
         print("Error: No jokes available.")
         return
     end
 
     local lineNumber = math.random(1, maxIndex)
-    local line = JokeData[lineNumber]
+    local line = chuckNorrisJokes[lineNumber] --JokeData
     if line then
         C_ChatInfo.SendChatMessage(line, "GUILD")
-        print(string.format("Line %d from JokeData table was sent.", lineNumber))
+        print(string.format("Line %d from the Chuck files(tbl) was sent.", lineNumber))
     else
         print("Error: No line found.")
     end
@@ -2990,7 +3039,6 @@ end)
 --#endregion Grief Mail
 
 --#region Content Frame Guild Functions
-
 --#region Purge
 local purgeFrame, purgeScrollChild
 local inactiveMembers = {}
@@ -3317,67 +3365,57 @@ function KMDA_Purge()
 
     RefreshFrame()
 end
-
 --#endregion Purge
 
---#region Notes
-local notesFrame -- Store the frame to avoid recreating it
-local keyFrame   -- For encryption/decryption key entry
+--#region New Notes
+local notesFrame
+local keyFrame
+local searchFrame
+
+-- Global Saved Tables (Initialized if nil)
+KMDA_SavedNotes = KMDA_SavedNotes or {}
+OG_EncryptedNotes = OG_EncryptedNotes or {}
 
 -- XOR Encryption Function
 local function XORCipher(input, key)
     local result = {}
     for i = 1, #input do
         local byte = input:byte(i)
-        local keyByte = key:byte(((i - 1) % #key) + 1) -- Cycle through key bytes
+        local keyByte = key:byte(((i - 1) % #key) + 1)
         table.insert(result, string.char(bit.bxor(byte, keyByte)))
     end
     return table.concat(result)
 end
 
-local function KMDA_NewNote()
-    if notesFrame then
-        notesFrame.titleBox:SetText("")
-        notesFrame.editBox:SetText("")
-        notesFrame.selectedNote = nil
-        notesFrame.editBox:SetFocus()
+-- Hex Encoding to prevent SavedVariables.lua \0 truncation
+local function ToHex(str)
+    local hex = {}
+    for i = 1, #str do
+        table.insert(hex, string.format("%02X", string.byte(str, i)))
     end
+    return table.concat(hex)
 end
 
--- Note Management Functions
-local function KMDA_EncryptAndSaveNote(title, content, key)
-    if not title or title == "" or not content or content == "" or not key or key == "" then
-        print("KMDA: Title, content, and key cannot be empty for encryption.")
-        return
+local function FromHex(str)
+    local chars = {}
+    for i = 1, #str, 2 do
+        local hexPair = str:sub(i, i+1)
+        if #hexPair < 2 then break end
+        local num = tonumber(hexPair, 16)
+        if num then
+            table.insert(chars, string.char(num))
+        else
+            return str -- Fallback for legacy unencoded data
+        end
     end
-    OG_EncryptedNotes[title] = XORCipher(content, key)
-    if KMDA_SavedNotes[title] then
-        KMDA_SavedNotes[title] = nil
-    end
-    print("KMDA: Note '" .. title .. "' has been encrypted and saved.")
-    KMDA_NewNote()
+    return table.concat(chars)
 end
 
-local function KMDA_DecryptAndOpenNote(title, key)
-    if not title or not OG_EncryptedNotes[title] then
-        print("KMDA: No encrypted note found with that title.")
-        return
-    end
-    if not key or key == "" then
-        print("KMDA: Key cannot be empty.")
-        return
-    end
-    local decryptedContent = XORCipher(OG_EncryptedNotes[title], key)
-    notesFrame.titleBox:SetText(title)
-    notesFrame.editBox:SetText(decryptedContent)
-    notesFrame.selectedNote = title
-end
-
--- Key Frame UI
+-- Forward Declarations
 local function KMDA_CreateKeyFrame()
     if keyFrame then return end
     keyFrame = CreateFrame("Frame", "KMDA_NoteKeyFrame", UIParent, "BasicFrameTemplateWithInset")
-    keyFrame:SetSize(300, 150)
+    keyFrame:SetSize(320, 160)
     keyFrame:SetPoint("CENTER")
     keyFrame:SetMovable(true)
     keyFrame:EnableMouse(true)
@@ -3387,27 +3425,27 @@ local function KMDA_CreateKeyFrame()
     keyFrame:SetFrameStrata("DIALOG")
 
     keyFrame.title = keyFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    keyFrame.title:SetPoint("CENTER", keyFrame.TitleBg, "CENTER", 0, 0)
+    keyFrame.title:SetPoint("CENTER", keyFrame.TitleBg or keyFrame, "CENTER", 0, 0)
 
     keyFrame.noteTitle = keyFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    keyFrame.noteTitle:SetPoint("TOP", keyFrame.title, "BOTTOM", 0, -10)
+    keyFrame.noteTitle:SetPoint("TOP", keyFrame.title, "BOTTOM", 0, -12)
     keyFrame.noteTitle:SetWidth(keyFrame:GetWidth() - 20)
     keyFrame.noteTitle:SetJustifyH("CENTER")
 
     local keyInput = CreateFrame("EditBox", nil, keyFrame, "InputBoxTemplate")
-    keyInput:SetSize(128, 30)
-    keyInput:SetPoint("TOP", keyFrame.noteTitle, "BOTTOM", 0, -5)
+    keyInput:SetSize(200, 30)
+    keyInput:SetPoint("TOP", keyFrame.noteTitle, "BOTTOM", 0, -10)
     keyInput:SetAutoFocus(true)
     keyFrame.keyInput = keyInput
 
     local actionBtn = CreateFrame("Button", nil, keyFrame, "GameMenuButtonTemplate")
-    actionBtn:SetSize(100, 30)
-    actionBtn:SetPoint("BOTTOMLEFT", keyFrame, "BOTTOMLEFT", 20, 10)
+    actionBtn:SetSize(110, 28)
+    actionBtn:SetPoint("BOTTOMLEFT", keyFrame, "BOTTOMLEFT", 25, 15)
     keyFrame.actionBtn = actionBtn
 
     local cancelBtn = CreateFrame("Button", nil, keyFrame, "GameMenuButtonTemplate")
-    cancelBtn:SetSize(100, 30)
-    cancelBtn:SetPoint("BOTTOMRIGHT", keyFrame, "BOTTOMRIGHT", -20, 10)
+    cancelBtn:SetSize(110, 28)
+    cancelBtn:SetPoint("BOTTOMRIGHT", keyFrame, "BOTTOMRIGHT", -25, 15)
     cancelBtn:SetText("Cancel")
     cancelBtn:SetScript("OnClick", function() keyFrame:Hide() end)
 
@@ -3417,192 +3455,297 @@ local function KMDA_CreateKeyFrame()
     end)
 end
 
-local function KMDA_ShowDecryptKeyFrame(noteTitle)
-    KMDA_CreateKeyFrame()
-    keyFrame.currentTitle = noteTitle
-    keyFrame.noteTitle:SetText(noteTitle)
-    keyFrame.title:SetText("Enter Key to Decrypt")
-    keyFrame.actionBtn:SetText("Decrypt")
-    keyFrame.actionBtn:SetScript("OnClick", function()
-        local key = keyFrame.keyInput:GetText()
-        if key and key ~= "" then
-            KMDA_DecryptAndOpenNote(noteTitle, key)
-            keyFrame:Hide()
-        else
-            print("KMDA: Please enter a key.")
+-- Search Frame UI
+local function KMDA_CreateSearchFrame()
+    if searchFrame then return end
+    searchFrame = CreateFrame("Frame", "KMDA_NoteSearchFrame", UIParent, "BasicFrameTemplateWithInset")
+    searchFrame:SetSize(360, 180)
+    searchFrame:SetPoint("CENTER")
+    searchFrame:SetMovable(true)
+    searchFrame:EnableMouse(true)
+    searchFrame:RegisterForDrag("LeftButton")
+    searchFrame:SetScript("OnDragStart", searchFrame.StartMoving)
+    searchFrame:SetScript("OnDragStop", searchFrame.StopMovingOrSizing)
+    searchFrame:SetFrameStrata("DIALOG")
+
+    searchFrame.title = searchFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    searchFrame.title:SetPoint("CENTER", searchFrame.TitleBg or searchFrame, "CENTER", 0, 0)
+    searchFrame.title:SetText("Find / Search Notes")
+
+    local searchInput = CreateFrame("EditBox", nil, searchFrame, "InputBoxTemplate")
+    searchInput:SetSize(280, 30)
+    searchInput:SetPoint("TOP", searchFrame, "TOP", 0, -45)
+    searchInput:SetAutoFocus(true)
+    searchFrame.searchInput = searchInput
+
+    local findInNoteBtn = CreateFrame("Button", nil, searchFrame, "GameMenuButtonTemplate")
+    findInNoteBtn:SetSize(145, 28)
+    findInNoteBtn:SetPoint("BOTTOMLEFT", searchFrame, "BOTTOMLEFT", 20, 15)
+    findInNoteBtn:SetText("Find in Current Note")
+    findInNoteBtn:SetScript("OnClick", function()
+        local query = searchInput:GetText()
+        if not notesFrame or not notesFrame.editBox then return end
+        if query and query ~= "" then
+            local text = notesFrame.editBox:GetText()
+            -- Added 'true' to ensure plaintext search
+            local pos = text:lower():find(query:lower(), 1, true)
+            if pos then
+                print("KMDA: Found '" .. query .. "' at position " .. pos)
+                notesFrame.editBox:SetFocus()
+            else
+                print("KMDA: '" .. query .. "' not found in current note.")
+            end
         end
     end)
-    keyFrame:Show()
-end
 
-local function KMDA_ShowEncryptKeyFrame(noteTitle)
-    KMDA_CreateKeyFrame()
-    keyFrame.currentTitle = noteTitle
-    keyFrame.noteTitle:SetText(noteTitle)
-    keyFrame.title:SetText("Create or Enter Key")
-    keyFrame.actionBtn:SetText("Encrypt")
-    keyFrame.actionBtn:SetScript("OnClick", function()
-        local key = keyFrame.keyInput:GetText()
-        local content = notesFrame.editBox:GetText()
-        if key and #key >= 6 then
-            KMDA_EncryptAndSaveNote(noteTitle, content, key)
-            keyFrame:Hide()
-        else
-            print("KMDA: Key must be at least 6 characters long.")
+    local searchSavedBtn = CreateFrame("Button", nil, searchFrame, "GameMenuButtonTemplate")
+    searchSavedBtn:SetSize(145, 28)
+    searchSavedBtn:SetPoint("BOTTOMRIGHT", searchFrame, "BOTTOMRIGHT", -20, 15)
+    searchSavedBtn:SetText("Search Saved Notes")
+    searchSavedBtn:SetScript("OnClick", function()
+        local query = searchInput:GetText()
+        if query and query ~= "" then
+            print("KMDA: Searching saved notes for: " .. query)
+            local foundCount = 0
+            for title, content in pairs(KMDA_SavedNotes) do
+                -- Added 'true' to prevent Lua pattern crashes on (, [, etc.
+                if title:lower():find(query:lower(), 1, true) or content:lower():find(query:lower(), 1, true) then
+                    print("- Found match in note title/content: " .. title)
+                    foundCount = foundCount + 1
+                end
+            end
+            print("KMDA: Search complete. Found matches in " .. foundCount .. " saved notes.")
         end
     end)
-    keyFrame:Show()
+
+    searchFrame:SetScript("OnHide", function(self)
+        self.searchInput:SetText("")
+    end)
 end
 
-local function KMDA_OpenSavedNote(title)
-    if notesFrame and KMDA_SavedNotes and KMDA_SavedNotes[title] then
-        notesFrame.titleBox:SetText(title)
-        notesFrame.editBox:SetText(KMDA_SavedNotes[title])
-        notesFrame.selectedNote = title
+-- Core Note Functions
+local function KMDA_NewNote()
+    if notesFrame then
+        notesFrame.titleBox:SetText("")
+        notesFrame.editBox:SetText("")
+        notesFrame.selectedNote = nil
+        notesFrame.statusText:SetText("New Note (Unsaved)")
+        notesFrame.editBox:SetFocus()
     end
 end
 
-local function CreateNotesFrame()
-    if not KMDA_SavedNotes then KMDA_SavedNotes = {} end
-    if not OG_EncryptedNotes then OG_EncryptedNotes = {} end
+local function KMDA_EncryptAndSaveNote(title, content, key)
+    if not title or title == "" or not content or content == "" or not key or key == "" then
+        print("KMDA: Title, content, and key cannot be empty.")
+        return
+    end
+    
+    -- Inject verification prefix to prevent rendering crashes
+    local secureContent = "KMDA_VALID:" .. content
+    local encryptedRaw = XORCipher(secureContent, key)
+    
+    OG_EncryptedNotes[title] = ToHex(encryptedRaw)
+    KMDA_SavedNotes[title] = nil
+    
+    print("KMDA: Note '" .. title .. "' encrypted & saved.")
+    notesFrame.statusText:SetText("Encrypted & Saved: " .. title)
+    KMDA_NewNote()
+end
 
-    if not notesFrame then
-        notesFrame = CreateFrame("Frame", "KMDANotesFrame", UIParent, "BasicFrameTemplateWithInset")
-        notesFrame:SetSize(800, 400)
-        notesFrame:SetPoint("CENTER")
-        notesFrame:SetMovable(true)
-        notesFrame:EnableMouse(true)
-        notesFrame:RegisterForDrag("LeftButton")
-        notesFrame:SetScript("OnDragStart", notesFrame.StartMoving)
-        notesFrame:SetScript("OnDragStop", notesFrame.StopMovingOrSizing)
+local function KMDA_DecryptAndOpenNote(title, key)
+    if not title or not OG_EncryptedNotes[title] then return end
+    
+    local rawEncrypted = FromHex(OG_EncryptedNotes[title])
+    local decryptedContent = XORCipher(rawEncrypted, key)
+    
+    -- Verify password by checking prefix to avoid Invalid UTF-8 hard crashes
+    if decryptedContent:sub(1, 11) == "KMDA_VALID:" then
+        local actualContent = decryptedContent:sub(12)
+        notesFrame.titleBox:SetText(title)
+        notesFrame.editBox:SetText(actualContent)
+        notesFrame.editBox:SetCursorPosition(0)
+        notesFrame.selectedNote = title
+        notesFrame.statusText:SetText("Loaded Encrypted Note: " .. title)
+    else
+        print("KMDA: Incorrect decryption key or corrupted note!")
+    end
+end
 
-        notesFrame.title = notesFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        notesFrame.title:SetPoint("CENTER", notesFrame.TitleBg, "CENTER", 0, 0)
-        notesFrame.title:SetText("KMDA Notes")
+local function KMDA_OpenSavedNote(title)
+    if notesFrame and KMDA_SavedNotes[title] then
+        notesFrame.titleBox:SetText(title)
+        notesFrame.editBox:SetText(KMDA_SavedNotes[title])
+        notesFrame.editBox:SetCursorPosition(0)
+        notesFrame.selectedNote = title
+        notesFrame.statusText:SetText("Loaded Note: " .. title)
+    end
+end
 
-        local dropdown = CreateFrame("DropdownButton", "KMDANotesDropdown", notesFrame, "WowStyle1DropdownTemplate")
-        dropdown:SetPoint("TOPLEFT", 20, -40)
-        dropdown:SetWidth(200)
-        dropdown:SetDefaultText("Select an Option")
+-- Main Editor UI Constructor
+function CreateNotesFrame()
+    if notesFrame then
+        notesFrame:Show()
+        return
+    end
 
-        dropdown:SetupMenu(function(self, rootDescription)
-            rootDescription:CreateButton("1.) Create New Note", KMDA_NewNote)
-            local savedMenu = rootDescription:CreateButton("2.) Open Note")
-            local allTitles = {}
-            for title in pairs(KMDA_SavedNotes) do
-                table.insert(allTitles, { title = title, encrypted = false })
-            end
-            for title in pairs(OG_EncryptedNotes) do
-                table.insert(allTitles, { title = title, encrypted = true })
-            end
-            table.sort(allTitles, function(a, b) return a.title < b.title end)
-            if #allTitles == 0 then
-                savedMenu:CreateTitle("No saved notes.")
-            else
-                for _, noteInfo in ipairs(allTitles) do
-                    local buttonText = noteInfo.title
-                    local onClickFunc
-                    if noteInfo.encrypted then
-                        buttonText = "|TInterface\\CharacterFrame\\UI-Character-Tab-LOCKED:16:16:0:0|t " ..
-                            noteInfo.title
-                        onClickFunc = function() KMDA_ShowDecryptKeyFrame(noteInfo.title) end
-                    else
-                        onClickFunc = function() KMDA_OpenSavedNote(noteInfo.title) end
-                    end
-                    savedMenu:CreateButton(buttonText, onClickFunc)
-                end
-            end
-        end)
+    notesFrame = CreateFrame("Frame", "KMDANotesFrame", UIParent, "BasicFrameTemplateWithInset")
+    notesFrame:SetSize(820, 500)
+    notesFrame:SetPoint("CENTER")
+    notesFrame:SetMovable(true)
+    notesFrame:EnableMouse(true)
+    notesFrame:RegisterForDrag("LeftButton")
+    notesFrame:SetScript("OnDragStart", notesFrame.StartMoving)
+    notesFrame:SetScript("OnDragStop", notesFrame.StopMovingOrSizing)
 
-        local titleBox = CreateFrame("EditBox", nil, notesFrame, "InputBoxTemplate")
-        titleBox:SetSize(300, 30)
-        titleBox:SetPoint("LEFT", dropdown, "RIGHT", 20, 0)
-        titleBox:SetAutoFocus(false)
-        notesFrame.titleBox = titleBox
+    notesFrame.title = notesFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    notesFrame.title:SetPoint("CENTER", notesFrame.TitleBg or notesFrame, "CENTER", 0, 0)
+    notesFrame.title:SetText("KMDA Text Editor")
 
-        local titleLabel = titleBox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-        titleLabel:SetPoint("BOTTOMLEFT", titleBox, "TOPLEFT", 0, 2)
-        titleLabel:SetText("Note Title:")
-
-        local scrollFrame = CreateFrame("ScrollFrame", nil, notesFrame, "UIPanelScrollFrameTemplate, BackdropTemplate")
-        scrollFrame:SetPoint("TOPLEFT", dropdown, "BOTTOMLEFT", 0, -20)
-        scrollFrame:SetPoint("BOTTOMRIGHT", notesFrame, "BOTTOMRIGHT", -30, 50)
-        scrollFrame:SetBackdrop({
-            bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-            tile = true,
-            tileSize = 16,
-            edgeSize = 16,
-            insets = { left = 3, right = 3, top = 3, bottom = 3 }
-        })
-        scrollFrame:SetBackdropColor(0, 0, 0, 0.5)
-        scrollFrame:SetBackdropBorderColor(0.8, 0.8, 0.8, 1)
-
-        local editBox = CreateFrame("EditBox", nil, scrollFrame)
-        editBox:SetMultiLine(true)
-        editBox:SetFontObject(ChatFontNormal)
-        editBox:SetWidth(730)
-        editBox:SetTextInsets(5, 5, 5, 5)
-        editBox:SetAutoFocus(false)
-        scrollFrame:SetScrollChild(editBox)
-        notesFrame.editBox = editBox
-
-        scrollFrame:SetScript("OnMouseDown", function() editBox:SetFocus() end)
-
-        local btnSave = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
-        btnSave:SetSize(100, 30)
-        btnSave:SetPoint("BOTTOMLEFT", 20, 10)
-        btnSave:SetText("Save Note")
-        btnSave:SetScript("OnClick", function()
-            local title = titleBox:GetText()
+    local menuDropdown = CreateFrame("DropdownButton", "KMDAEditorMenu", notesFrame, "WowStyle1DropdownTemplate")
+    menuDropdown:SetPoint("TOPLEFT", 15, -32)
+    menuDropdown:SetWidth(120)
+    menuDropdown:SetDefaultText("File")
+    menuDropdown:SetupMenu(function(self, rootDescription)
+        rootDescription:CreateButton("New Note", KMDA_NewNote)
+        rootDescription:CreateButton("Save Note", function()
+            local title = notesFrame.titleBox:GetText()
             if title and title ~= "" then
-                KMDA_SavedNotes[title] = editBox:GetText()
-                notesFrame.selectedNote = title
+                KMDA_SavedNotes[title] = notesFrame.editBox:GetText()
+                OG_EncryptedNotes[title] = nil -- Prevents state duplication
+                notesFrame.statusText:SetText("Saved: " .. title)
                 print("KMDA: Note '" .. title .. "' saved.")
             else
-                print("KMDA: Please enter a title.")
+                print("KMDA: Please enter a note title first.")
             end
         end)
-
-        local btnEdit = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
-        btnEdit:SetSize(100, 30)
-        btnEdit:SetPoint("LEFT", btnSave, "RIGHT", 10, 0)
-        btnEdit:SetText("Edit Note")
-        btnEdit:SetScript("OnClick", function() editBox:SetFocus() end)
-
-        local btnDelete = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
-        btnDelete:SetSize(100, 30)
-        btnDelete:SetPoint("LEFT", btnEdit, "RIGHT", 10, 0)
-        btnDelete:SetText("Delete Note")
-        btnDelete:SetScript("OnClick", function()
-            local title = titleBox:GetText()
+        rootDescription:CreateButton("Delete Note", function()
+            local title = notesFrame.titleBox:GetText()
             if title and (KMDA_SavedNotes[title] or OG_EncryptedNotes[title]) then
                 KMDA_SavedNotes[title] = nil
                 OG_EncryptedNotes[title] = nil
                 KMDA_NewNote()
-                print("KMDA: Note '" .. title .. "' deleted.")
+                print("KMDA: Deleted '" .. title .. "'.")
             end
         end)
+    end)
 
-        local btnEncrypt = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
-        btnEncrypt:SetSize(100, 30)
-        btnEncrypt:SetPoint("LEFT", btnDelete, "RIGHT", 10, 0)
-        btnEncrypt:SetText("Encrypt Note")
-        btnEncrypt:SetScript("OnClick", function()
-            local title = notesFrame.titleBox:GetText()
-            local content = notesFrame.editBox:GetText()
-            if title and title ~= "" and content and content ~= "" then
-                KMDA_ShowEncryptKeyFrame(title)
-            else
-                print("KMDA: Note must have a title and content to be encrypted.")
+    local openDropdown = CreateFrame("DropdownButton", "KMDAOpenMenu", notesFrame, "WowStyle1DropdownTemplate")
+    openDropdown:SetPoint("LEFT", menuDropdown, "RIGHT", 8, 0)
+    openDropdown:SetWidth(140)
+    openDropdown:SetDefaultText("Open...")
+    openDropdown:SetupMenu(function(self, rootDescription)
+        local allTitles = {}
+        for title in pairs(KMDA_SavedNotes) do table.insert(allTitles, { title = title, encrypted = false }) end
+        for title in pairs(OG_EncryptedNotes) do table.insert(allTitles, { title = title, encrypted = true }) end
+        table.sort(allTitles, function(a, b) return a.title < b.title end)
+        
+        if #allTitles == 0 then
+            rootDescription:CreateTitle("No saved notes.")
+        else
+            for _, info in ipairs(allTitles) do
+                local label = info.encrypted and ("|TInterface\\CharacterFrame\\UI-Character-Tab-LOCKED:14:14:0:0|t " .. info.title) or info.title
+                rootDescription:CreateButton(label, function()
+                    if info.encrypted then
+                        KMDA_CreateKeyFrame()
+                        keyFrame.currentTitle = info.title
+                        keyFrame.noteTitle:SetText(info.title)
+                        keyFrame.title:SetText("Enter Decryption Key")
+                        keyFrame.actionBtn:SetText("Decrypt")
+                        keyFrame.actionBtn:SetScript("OnClick", function()
+                            local key = keyFrame.keyInput:GetText()
+                            if key and key ~= "" then
+                                KMDA_DecryptAndOpenNote(info.title, key)
+                                keyFrame:Hide()
+                            end
+                        end)
+                        keyFrame:Show()
+                    else
+                        KMDA_OpenSavedNote(info.title)
+                    end
+                end)
             end
-        end)
+        end
+    end)
 
-        notesFrame.CloseButton:SetScript("OnClick", function() notesFrame:Hide() end)
-    end
+    local searchBtn = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+    searchBtn:SetSize(80, 24)
+    searchBtn:SetPoint("LEFT", openDropdown, "RIGHT", 8, 0)
+    searchBtn:SetText("Search")
+    searchBtn:SetScript("OnClick", function()
+        KMDA_CreateSearchFrame()
+        searchFrame:Show()
+    end)
+
+    local encryptBtn = CreateFrame("Button", nil, notesFrame, "GameMenuButtonTemplate")
+    encryptBtn:SetSize(90, 24)
+    encryptBtn:SetPoint("LEFT", searchBtn, "RIGHT", 8, 0)
+    encryptBtn:SetText("Encrypt")
+    encryptBtn:SetScript("OnClick", function()
+        local title = notesFrame.titleBox:GetText()
+        local content = notesFrame.editBox:GetText()
+        if title ~= "" and content ~= "" then
+            KMDA_CreateKeyFrame()
+            keyFrame.currentTitle = title
+            keyFrame.noteTitle:SetText(title)
+            keyFrame.title:SetText("Create Encryption Key")
+            keyFrame.actionBtn:SetText("Encrypt")
+            keyFrame.actionBtn:SetScript("OnClick", function()
+                local key = keyFrame.keyInput:GetText()
+                if key and #key >= 6 then
+                    KMDA_EncryptAndSaveNote(title, content, key)
+                    keyFrame:Hide()
+                else
+                    print("KMDA: Key must be at least 6 characters.")
+                end
+            end)
+            keyFrame:Show()
+        else
+            print("KMDA: Title and content required for encryption.")
+        end
+    end)
+
+    local titleBox = CreateFrame("EditBox", nil, notesFrame, "InputBoxTemplate")
+    titleBox:SetSize(320, 26)
+    titleBox:SetPoint("TOPLEFT", menuDropdown, "BOTTOMLEFT", 0, -12)
+    titleBox:SetAutoFocus(false)
+    notesFrame.titleBox = titleBox
+
+    local titleLabel = titleBox:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    titleLabel:SetPoint("BOTTOMLEFT", titleBox, "TOPLEFT", 0, 2)
+    titleLabel:SetText("Document Title:")
+
+    local statusText = notesFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    statusText:SetPoint("BOTTOMLEFT", notesFrame, "BOTTOMLEFT", 15, 12)
+    statusText:SetText("Ready")
+    notesFrame.statusText = statusText
+
+    local scrollFrame = CreateFrame("ScrollFrame", nil, notesFrame, "UIPanelScrollFrameTemplate, BackdropTemplate")
+    scrollFrame:SetPoint("TOPLEFT", titleBox, "BOTTOMLEFT", 0, -15)
+    scrollFrame:SetPoint("BOTTOMRIGHT", notesFrame, "BOTTOMRIGHT", -30, 35)
+    scrollFrame:SetBackdrop({
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 16,
+        insets = { left = 3, right = 3, top = 3, bottom = 3 }
+    })
+    scrollFrame:SetBackdropColor(0.1, 0.1, 0.1, 0.85)
+    scrollFrame:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+
+    local editBox = CreateFrame("EditBox", nil, scrollFrame)
+    editBox:SetMultiLine(true)
+    editBox:SetFontObject(ChatFontNormal)
+    editBox:SetWidth(750)
+    editBox:SetTextInsets(8, 8, 8, 8)
+    editBox:SetAutoFocus(false)
+    scrollFrame:SetScrollChild(editBox)
+    notesFrame.editBox = editBox
+
+    scrollFrame:SetScript("OnMouseDown", function() editBox:SetFocus() end)
+    notesFrame.CloseButton:SetScript("OnClick", function() notesFrame:Hide() end)
+
     notesFrame:Show()
 end
---#endregion Notes
+--#endregion New Notes
 
 --#region MemberSearch RightClick Functions
 local function ArmoryLinkLoL(CopiedNameLink, playerName)
@@ -3709,7 +3852,7 @@ local function SetupMacroAndBind(action, player)
     local command = (action == "promote" and "/gpromote " or "/gdemote ") .. player
 
     if macroIndex == 0 then
-        local numAccountMacros, numCharacterMacros = GetNumMacros()
+        local numAccountMacros, _ = GetNumMacros()
         if numAccountMacros >= 120 then
             print("KMDA: General macro slots are full. Please delete one to use this feature.")
             return
@@ -3849,7 +3992,7 @@ local function CreatePlayerManagementFrame()
     -- Public Note Display
     local publicNoteText = playerManagementFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     publicNoteText:SetPoint("TOPLEFT", publicNoteLabel, "BOTTOMLEFT", 0, -5)
-    publicNoteText:SetWidth(220)
+    publicNoteText:SetWidth(255)
     publicNoteText:SetJustifyH("LEFT")
     publicNoteText:SetTextColor(1, 1, 1)
 
@@ -3865,7 +4008,7 @@ local function CreatePlayerManagementFrame()
     detailedNotesBtn:SetSize(150, 25)
     detailedNotesBtn:SetPoint("TOPLEFT", detailedNotesLabel, "BOTTOMLEFT", 0, -5)
     detailedNotesBtn:SetText("Open Notes")
-    
+
     local time = 0
     detailedNotesBtn:SetScript("OnEnter", function(self)
         self:SetScript("OnUpdate", function(self, elapsed)
@@ -4234,11 +4377,13 @@ local function UpdateSearchResults(searchText)
             ----------------------------------------------------------
             local nameCol = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
             nameCol:SetPoint("LEFT", row, "LEFT", 0, 0)
-            nameCol:SetSize(190, rowHeight)
+            nameCol:SetSize(195, rowHeight)
             nameCol:RegisterForClicks("LeftButtonUp", "RightButtonUp")
             nameCol:SetText(playerName)
-            nameCol:SetNormalFontObject("GameFontNormal")
-            nameCol:SetHighlightFontObject("GameFontHighlight")
+            nameCol:SetNormalFontObject("GameFontNormalMed2Outline") --SetNormalFontObject("GameFontNormal")
+            nameCol:SetHighlightFontObject("GameFontHighlightMed2Outline") --SetHighlightFontObject("GameFontHighlight")
+--:SetNormalFontObject("GameFontNormalMed2Outline")--
+--:SetHighlightFontObject("GameFontHighlightMed2Outline")
 
             nameCol:SetScript("OnClick", function(self, button)
                 if button == "RightButton" then
@@ -4353,9 +4498,9 @@ local function CreateSearchFrame()
 
     -- Headers for columns
     local headers = {
-        { text = "Name",   width = 150, point = "TOPLEFT", offsetX = 10 },
-        { text = "Rank",   width = 100, point = "TOPLEFT", offsetX = 160 },
-        { text = "Status", width = 100, point = "TOPLEFT", offsetX = 270 },
+        { text = "Name",   width = 150, point = "TOPLEFT", offsetX = 50 },
+        { text = "Rank",   width = 100, point = "TOPLEFT", offsetX = 190 },
+        { text = "Status", width = 100, point = "TOPLEFT", offsetX = 290 },
     }
 
     for _, header in ipairs(headers) do
@@ -4975,10 +5120,10 @@ local function ShowFastOptionsMenu(anchor)
 end
 --#endregion
 
---#region Fast Options Content Menu
+--#region Fast Options Functions
 local function toggle_ZoneSpam()
     zoneDataSpam = not zoneDataSpam
-    local statetring = zoneDataSpam and "Zone Data On" or "Zone Data Off"
+    local statetring = zoneDataSpam and "Zone Data On" or "Zone Data Off" 
     print(statetring)
     if zoneDataSpam then
         if OldGodsDB.soundEnabled then
@@ -5003,8 +5148,7 @@ OG_Fast_Options = {
         fastFunction = toggle_ZoneSpam,
     },
 }
---#endregion Fast Options Content Menu
-
+--#endregion Fast Options Functions
 --#endregion Content Frame Guild Functions
 
 --#region Content Frame optionsFrame.contentFrame
@@ -5073,13 +5217,16 @@ end
 
 local function OldGods_DeleteUserTheme(themeName)
     if not themeName or themeName == "" then
-        print("|cffff0000OldGods:|r Theme name cannot be empty.")
+        print("|cFF0F0F00ATTENTION|r: Can not delete empty theme name!")
         return
     end
 
     if OldGods_UserThemes[themeName] then
         OldGods_UserThemes[themeName] = nil
-        print("|cffff9900OldGods:|r Deleted theme '" .. themeName .. "'.")
+        print("|cFF00FF00SUCEESS|r: Theme " .. themeName .. " deleted!")
+    else
+        print("|cFFF0F000ATTENTION|r: Theme '" .. themeName .. "' not found!")
+        return
     end
 end
 
@@ -5104,26 +5251,6 @@ local function OldGods_ApplyUserTheme(themeName)
     print("|cff00ff00OldGods:|r Applied theme '" .. themeName .. "'.")
 end
 
-StaticPopupDialogs["OLDGODS_SAVE_THEME"] = {
-    text = "Enter a name for your theme:",
-    button1 = "Save",
-    button2 = "Cancel",
-    hasEditBox = true,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    preferredIndex = 3, -- avoids overlap with other popups
-    OnAccept = function(popup)
-        local editBox = _G[popup:GetName() .. "EditBox"]
-        local name = editBox and editBox:GetText()
-        if name and name ~= "" then
-            OldGods_SaveUserTheme(name)
-        else
-            print("|cffff0000OldGods:|r Invalid name.")
-        end
-    end,
-}
-
 local function AddResetButton(parent, theme, colorOptions)
     local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     button:SetSize(150, 30)
@@ -5143,7 +5270,6 @@ local function AddResetButton(parent, theme, colorOptions)
         GameTooltip:Hide()
     end)
 
-    --#region
     button:SetScript("OnClick", function()
         local defaults = theme
 
@@ -5163,12 +5289,30 @@ local function AddResetButton(parent, theme, colorOptions)
             end
         end
 
-        ApplyTheme(GuildChatWindow, theme)
+        ApplyTheme(GuildChatWindow, OG_Themes["Your Custom Theme"], "Your Custom Theme")
         print("Theme reset to defaults!")
     end)
-    --#endregion
 
-    -- Save Button
+    StaticPopupDialogs["OLDGODS_SAVE_THEME"] = {
+        text = "Enter a name for your theme:",
+        button1 = "Save",
+        button2 = "Cancel",
+        hasEditBox = true,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = 3, -- avoids overlap with other popups
+        OnAccept = function(popup)
+            local editBox = _G[popup:GetName() .. "EditBox"]
+            local name = editBox and editBox:GetText()
+            if name and name ~= "" then
+                OldGods_SaveUserTheme(name)
+            else
+                print("|cffff0000OldGods:|r Invalid name.")
+            end
+        end,
+    }
+
     local saveButton = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     saveButton:SetSize(150, 30)
     saveButton:SetPoint("TOP", button, "BOTTOM", 0, -5)
@@ -5179,31 +5323,40 @@ local function AddResetButton(parent, theme, colorOptions)
         StaticPopup_Show("OLDGODS_SAVE_THEME")
     end)
 
-    --[[ Delete Button
+    StaticPopupDialogs["OLDGODS_DELETE_THEME"] = {
+        text = "Enter the name of a saved theme to delete:",
+        button1 = "Delete",
+        button2 = "Cancel",
+        hasEditBox = true,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = 3, -- avoids overlap with other popups
+        OnAccept = function(popup)
+            local editBox = _G[popup:GetName() .. "EditBox"]
+            local name = editBox and editBox:GetText()
+            if name and name ~= "" then
+                OldGods_DeleteUserTheme(name)
+            else
+                print("|cffff0000OldGods:|r Invalid name.")
+            end
+        end,
+    }
+
     local deleteButton = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     deleteButton:SetSize(150, 30)
     deleteButton:SetPoint("TOP", saveButton, "BOTTOM", 0, -5)
+    deleteButton:SetNormalFontObject("GameFontNormalMed2Outline")
+    deleteButton:SetHighlightFontObject("GameFontHighlightMed2Outline")
     deleteButton:SetText("Delete Theme")
     deleteButton:SetScript("OnClick", function()
-        StaticPopupDialogs["OLDGODS_DELETE_THEME"] = {
-            text = "Enter the name of the theme to delete:",
-            button1 = "Delete",
-            button2 = "Cancel",
-            hasEditBox = true,
-            OnAccept = function(self)
-                local name = self.editBox:GetText()
-                OldGods_DeleteUserTheme(name)
-            end,
-            timeout = 0,
-            whileDead = true,
-            hideOnEscape = true,
-        }
         StaticPopup_Show("OLDGODS_DELETE_THEME")
     end)
-    ]]
-    return button, saveButton --, deleteButton
+
+    return button, saveButton, deleteButton
 end
 
+--#region Theme Elements Buttons
 local function PopulateContentFrame_ThemeColorSettings(optionsFrame, theme)
     local buttons = {}
     local yOffset = -15 -- Initial Y offset
@@ -5252,6 +5405,10 @@ local function PopulateContentFrame_ThemeColorSettings(optionsFrame, theme)
 
     return buttons
 end
+--#endregion Theme Element Buttons
+
+--#endregion Custom Theme
+
 --#endregion populate Color settings
 
 --#region populate General settings
@@ -5340,7 +5497,6 @@ local function PopulateContentFrame_SoundSettings(optionsFrame)
 end
 --#endregion populate Sound Settings
 
-
 --#region populate Guild settings
 local function dummyFunction()
     print("More Functions coming in future updates!")
@@ -5375,8 +5531,6 @@ local function PopulateContentFrame_GuildSettings(optionsFrame)
     return buttons
 end
 --#endregion populate Guild settings
-
---#endregion POPULATE CONTENT FRAME
 
 --#region Navigation buttons callback functions
 local function ShowColorsSettings(optionsFrame)
@@ -5620,8 +5774,6 @@ end
 
 --#endregion Create Options Frame
 
---#endregion Options UI and Functions
-
 --#region OnChatMessage called Functions
 
 --chatMessageSpice takes parameters from data gathered in OnChatMessage()
@@ -5794,19 +5946,25 @@ OnChatMessageEventFrame:SetScript("OnEvent", function(self, event, ...)
         return
     end
 
+    -- type and state are initialized with ADDON_RESTRICTION_STATE_CHANGED
+    -- this fires prior to restrictions and after they have deactivated.
     local type, state = ...
     local restrictionName = type
     local restrictionState = state
 
-    -- 1. ADDING TO THE TABLE
+    -- 1. Are we restricted (encounter activating or active, or in combat )
+    -- I found the enumerated values here: https://warcraft.wiki.gg/wiki/Event:ADDON_RESTRICTION_STATE_CHANGED
     if restrictionState == Enum.AddOnRestrictionState.Activating or restrictionState == Enum.AddOnRestrictionState.Active then
         OG_InstancePause.activeRestrictions[restrictionName] = restrictionState
-
+        
+        -- We are restricted everything is secret, we respect blizzards new addon rules 
+        -- so we toggle the guard, and do some other things  
         if not OG_InstancePause.active then
             OG_InstancePause.active = true
             OG_InstancePause.startTime = GetTime()
             OG_DisableGuildChat()
 
+            -- the other things is messaging the user in the addon
             local chatMessage = string.format(
                 "|cFFFFFFFF[|r|cFF0000FFOG|r|cFFFFFFFF]|r: Guild chat paused due to |cff55FF99(|r|cffF0F0FF%s|r|cff55FF99)|r(%s)",
                 restrictionName, restrictionState)
@@ -5816,35 +5974,41 @@ OnChatMessageEventFrame:SetScript("OnEvent", function(self, event, ...)
         return
     end
 
-    -- 2. REMOVING FROM THE TABLE
+    -- 2. Checking and Clearing: No active restrictions so we nil table, otherwise the table
+    -- holds the onto the current restriction and keeps the event unregistered.
     if restrictionState == Enum.AddOnRestrictionState.Inactive then
-        -- FIX: Use restrictionName instead of type so the keys match!
         OG_InstancePause.activeRestrictions[restrictionName] = nil
 
-        -- If the table is now completely empty, all restrictions are gone
+        -- we check the table to ensure no other restrictions exist
         if next(OG_InstancePause.activeRestrictions) == nil then
+            -- table is empty so we sum up the elapsed time 
             local elapsed = OG_InstancePause.startTime and (GetTime() - OG_InstancePause.startTime) or 0
             local minutes = math.floor(elapsed / 60)
             local seconds = math.floor(elapsed % 60)
-
+            
+            -- and call the helper function that registers the CHAT_MSG_GUILD event
             OG_EnableGuildChat()
 
+            -- let the user know were back in bussiness 
             local chatMessage = string.format(
                 "|cFFFFFFFF[|r|cFF0000FFOG|r|cFFFFFFFF]|r: Guild chat resumed after |cff00ff00%02d:%02d|r",
                 minutes,
                 seconds
             )
-
             table.insert(OG_ChatMessageTable, chatMessage)
             updateTargetEditBoxText(GuildChatWindow.editBox, OG_ChatMessageTable)
 
+            --turn off the gaurd and reset the timer
             OG_InstancePause.active = false
             OG_InstancePause.startTime = nil
         else
-            -- There are still other restrictions active
+            -- There are still other restrictions active table is not empty
+            -- this is optional but a nice feed back, for users or debugging
             local resNameStateMsg = string.format("Restriction Name: |cFF000FF0%s|r\nRestriction State: |cFFFFFF00%s|r",
                 restrictionName, restrictionState)
             print(resNameStateMsg)
+            -- and that’s how you avoid blizzards secrets in 12.0+ with event 
+            -- management and research beyond an AI models training on current API  
         end
     end
 end)
@@ -6056,7 +6220,10 @@ local function InitializeTheme()
         ApplyFont(GuildChatWindow.editBox, OG_Fonts[OldGods_LastFontName], OldGods_LastFontName)
     end
 
-    OldGods_Emoji:Enable()
+    -- what do we say to emojies, 
+    -- for the emoji enjoyer just uncomment next line remone the --
+   
+    --OldGods_Emoji:Enable() 
 
     C_Timer.After(10, function()
         CreateThemeForPlayersGuild(GuildChatWindow)
