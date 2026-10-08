@@ -2991,7 +2991,6 @@ end)
 
 --#region Content Frame Guild Functions
 
-
 --#region Purge
 local purgeFrame, purgeScrollChild
 local inactiveMembers = {}
